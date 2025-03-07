@@ -1,0 +1,35 @@
+name: 機能説明 yml version
+description: 機能について
+title: "[ここにタイトルを入力]"
+labels: ["feature"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 機能の概要を記述してください
+  - type: textarea
+    id: specification
+    attributes:
+      label: 詳細
+      description: 機能の詳細を記述してください
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: 影響範囲
+      description: 影響範囲を記述してください
+  - type: textarea
+    id: notes
+    attributes:
+      label: 注意点
+      description: 注意点を記述してください
+  - type: textarea
+    id: test-cases
+    attributes:
+      label: テストケース
+      description: テストケースを記述してください
+  - type: textarea
+    id: other
+    attributes:
+      label: その他
+      description: 他に何かあれば記述してください
