@@ -27,17 +27,18 @@ class SharedPtr {
 
     SharedPtr& operator=(const SharedPtr& other) {
         if (this != &other) {
+			int *tmp_count = other._count;
+			if (_ptr != NULL) {
+				++(*tmp_count);
+			} else {
+				tmp_count = new int(0);
+			}
             if (--(*_count) <= 0) {
                 delete _ptr;
                 delete _count;
             }
             _ptr = other._ptr;
-            _count = other._count;
-            if (_ptr != NULL) {
-                ++(*_count);
-            } else {
-                _count = new int(0);
-            }
+			_count = tmp_count;
         }
         return *this;
     }
