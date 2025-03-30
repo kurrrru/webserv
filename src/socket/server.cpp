@@ -35,7 +35,7 @@ Server::~Server() {
     close(_server_sock);
 }
 
-int Server::getFd() {
+int Server::getFd() const {
     return _server_sock;
 }
 
@@ -72,6 +72,6 @@ void Server::setName(const std::string& name) {
     _name = name;
 }
 
-std::string Server::getName() {
+std::string Server::getName() const {
     return _name;
 }
