@@ -91,9 +91,9 @@ int main() {
                     // std::string response = response->getResponse();
                     // send(client_sock, response.c_str(), response.size(), 0);
 
-                    const char* responseHeader = "HTTP/1.1 200 OK\nContent-Length: ";
+                    const char* responseHeader = "HTTP/1.1 200 OK\r\nContent-Length: ";
                     std::string responseBody = "<html><body>hello" + whole_request + "</body></html>";
-                    std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\n\n" + responseBody;
+                    std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\r\n\r\n" + responseBody;
                     send(client_sock, response.c_str(), response.size(), 0);
                     // std::cout << response << std::endl;
                     epoll.del(client_sock);
