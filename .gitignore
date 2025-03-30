@@ -1,5 +1,8 @@
 .vscode/
 
+# executive files
+webserv
+
 # Prerequisites
 *.d
 
