@@ -62,7 +62,7 @@ int main() {
                     int len = 0;
                     std::string whole_request;
                     do {
-                        int len = recv(client_sock, buf, sizeof(buf), 0);
+                        len = recv(client_sock, buf, sizeof(buf), 0);
                         if (len == -1) {
                             perror("recv");
                         } else if (len == 0) {
