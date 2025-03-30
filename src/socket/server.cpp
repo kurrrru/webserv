@@ -20,11 +20,11 @@ Server::Server(int port) {
     createServerSocket();
 }
 
-Server::Server(Server const& other) {
+Server::Server(const Server& other) {
     _port = other._port;
 }
 
-Server& Server::operator=(Server const& other) {
+Server& Server::operator=(const Server& other) {
     if (this != &other) {
         _port = other._port;
     }

@@ -7,8 +7,8 @@ class Server {
  public:
     Server();
     Server(int port);
-    Server(Server const& other);
-    Server& operator=(Server const& other);
+    Server(const Server& other);
+    Server& operator=(const Server& other);
     virtual ~Server();
     int getFd();
     void setName(const std::string& name);
