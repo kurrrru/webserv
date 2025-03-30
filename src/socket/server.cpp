@@ -45,17 +45,23 @@ void Server::createServerSocket() {
         perror("socket");
         exit(EXIT_FAILURE);
     }
-    
+
+    int opt = 1;
+    if (setsockopt(_server_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(_port);
-    
+
     if (bind(_server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         perror("bind");
         exit(EXIT_FAILURE);
     }
-    
+
     if (listen(_server_sock, 5) == -1) {
         perror("listen");
         exit(EXIT_FAILURE);
