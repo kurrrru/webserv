@@ -62,7 +62,7 @@ void Server::createServerSocket() {
         exit(EXIT_FAILURE);
     }
 
-    if (listen(_server_sock, 5) == -1) {
+    if (listen(_server_sock, SOMAXCONN) == -1) {
         perror("listen");
         exit(EXIT_FAILURE);
     }
