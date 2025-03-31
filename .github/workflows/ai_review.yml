@@ -6,7 +6,9 @@ permissions:
 
 on:
   pull_request:
-    types: [opened]
+    types:
+    - opened
+    - synchronize
   pull_request_review_comment:
     types: [created]
   issue_comment:
