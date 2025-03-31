@@ -59,7 +59,7 @@ class SharedPtr {
         }
     }
 
-    T* const get() const {
+    T* get() const {
         return _ptr;
     }
 
@@ -88,7 +88,7 @@ class SharedPtr {
         return _ptr;
     }
 
-    explicit operator bool() const {
+    operator bool() const {
         return _ptr != NULL;
     }
 
