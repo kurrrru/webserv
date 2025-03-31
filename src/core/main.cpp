@@ -14,17 +14,20 @@
 #include "../event/epoll.hpp"
 #include "../event/tagged_epoll_event.hpp"
 #include "../../toolbox/string.hpp"
+#include "../../toolbox/shared.hpp"
 
 int main() {
     try {
         Epoll epoll;
-        Server* server1 = new Server(5000);
+        // Server* server1 = new Server(5000);
+        toolbox::SharedPtr<Server> server1(new Server(5000));
         server1->setName("server1");
-        epoll.addServer(server1->getFd(), server1);
+        epoll.addServer(server1->getFd(), server1.get());
 
-        Server* server2 = new Server(8001);
+        // Server* server2 = new Server(8001);
+        toolbox::SharedPtr<Server> server2(new Server(8001));
         server2->setName("server2");
-        epoll.addServer(server2->getFd(), server2);
+        epoll.addServer(server2->getFd(), server2.get());
 
         int cnt = 0; // for debug
         struct epoll_event events[1000];
@@ -102,7 +105,7 @@ int main() {
             }
         }
         epoll.del(server1->getFd());
-        // epoll.del(server2->getFd());
+        epoll.del(server2->getFd());
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
