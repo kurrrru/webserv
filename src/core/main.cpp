@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <sstream>
+#include <csignal>
 
 #include "../socket/server.hpp"
 #include "../socket/client.hpp"
@@ -19,54 +20,52 @@
 int main() {
     try {
         Epoll epoll;
-        // Server* server1 = new Server(5000);
         toolbox::SharedPtr<Server> server1(new Server(5000));
         server1->setName("server1");
-        epoll.addServer(server1->getFd(), server1.get());
+        epoll.addServer(server1->getFd(), server1);
 
-        // Server* server2 = new Server(8001);
         toolbox::SharedPtr<Server> server2(new Server(8001));
         server2->setName("server2");
-        epoll.addServer(server2->getFd(), server2.get());
+        epoll.addServer(server2->getFd(), server2);
 
         int cnt = 0; // for debug
         struct epoll_event events[1000];
         while (1) {
             int nfds = epoll.wait(events, 1000, -1);
-            std::cout << "Number of events: " << nfds << std::endl;
             if (nfds == -1) {
                 perror("epoll_wait");
                 break;
             }
             for (int i = 0; i < nfds; i++) {
                 taggedEventData* tagged = static_cast<taggedEventData*>(events[i].data.ptr);
-                if (tagged->tag == "server") {
-                    Server* server = static_cast<Server*>(tagged->ptr);
-                    std::cout << server->getName() << " accept" << std::endl;
-                    std::cout << server->getFd() << std::endl;
+                if (tagged->server.get() != NULL) {
+                    std::cout << "---------------   server   ---------------" <<std::endl;
+                    toolbox::SharedPtr<Server> server = tagged->server;
                     struct sockaddr_in client_addr;
                     socklen_t addr_len = sizeof(client_addr);
                     int client_sock = accept(server->getFd(), (struct sockaddr*)&client_addr, &addr_len);
-                    std::cout << "accepted client fd = " << client_sock << std::endl;
+                    std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                     if (client_sock == -1) {
                         perror("accept");
                         continue;
                     }
-                    Client* client = new Client(client_sock);
+                    toolbox::SharedPtr<Client> client(new Client(client_sock));
                     epoll.addClient(client_sock, client);
                 } else {
-                    std::cout << ++cnt << std::endl;
-                    std::cout << "client request" << std::endl;
-                    std::cout << tagged->tag << std::endl;
-                    Client* client = static_cast<Client*>(tagged->ptr);
+                    std::cout << "--------------- client " << ++cnt << " ---------------" <<std::endl;
+                    toolbox::SharedPtr<Client> client = tagged->client;
                     int client_sock = client->getFd();
-                    std::cout << "Client fd: " << client_sock << std::endl;
+                    std::cout << "send response to client fd: " << client_sock << std::endl;
+
                     char buf[1024];
                     int len = 0;
                     std::string whole_request;
                     do {
                         len = recv(client_sock, buf, sizeof(buf), 0);
                         if (len == -1) {
+                            if (errno == EAGAIN) { //if no recv data
+                                break;
+                            }
                             perror("recv");
                         } else if (len == 0) {
                             break;
@@ -100,7 +99,6 @@ int main() {
                     send(client_sock, response.c_str(), response.size(), 0);
                     // std::cout << response << std::endl;
                     epoll.del(client_sock);
-                    // close(client_sock);
                 }
             }
         }
