@@ -8,7 +8,6 @@
 #include <cerrno>
 #include <cstdio>
 #include <sstream>
-#include <csignal>
 
 #include "../socket/server.hpp"
 #include "../socket/client.hpp"
