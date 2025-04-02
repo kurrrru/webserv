@@ -22,13 +22,6 @@ Epoll::~Epoll() {
     for (std::map<int, struct epoll_event*>::iterator it = _events.begin(); it != _events.end(); ++it) {
         struct epoll_event* ev = it->second;
         taggedEventData* tagged = static_cast<taggedEventData*>(ev->data.ptr);
-        if (tagged->tag == "server") {
-            Server* server = static_cast<Server*>(tagged->ptr);
-            delete server;
-        } else if (tagged->tag == "client") {
-            Client* client = static_cast<Client*>(tagged->ptr);
-            delete client;
-        }
         delete tagged;
         delete ev;
     }
@@ -36,14 +29,12 @@ Epoll::~Epoll() {
     _events.clear();
 }
 
-void Epoll::addServer(int fd, Server* server) {
+void Epoll::addServer(int fd, toolbox::SharedPtr<Server> server) {
     struct epoll_event* ev = new struct epoll_event;
     ev->events = EPOLLIN;
-
     taggedEventData* tagged = new taggedEventData;
-    tagged->ptr = server;
-    tagged->tag = "server";
-    ev->data.ptr = tagged;
+    tagged->server = server;
+    ev->data.ptr = static_cast<void*>(tagged);
     toolbox::setNonBlocking(fd);
     if (epoll_ctl(_epfd, EPOLL_CTL_ADD, fd, ev) == -1) {
         delete tagged;
@@ -53,15 +44,14 @@ void Epoll::addServer(int fd, Server* server) {
     _events[fd] = ev;
 }
 
-void Epoll::addClient(int fd, Client* client) {
+void Epoll::addClient(int fd, toolbox::SharedPtr<Client> client) {
     struct epoll_event* ev = new struct epoll_event;
     ev->events = EPOLLIN | EPOLLET;
     taggedEventData* tagged = new taggedEventData;
-    tagged->ptr = client;
-    tagged->tag = "client";
-    ev->data.ptr = tagged;
+    tagged->client = client;
+    ev->data.ptr = static_cast<void*>(tagged);
     toolbox::setNonBlocking(fd);
-    std::cout << "Epoll::addClient fd = " << static_cast<Client*>(tagged->ptr)->getFd() << std::endl;
+    std::cout << "Epoll::addClient fd: " << client->getFd() << std::endl;
     if (epoll_ctl(_epfd, EPOLL_CTL_ADD, fd, ev) == -1) {
         delete tagged;
         delete ev;
@@ -75,18 +65,12 @@ void Epoll::del(int fd) {
     if (it != _events.end()) {
         struct epoll_event* ev = it->second;
         taggedEventData* tagged = static_cast<taggedEventData*>(ev->data.ptr);
-        if (tagged->tag == "server") {
-            Server* server = static_cast<Server*>(tagged->ptr);
-            delete server;
-        } else if (tagged->tag == "client") {
-            Client* client = static_cast<Client*>(tagged->ptr);
-            delete client;
-        }
         delete tagged;
         delete ev;
         _events.erase(it);
     }
     epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+    close(fd);
 }
 
 int Epoll::wait(struct epoll_event* events, int maxevents, int timeout) {

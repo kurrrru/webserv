@@ -18,17 +18,18 @@ class SharedPtr {
     }
     SharedPtr(const SharedPtr& other)
         : _ptr(other._ptr), _count(other._count) {
-        if (_ptr != NULL) {
+        if (other._ptr != NULL) {
             ++(*_count);
         } else {
             _count = new int(0);
         }
     }
 
+    // if other._ptr == NULL allocate new memory and assign 0
     SharedPtr& operator=(const SharedPtr& other) {
         if (this != &other) {
 			int *tmp_count = other._count;
-			if (_ptr != NULL) {
+			if (other._ptr != NULL) {
 				++(*tmp_count);
 			} else {
 				tmp_count = new int(0);
@@ -59,7 +60,7 @@ class SharedPtr {
         }
     }
 
-    T* const get() const {
+    T* get() const {
         return _ptr;
     }
 
@@ -88,7 +89,7 @@ class SharedPtr {
         return _ptr;
     }
 
-    explicit operator bool() const {
+    operator bool() const {
         return _ptr != NULL;
     }
 

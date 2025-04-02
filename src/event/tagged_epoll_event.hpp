@@ -2,7 +2,9 @@
 
 #include <string>
 
+#include "../../toolbox/shared.hpp"
+
 struct taggedEventData {
-    void* ptr;
-    std::string tag;
+    toolbox::SharedPtr<Server> server;
+    toolbox::SharedPtr<Client> client;
 };
