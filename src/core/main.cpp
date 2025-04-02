@@ -37,7 +37,7 @@ int main() {
             }
             for (int i = 0; i < nfds; i++) {
                 taggedEventData* tagged = static_cast<taggedEventData*>(events[i].data.ptr);
-                if (tagged->server.get() != NULL) {
+                if (tagged->server) {
                     std::cout << "---------------   server   ---------------" <<std::endl;
                     toolbox::SharedPtr<Server> server = tagged->server;
                     struct sockaddr_in client_addr;
