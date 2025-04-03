@@ -32,7 +32,6 @@ const char* Client::ClientException::what() const throw() {
     return _message;
 }
 
-
 int Client::getFd() const {
     return _socket_fd;
 }

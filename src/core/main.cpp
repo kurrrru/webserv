@@ -45,7 +45,7 @@ int main() {
                             socklen_t addr_len = sizeof(client_addr);
                             int client_sock = accept(server->getFd(), (struct sockaddr*)&client_addr, &addr_len);
                             if (client_sock == -1) {
-                                //break?
+                                //continue?
                                 throw std::runtime_error("epoll_ctl failed");
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
@@ -60,7 +60,7 @@ int main() {
                             toolbox::SharedPtr<Client> client = tagged->client;
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
-        
+
                             char buf[1024];
                             int len = 0;
                             std::string whole_request;
@@ -77,7 +77,7 @@ int main() {
                                     whole_request.append(buf, len);
                                 }
                             } while (len > 0);
-        
+
                             // requestをparseして、適切なresponseを作成する
                             // Response response;
                             // Request* request;
@@ -96,7 +96,7 @@ int main() {
                             // request->run(&response);
                             // std::string response = response->getResponse();
                             // send(client_sock, response.c_str(), response.size(), 0);
-        
+
                             const char* responseHeader = "HTTP/1.1 200 OK\r\nContent-Length: ";
                             std::string responseBody = "<html><body>hello" + whole_request + "</body></html>";
                             std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\r\n\r\n" + responseBody;
