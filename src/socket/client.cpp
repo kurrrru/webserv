@@ -26,6 +26,12 @@ Client::~Client() {
     }
 }
 
+Client::ClientException::ClientException(const char* message) : _message(message) {}
+
+const char* Client::ClientException::what() const throw() {
+    return _message;
+}
+
 int Client::getFd() const {
     return _socket_fd;
 }

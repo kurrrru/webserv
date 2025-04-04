@@ -69,7 +69,10 @@ void Epoll::del(int fd) {
         delete ev;
         _events.erase(it);
     }
-    epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL);
+    if (epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+        close (fd);
+        throw EpollException("epoll_ctl failed");
+    }
     close(fd);
 }
 
