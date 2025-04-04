@@ -46,7 +46,7 @@ int main() {
                             int client_sock = accept(server->getFd(), (struct sockaddr*)&client_addr, &addr_len);
                             if (client_sock == -1) {
                                 //continue?
-                                throw std::runtime_error("epoll_ctl failed");
+                                throw std::runtime_error("accept failed");
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock));
