@@ -4,9 +4,16 @@
 #include <string>
 #include <vector>
 
+#include "http_namespace.hpp"
 #include "parse_request.hpp"
 
-enum RequestState { REQUEST_LINE, HEADERS, BODY, COMPLETED };
+enum RequestState { START, REQUEST_LINE, HEADERS, BODY, COMPLETED };
+
+enum ParseState {
+    PARSE_INVALID_METHOD,
+    PARSE_INVALID_URI,
+    PARSE_INVALID_VERSION
+};
 
 struct RequestLine {
     std::string method;
@@ -41,6 +48,14 @@ struct RequestData {
 
 class RequestParse {
    public:
+    class ParseException : public std::exception {
+       public:
+        ParseException(const char* message);
+        const char* what() const throw();
+
+       private:
+        const char* _message;
+    };
     RequestParse();
     ~RequestParse();
     void run(std::string& input);
@@ -62,9 +77,17 @@ class RequestParse {
     std::pair<std::string, std::vector<std::string> > readFields();
     std::string readBody();
     void validateRequestLine();
+    void validateMethod(std::string& method);
+    void validateUri(std::string& uri);
+    void validateVersion(std::string& version);
     void validateFields();
     void validateBody();
+    void splitRequestLine(std::string& line);
     bool CaseInsensitiveCompare(const std::string& str1,
                                 const std::string& str2) const;
     RequestData _data;
 };
+
+std::string trim(std::string& src, const std::string& sep);
+bool hasCtlChar(std::string& str);
+bool isUppStr(std::string& str);
