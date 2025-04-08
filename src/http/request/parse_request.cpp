@@ -4,6 +4,36 @@
 
 #include "http_namespace.hpp"
 
+/*
+debug
+*/
+
+void printMap(std::map<std::string, std::vector<std::string>> field) {
+
+}
+
+void RequestParse::showAll() {
+    std::cout << "----- headerLine -----" << std::endl;
+    std::cout << "method: " << _data.requestLine.method << std::endl;
+    std::cout << "uri: " << _data.requestLine.uri << std::endl;
+    std::cout << "version: " << _data.requestLine.version << std::endl;
+    std::cout << "----- parsed fields -----" << std::endl;
+    for (std::map<std::string, std::vector<std::string>>::iterator it1 =
+        _data.field.fields.begin();
+        it1 != _data.field.fields.end(); ++it1) {
+            if (it1->second.empty()) {
+                continue;
+            }
+            std::cout << it1->first << " ->> ";
+            for (std::vector<std::string>::iterator it2 = it1->second.begin();
+            it2 != it1->second.end(); ++it2) {
+                std::cout << *it2;
+            }
+            std::cout << std::endl;
+        }
+    std::cout << "----- recv body -----\n" << _data.body.body << std::endl; 
+}
+
 RequestParse::RequestParse() {};
 
 RequestParse::~RequestParse() {};
@@ -18,25 +48,25 @@ const char* RequestParse::ParseException::what() const throw() {
 void RequestParse::run(std::string& input) {
     _data.inputBuffer.append(input);
     parseRequestLine();
-    // parseFields();
-    // parseBody();
+    parseFields();
+    parseBody();
 }
 
+/*
+ParseRequestLine
+*/
+
 void RequestParse::parseRequestLine() {
-    if (_data.requestState != START) {
+    if (_data.requestState != REQUEST_LINE) {
         return;
     }
     if (_data.inputBuffer.find(http::CRLF) == std::string::npos) {
         return;
     }
     std::string line = trim(_data.inputBuffer, http::CRLF);
-    std::cout << line << std::endl;
     splitRequestLine(line);
     validateRequestLine();
-    std::cout << "method: " << _data.requestLine.method << std::endl;
-    std::cout << "uri: " << _data.requestLine.uri << std::endl;
-    std::cout << "version: " << _data.requestLine.version << std::endl;
-    _data.requestState = REQUEST_LINE;
+    _data.requestState = HEADERS;
 }
 
 void RequestParse::splitRequestLine(std::string& line) {
@@ -53,10 +83,13 @@ void RequestParse::validateRequestLine() {
 
 void RequestParse::validateMethod(std::string& method) {
     if (method.empty()) {
+        _data.errorCode = PARSE_INVALID_METHOD;
         throw ParseException("Error: method doesn't exist");
     }
     if (hasCtlChar(method) || !isUppStr(method)) {
-        throw ParseException("Error: method has control or lowercase character");
+        _data.errorCode = PARSE_INVALID_METHOD;
+        throw ParseException(
+            "Error: method has control or lowercase character");
     }
     if (method != http::GET && method != http::POST && method != http::DELETE) {
         _data.errorCode = PARSE_INVALID_METHOD;
@@ -68,6 +101,7 @@ void RequestParse::validateMethod(std::string& method) {
 // need think normalizetion, query, fragment
 void RequestParse::validateUri(std::string& uri) {
     if (uri.empty()) {
+        _data.errorCode = PARSE_INVALID_URI;
         throw ParseException("Error: uri doesn't exist");
     }
     if (*(uri.begin()) != '/' || hasCtlChar(uri)) {
@@ -79,9 +113,11 @@ void RequestParse::validateUri(std::string& uri) {
 
 void RequestParse::validateVersion(std::string& version) {
     if (version.empty()) {
+        _data.errorCode = PARSE_INVALID_VERSION;
         throw ParseException("Error: version doesn't exist");
     }
     if (hasCtlChar(version)) {
+        _data.errorCode = PARSE_INVALID_VERSION;
         throw ParseException("Error: version has control character");
     }
     if (version != http::HTTP_VERSION) {
@@ -91,33 +127,102 @@ void RequestParse::validateVersion(std::string& version) {
     return;
 }
 
-// void RequestParse::validateUri(std::string& uri) {
-//     enum UriState { START, PATH, QUERY, FRAGMENT, END };
-//     int state = START;
-//     for (std::string::iterator it = uri.begin(); it != uri.end(); ++it) {
-//         switch (state) {
-//             case START:
-//                 if (*it != '/') {
-//                     throw ParseException("RequestParse: invalid uri START");
-//                 }
-//                 state = PATH;
-//                 break;
-//             case PATH:
-//                 if (*it == '?') {
-//                     state = QUERY;
-//                 }
-//                 break;
-//             case QUERY:
-//                 if (*it == '#') {
-//                     state = FRAGMENT;
-//                 }
-//                 break;
-//             case FRAGMENT:
-//             default:
-//                 throw ParseException("RequestParse: invalid uri default");
-//         }
-//     }
-// }
+/*
+ParseFields
+*/
+
+void RequestParse::parseFields() {
+    if (_data.requestState != HEADERS) {
+        return;
+    }
+    if (_data.inputBuffer.find(http::CRLF) == std::string::npos) {
+        return;
+    }
+    if (_data.field.fields.empty()) {
+        _data.field.initField();
+    }
+    for (;;) {
+        if (_data.inputBuffer.find(http::CRLF) == 0) {
+            _data.requestState = BODY;
+            _data.inputBuffer = _data.inputBuffer.substr(2, _data.inputBuffer.length());
+            return;
+        }
+        if (_data.inputBuffer.find(http::CRLF) == std::string::npos) {
+            return;
+        }
+        std::string line = trim(_data.inputBuffer, http::CRLF);
+        std::pair<std::string, std::vector<std::string>> pair =
+            splitFieldLine(line);
+        _data.field.set(pair);
+    }
+}
+
+// valid line only
+// need split line
+std::pair<std::string, std::vector<std::string>> RequestParse::splitFieldLine(
+    std::string& line) {
+    std::size_t pos = line.find_first_of(':');
+    if (pos == std::string::npos) {
+        throw ParseException("Error: invalid field line");
+    }
+    std::pair<std::string, std::vector<std::string>> pair;
+    pair.first = trim(line, ": ");
+    pair.second.push_back(line);
+    return pair;
+}
+
+/*
+ParseBody
+*/
+
+//if, if, if contentLength > bodyLength??
+void RequestParse::parseBody() {
+    if (_data.requestState != BODY) {
+        return;
+    }
+    if (!_data.body.contentLength && !_data.field.fields.find(http::ContentLength)->second.empty()) {
+        _data.body.contentLength = std::atoi((_data.field.fields.find(http::ContentLength)->second.begin())->c_str());
+    }
+    if (_data.body.contentLength > _data.body.recvedLength) {
+        _data.body.body.append(_data.inputBuffer.substr(0, _data.body.contentLength));
+        _data.body.recvedLength += _data.inputBuffer.length();
+    }
+    if (_data.body.contentLength <= _data.body.recvedLength || _data.inputBuffer.empty()) {
+        _data.requestState = COMPLETED;
+        return;
+    }
+    _data.inputBuffer.clear();
+}
+
+/*
+Field function
+*/
+
+void Fields::initField() {
+    fields.insert(std::make_pair(http::Host, std::vector<std::string>()));
+    fields.insert(
+        std::make_pair(http::ContentType, std::vector<std::string>()));
+    fields.insert(
+        std::make_pair(http::ContentLength, std::vector<std::string>()));
+    fields.insert(std::make_pair(http::UserAgent, std::vector<std::string>()));
+    fields.insert(std::make_pair(http::Connection, std::vector<std::string>()));
+    fields.insert(std::make_pair(http::Accept, std::vector<std::string>()));
+}
+
+bool Fields::set(std::pair<std::string, std::vector<std::string>>& pair) {
+    for (std::map<std::string, std::vector<std::string>>::iterator m_it =
+             fields.begin();
+         m_it != fields.end(); ++m_it) {
+        if (caseInsensitiveCompare(m_it->first, pair.first)) {
+            for (std::vector<std::string>::iterator v_it = pair.second.begin();
+                 v_it != pair.second.end(); v_it++) {
+                m_it->second.push_back(*v_it);
+            }
+            return true;
+        }
+    }
+    return false;
+}
 
 /*
 utils
@@ -145,6 +250,18 @@ bool hasCtlChar(std::string& str) {
 bool isUppStr(std::string& str) {
     for (std::string::iterator it = str.begin(); it != str.end(); ++it) {
         if (!std::isupper(*it)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
+    if (str1.length() != str2.length()) {
+        return false;
+    }
+    for (std::size_t i = 0; i < str1.length(); ++i) {
+        if (std::tolower(str1[i]) != std::tolower(str2[i])) {
             return false;
         }
     }

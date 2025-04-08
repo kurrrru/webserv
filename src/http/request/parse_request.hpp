@@ -3,11 +3,12 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "http_namespace.hpp"
 #include "parse_request.hpp"
 
-enum RequestState { START, REQUEST_LINE, HEADERS, BODY, COMPLETED };
+enum RequestState { REQUEST_LINE, HEADERS, BODY, COMPLETED };
 
 enum ParseState {
     PARSE_INVALID_METHOD,
@@ -22,8 +23,9 @@ struct RequestLine {
 };
 
 struct Fields {
+    void initField();
     const std::string& get(const std::string& key) const;
-    void set(const std::string& key, const std::string& value);
+    bool set(std::pair<std::string, std::vector<std::string>>& pair);
 
     std::map<std::string, std::vector<std::string> > fields;
 };
@@ -66,6 +68,7 @@ class RequestParse {
     const bool isCompleted() const;
     const bool hasError() const;
     const int getErrorCode() const;
+    void showAll();
 
    private:
     RequestParse(RequestParse& other) {};
@@ -83,11 +86,15 @@ class RequestParse {
     void validateFields();
     void validateBody();
     void splitRequestLine(std::string& line);
-    bool CaseInsensitiveCompare(const std::string& str1,
-                                const std::string& str2) const;
-    RequestData _data;
-};
+    std::pair<std::string, std::vector<std::string> > splitFieldLine(
+        std::string& line);
 
-std::string trim(std::string& src, const std::string& sep);
-bool hasCtlChar(std::string& str);
-bool isUppStr(std::string& str);
+    RequestData _data;
+    };
+
+    bool caseInsensitiveCompare(const std::string& str1,
+                                const std::string& str2);
+    std::string trim(std::string& src, const std::string& sep);
+    bool hasCtlChar(std::string& str);
+    bool isUppStr(std::string& str);
+    bool caseInsensitiveCompare(const std::string& str1, const std::string& str2);
