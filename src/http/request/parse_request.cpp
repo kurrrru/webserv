@@ -78,18 +78,32 @@ void ParseRequest::splitRequestLine(std::string& line) {
     _data.requestLine.path = _data.requestLine.uri.substr(0, q_pos);
     if (q_pos > f_pos) {
         _data.errorCode = PARSE_INVALID_URI;
-        throw ParseException("Error: invalid order");
+        throw ParseException("Error: uri invalid order");
     }
     if (q_pos != std::string::npos) {
         std::size_t queryLength =
             (f_pos != std::string::npos) ? (f_pos - q_pos) : std::string::npos;
         _data.requestLine.query =
             _data.requestLine.uri.substr(q_pos, queryLength);
+        splitQuery(_data.requestLine.query);
     }
     if (f_pos != std::string::npos) {
         _data.requestLine.fragment = _data.requestLine.uri.substr(f_pos);
     }
     _data.requestLine.version = trim(line, http::SP);
+}
+
+//?id=5&date=2023-04-09&author=yooshima&limit=10
+// chdeeeeck
+void ParseRequest::splitQuery(std::string& query) {
+    query.erase(0, 1);
+    for (!query.empty) {
+        std::size_t e_pos = query.find("=");
+        std::size_t a_pos = query.find("&");
+        _data.requestLine.queryMap[query.substr(0, e_pos)] =
+            query.substr(e_pos, a_pos);
+        query.erase(0, a_pos);
+    }
 }
 
 void ParseRequest::validateRequestLine() {

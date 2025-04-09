@@ -22,7 +22,9 @@ struct RequestLine {
     std::string uri;
     std::string path;
     std::string query;
+    std::map<std::string, std::string> queryMap;
     std::string fragment;  // no processing required
+
     std::string version;
 };
 
@@ -86,6 +88,7 @@ class ParseRequest {
     void validateVersion(std::string& version);
 
     void splitRequestLine(std::string& line);
+    void splitQuery(std::string& query);
     std::pair<std::string, std::vector<std::string>> splitFieldLine(
         std::string& line);
 
