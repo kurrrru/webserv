@@ -1,11 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <map>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-#include "http_namespace.hpp"
+#include "../http_namespace.hpp"
+#include "../status_code.hpp"
 #include "parse_request.hpp"
 
 enum RequestState { REQUEST_LINE, HEADERS, BODY, COMPLETED };
@@ -19,6 +20,9 @@ enum ParseState {
 struct RequestLine {
     std::string method;
     std::string uri;
+    std::string path;
+    std::string query;
+    std::string fragment;  // no processing required
     std::string version;
 };
 
@@ -27,7 +31,7 @@ struct Fields {
     const std::string& get(const std::string& key) const;
     bool set(std::pair<std::string, std::vector<std::string>>& pair);
 
-    std::map<std::string, std::vector<std::string> > fields;
+    std::map<std::string, std::vector<std::string>> fields;
 };
 
 struct Body {
@@ -42,13 +46,14 @@ struct RequestData {
     int requestState;
     bool hasError;
     int errorCode;
+    std::pair<std::string, std::string> errorStatus;
     RequestLine requestLine;
     Fields field;
     Body body;
     std::string inputBuffer;
 };
 
-class RequestParse {
+class ParseRequest {
    public:
     class ParseException : public std::exception {
        public:
@@ -58,43 +63,38 @@ class RequestParse {
        private:
         const char* _message;
     };
-    RequestParse();
-    ~RequestParse();
+    ParseRequest();
+    ~ParseRequest();
     void run(std::string& input);
-    const RequestLine& getRequestLine() const;
-    const Fields& getFields() const;
-    const Body& getBody() const;
-    const int getState() const;
-    const bool isCompleted() const;
-    const bool hasError() const;
-    const int getErrorCode() const;
-    void showAll();
+    void showAll();  // use debug
+                     //   const RequestLine& getRequestLine() const;  // not
+                     //   use? const Fields& getFields() const; const Body&
+                     //   getBody() const; const int getState() const; const
+                     //   bool isCompleted() const; const bool hasError() const;
+                     //   const int getErrorCode() const;
 
    private:
-    RequestParse(RequestParse& other) {};
-    RequestParse& operator=(RequestParse& other) { return *this; };
+    ParseRequest(ParseRequest& other) {};
+    ParseRequest& operator=(ParseRequest& other) { return *this; };
     void parseRequestLine();
     void parseFields();
     void parseBody();
-    std::string readRequestLine();
-    std::pair<std::string, std::vector<std::string> > readFields();
-    std::string readBody();
+
     void validateRequestLine();
     void validateMethod(std::string& method);
-    void validateUri(std::string& uri);
+    void validateUri(std::string& uri, std::string& path);
     void validateVersion(std::string& version);
-    void validateFields();
-    void validateBody();
+
     void splitRequestLine(std::string& line);
-    std::pair<std::string, std::vector<std::string> > splitFieldLine(
+    std::pair<std::string, std::vector<std::string>> splitFieldLine(
         std::string& line);
 
     RequestData _data;
-    };
+};
 
-    bool caseInsensitiveCompare(const std::string& str1,
-                                const std::string& str2);
-    std::string trim(std::string& src, const std::string& sep);
-    bool hasCtlChar(std::string& str);
-    bool isUppStr(std::string& str);
-    bool caseInsensitiveCompare(const std::string& str1, const std::string& str2);
+bool isTraversalAttack(std::string& path);
+bool caseInsensitiveCompare(const std::string& str1, const std::string& str2);
+std::string trim(std::string& src, const std::string& sep);
+bool hasCtlChar(std::string& str);
+bool isUppStr(std::string& str);
+bool caseInsensitiveCompare(const std::string& str1, const std::string& str2);

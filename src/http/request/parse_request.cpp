@@ -2,50 +2,50 @@
 
 #include <iostream>
 
-#include "http_namespace.hpp"
-
 /*
 debug
 */
 
-void printMap(std::map<std::string, std::vector<std::string>> field) {
-
-}
-
-void RequestParse::showAll() {
+void ParseRequest::showAll() {
     std::cout << "----- headerLine -----" << std::endl;
     std::cout << "method: " << _data.requestLine.method << std::endl;
     std::cout << "uri: " << _data.requestLine.uri << std::endl;
+    std::cout << "path: " << _data.requestLine.path << std::endl;
+    std::cout << "query: " << _data.requestLine.query << std::endl;
+    std::cout << "fragment: " << _data.requestLine.fragment << std::endl;
     std::cout << "version: " << _data.requestLine.version << std::endl;
     std::cout << "----- parsed fields -----" << std::endl;
     for (std::map<std::string, std::vector<std::string>>::iterator it1 =
-        _data.field.fields.begin();
-        it1 != _data.field.fields.end(); ++it1) {
-            if (it1->second.empty()) {
-                continue;
-            }
-            std::cout << it1->first << " ->> ";
-            for (std::vector<std::string>::iterator it2 = it1->second.begin();
-            it2 != it1->second.end(); ++it2) {
-                std::cout << *it2;
-            }
-            std::cout << std::endl;
+             _data.field.fields.begin();
+         it1 != _data.field.fields.end(); ++it1) {
+        if (it1->second.empty()) {
+            continue;
         }
-    std::cout << "----- recv body -----\n" << _data.body.body << std::endl; 
+        std::cout << it1->first << " ->> ";
+        for (std::vector<std::string>::iterator it2 = it1->second.begin();
+             it2 != it1->second.end(); ++it2) {
+            std::cout << *it2;
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "----- recv body -----\n" << _data.body.body << std::endl;
+    std::cout << "----- parse status ----\n"
+              << _data.errorStatus.first << " " << _data.errorStatus.second
+              << std::endl;
 }
 
-RequestParse::RequestParse() {};
+ParseRequest::ParseRequest() {};
 
-RequestParse::~RequestParse() {};
+ParseRequest::~ParseRequest() {};
 
-RequestParse::ParseException::ParseException(const char* message)
+ParseRequest::ParseException::ParseException(const char* message)
     : _message(message) {}
 
-const char* RequestParse::ParseException::what() const throw() {
+const char* ParseRequest::ParseException::what() const throw() {
     return _message;
 }
 
-void RequestParse::run(std::string& input) {
+void ParseRequest::run(std::string& input) {
     _data.inputBuffer.append(input);
     parseRequestLine();
     parseFields();
@@ -56,7 +56,7 @@ void RequestParse::run(std::string& input) {
 ParseRequestLine
 */
 
-void RequestParse::parseRequestLine() {
+void ParseRequest::parseRequestLine() {
     if (_data.requestState != REQUEST_LINE) {
         return;
     }
@@ -69,19 +69,36 @@ void RequestParse::parseRequestLine() {
     _data.requestState = HEADERS;
 }
 
-void RequestParse::splitRequestLine(std::string& line) {
+// METHOD URI[PATH QUERY FRAGMENT] VERSION
+void ParseRequest::splitRequestLine(std::string& line) {
     _data.requestLine.method = trim(line, http::SP);
     _data.requestLine.uri = trim(line, http::SP);
+    std::size_t q_pos = _data.requestLine.uri.find("?");
+    std::size_t f_pos = _data.requestLine.uri.find("#");
+    _data.requestLine.path = _data.requestLine.uri.substr(0, q_pos);
+    if (q_pos > f_pos) {
+        _data.errorCode = PARSE_INVALID_URI;
+        throw ParseException("Error: invalid order");
+    }
+    if (q_pos != std::string::npos) {
+        std::size_t queryLength =
+            (f_pos != std::string::npos) ? (f_pos - q_pos) : std::string::npos;
+        _data.requestLine.query =
+            _data.requestLine.uri.substr(q_pos, queryLength);
+    }
+    if (f_pos != std::string::npos) {
+        _data.requestLine.fragment = _data.requestLine.uri.substr(f_pos);
+    }
     _data.requestLine.version = trim(line, http::SP);
 }
 
-void RequestParse::validateRequestLine() {
+void ParseRequest::validateRequestLine() {
     validateMethod(_data.requestLine.method);
-    validateUri(_data.requestLine.uri);
+    validateUri(_data.requestLine.uri, _data.requestLine.path);
     validateVersion(_data.requestLine.version);
 }
 
-void RequestParse::validateMethod(std::string& method) {
+void ParseRequest::validateMethod(std::string& method) {
     if (method.empty()) {
         _data.errorCode = PARSE_INVALID_METHOD;
         throw ParseException("Error: method doesn't exist");
@@ -91,6 +108,7 @@ void RequestParse::validateMethod(std::string& method) {
         throw ParseException(
             "Error: method has control or lowercase character");
     }
+    // need change
     if (method != http::GET && method != http::POST && method != http::DELETE) {
         _data.errorCode = PARSE_INVALID_METHOD;
         throw ParseException("Error: method isn't supported");
@@ -99,7 +117,7 @@ void RequestParse::validateMethod(std::string& method) {
 }
 
 // need think normalizetion, query, fragment
-void RequestParse::validateUri(std::string& uri) {
+void ParseRequest::validateUri(std::string& uri, std::string& path) {
     if (uri.empty()) {
         _data.errorCode = PARSE_INVALID_URI;
         throw ParseException("Error: uri doesn't exist");
@@ -108,10 +126,14 @@ void RequestParse::validateUri(std::string& uri) {
         _data.errorCode = PARSE_INVALID_URI;
         throw ParseException("Error: missing '/' or uri has control character");
     }
+    if (isTraversalAttack(path)) {
+        _data.errorCode = PARSE_INVALID_URI;
+        throw ParseException("Error: warning! path is TraversalAttack");
+    }
     return;
 }
 
-void RequestParse::validateVersion(std::string& version) {
+void ParseRequest::validateVersion(std::string& version) {
     if (version.empty()) {
         _data.errorCode = PARSE_INVALID_VERSION;
         throw ParseException("Error: version doesn't exist");
@@ -131,7 +153,7 @@ void RequestParse::validateVersion(std::string& version) {
 ParseFields
 */
 
-void RequestParse::parseFields() {
+void ParseRequest::parseFields() {
     if (_data.requestState != HEADERS) {
         return;
     }
@@ -144,7 +166,8 @@ void RequestParse::parseFields() {
     for (;;) {
         if (_data.inputBuffer.find(http::CRLF) == 0) {
             _data.requestState = BODY;
-            _data.inputBuffer = _data.inputBuffer.substr(2, _data.inputBuffer.length());
+            _data.inputBuffer =
+                _data.inputBuffer.substr(2, _data.inputBuffer.length());
             return;
         }
         if (_data.inputBuffer.find(http::CRLF) == std::string::npos) {
@@ -159,7 +182,7 @@ void RequestParse::parseFields() {
 
 // valid line only
 // need split line
-std::pair<std::string, std::vector<std::string>> RequestParse::splitFieldLine(
+std::pair<std::string, std::vector<std::string>> ParseRequest::splitFieldLine(
     std::string& line) {
     std::size_t pos = line.find_first_of(':');
     if (pos == std::string::npos) {
@@ -175,21 +198,26 @@ std::pair<std::string, std::vector<std::string>> RequestParse::splitFieldLine(
 ParseBody
 */
 
-//if, if, if contentLength > bodyLength??
-void RequestParse::parseBody() {
+// if, if, if contentLength > bodyLength??
+void ParseRequest::parseBody() {
     if (_data.requestState != BODY) {
         return;
     }
-    if (!_data.body.contentLength && !_data.field.fields.find(http::ContentLength)->second.empty()) {
-        _data.body.contentLength = std::atoi((_data.field.fields.find(http::ContentLength)->second.begin())->c_str());
+    if (!_data.body.contentLength &&
+        !_data.field.fields.find(http::CONTENT_LENGTH)->second.empty()) {
+        _data.body.contentLength = std::atoi(
+            (_data.field.fields.find(http::CONTENT_LENGTH)->second.begin())
+                ->c_str());
     }
     if (_data.body.contentLength > _data.body.recvedLength) {
-        _data.body.body.append(_data.inputBuffer.substr(0, _data.body.contentLength));
+        _data.body.body.append(
+            _data.inputBuffer.substr(0, _data.body.contentLength));
         _data.body.recvedLength += _data.inputBuffer.length();
     }
-    if (_data.body.contentLength <= _data.body.recvedLength || _data.inputBuffer.empty()) {
+    if (_data.body.contentLength <= _data.body.recvedLength ||
+        _data.inputBuffer.empty()) {
         _data.requestState = COMPLETED;
-        return;
+        _data.errorStatus = StatusCode::getStatusPair(OK);
     }
     _data.inputBuffer.clear();
 }
@@ -199,14 +227,10 @@ Field function
 */
 
 void Fields::initField() {
-    fields.insert(std::make_pair(http::Host, std::vector<std::string>()));
-    fields.insert(
-        std::make_pair(http::ContentType, std::vector<std::string>()));
-    fields.insert(
-        std::make_pair(http::ContentLength, std::vector<std::string>()));
-    fields.insert(std::make_pair(http::UserAgent, std::vector<std::string>()));
-    fields.insert(std::make_pair(http::Connection, std::vector<std::string>()));
-    fields.insert(std::make_pair(http::Accept, std::vector<std::string>()));
+    for (std::size_t i = 0; i < http::FIELD_SIZE; ++i) {
+        fields.insert(
+            std::make_pair(http::FIELDS[i], std::vector<std::string>()));
+    }
 }
 
 bool Fields::set(std::pair<std::string, std::vector<std::string>>& pair) {
@@ -219,6 +243,43 @@ bool Fields::set(std::pair<std::string, std::vector<std::string>>& pair) {
                 m_it->second.push_back(*v_it);
             }
             return true;
+        }
+    }
+    return false;
+}
+
+/*
+local
+*/
+
+bool isTraversalAttack(std::string& path) {
+    std::string normalizePath = path;
+    std::size_t pos = 0;
+    while ((pos = normalizePath.find("//", pos)) != std::string::npos) {
+        normalizePath.replace(pos, 2, "/");
+    }
+    std::vector<std::string> splitPath;
+    std::string parts;
+    for (std::size_t i = 0; i < normalizePath.length(); ++i) {
+        if (normalizePath[i] == '/' && !parts.empty()) {
+            splitPath.push_back(parts);
+            parts.clear();
+        } else {
+            parts += normalizePath[i];
+        }
+    }
+    if (!parts.empty()) {
+        splitPath.push_back(parts);
+    }
+    int level = 0;
+    for (std::size_t i = 0; i < splitPath.size(); ++i) {
+        if (splitPath[i] == "..") {
+            --level;
+            if (level < 0) {
+                return true;
+            }
+        } else if (splitPath[i] != ".") {
+            ++level;
         }
     }
     return false;
