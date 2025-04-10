@@ -6,40 +6,6 @@
 debug
 */
 
-void ParseRequest::showAll() {
-    std::cout << "----- headerLine -----" << std::endl;
-    std::cout << "method: " << _data.requestLine.method << std::endl;
-    std::cout << "uri: " << _data.requestLine.uri << std::endl;
-    std::cout << "path: " << _data.requestLine.path << std::endl;
-    std::cout << "query: " << _data.requestLine.query << std::endl;
-    std::cout << "fragment: " << _data.requestLine.fragment << std::endl;
-    std::cout << "version: " << _data.requestLine.version << std::endl;
-    std::cout << "----- query map -----" << std::endl;
-    for (std::map<std::string, std::string>::iterator it1 =
-             _data.requestLine.queryMap.begin();
-         it1 != _data.requestLine.queryMap.end(); ++it1) {
-        std::cout << it1->first << ": " << it1->second << std::endl;
-    }
-    std::cout << "----- parsed fields -----" << std::endl;
-    for (std::map<std::string, std::vector<std::string>>::iterator it1 =
-             _data.field.fields.begin();
-         it1 != _data.field.fields.end(); ++it1) {
-        if (it1->second.empty()) {
-            continue;
-        }
-        std::cout << it1->first << " ->> ";
-        for (std::vector<std::string>::iterator it2 = it1->second.begin();
-             it2 != it1->second.end(); ++it2) {
-            std::cout << *it2;
-        }
-        std::cout << std::endl;
-    }
-    std::cout << "----- recv body -----\n" << _data.body.body << std::endl;
-    std::cout << "----- parse status ----\n"
-              << _data.errorStatus.first << " " << _data.errorStatus.second
-              << std::endl;
-}
-
 ParseRequest::ParseRequest() {};
 
 ParseRequest::~ParseRequest() {};
@@ -343,14 +309,14 @@ bool isUppStr(std::string& str) {
     return true;
 }
 
-bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
-    if (str1.length() != str2.length()) {
-        return false;
-    }
-    for (std::size_t i = 0; i < str1.length(); ++i) {
-        if (std::tolower(str1[i]) != std::tolower(str2[i])) {
-            return false;
-        }
-    }
-    return true;
-}
+// bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
+//     if (str1.length() != str2.length()) {
+//         return false;
+//     }
+//     for (std::size_t i = 0; i < str1.length(); ++i) {
+//         if (std::tolower(str1[i]) != std::tolower(str2[i])) {
+//             return false;
+//         }
+//     }
+//     return true;
+// }

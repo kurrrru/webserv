@@ -44,7 +44,4 @@ const std::string EQUAL = "=";
 const std::string AMPERSAND = "&";
 const std::string SHARP = "#";
 const std::string QUESTION = "?";
-
-
-
 }  // namespace http

@@ -18,8 +18,8 @@ class ParseURI {
 };
 */
 
-void ParseURI::parseURI(std::string& uri, std::string& path, std::string& query,
-                        std::string& fragment,
-                        std::map<std::string, std::string> queryMap) {
-    hello
-}
+// void ParseURI::parseURI(std::string& uri, std::string& path, std::string& query,
+//                         std::string& fragment,
+//                         std::map<std::string, std::string> queryMap) {
+//     hello
+// }

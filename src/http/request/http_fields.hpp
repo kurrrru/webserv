@@ -6,10 +6,16 @@
 
 class HTTPFields {
    public:
-    void add();
-    std::vector<std::string> get();
+    HTTPFields() {};
+    ~HTTPFields() {};
+    bool isInitialized();
+    void initFieldsMap();
+    bool add(std::pair<std::string, std::vector<std::string>>& pair);
+    std::vector<std::string> get(const std::string& key);
     bool parse();
+    std::map<std::string, std::vector<std::string>> _fieldsMap;
 
    private:
-    std::map<std::string, std::vector<std::string>> _headersMap;
+    HTTPFields(HTTPFields& other);
+    HTTPFields& operator=(HTTPFields& other);
 };

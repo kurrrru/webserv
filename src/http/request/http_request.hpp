@@ -6,15 +6,32 @@
 
 class HTTPRequest {
    public:
-    std::string method;
-    std::string uri;
-    std::string version;
-    // uri
-    std::string path;
-    std::string query;  //
-    std::map<std::string, std::string> queryMap;
-    std::string fragment;  //
+    struct Body {
+        std::string content;
+        std::size_t contentLength;
+        std::size_t recvedLength;
+    };
+    struct URI {
+        std::string fullUri;
+        std::string path;
+        std::string fullQuery;  //
+        std::map<std::string, std::string> queryMap;
+        std::string fragment;  // client dependent
+    };
 
+    HTTPRequest() {
+        body.contentLength = 0;
+        body.recvedLength = 0;
+    };
+    ~HTTPRequest() {};
+
+    std::string method;
+    URI uri;
+    std::string version;
     HTTPFields fields;
-    std::string body;
+    Body body;
+
+   private:
+    HTTPRequest(HTTPRequest& otheer) {};
+    HTTPRequest& operator=(HTTPRequest& other) { return *this; };
 };
