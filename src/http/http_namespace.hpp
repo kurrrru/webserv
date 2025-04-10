@@ -40,4 +40,11 @@ const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 // other
 const std::string CRLF = "\r\n";
 const std::string SP = " ";
+const std::string EQUAL = "=";
+const std::string AMPERSAND = "&";
+const std::string SHARP = "#";
+const std::string QUESTION = "?";
+
+
+
 }  // namespace http

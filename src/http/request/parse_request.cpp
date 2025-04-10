@@ -14,6 +14,10 @@ void ParseRequest::showAll() {
     std::cout << "query: " << _data.requestLine.query << std::endl;
     std::cout << "fragment: " << _data.requestLine.fragment << std::endl;
     std::cout << "version: " << _data.requestLine.version << std::endl;
+    std::cout << "----- query map -----"<< std::endl;
+    for (std::map<std::string, std::string>::iterator it1 = _data.requestLine.queryMap.begin(); it1 != _data.requestLine.queryMap.end(); ++it1) {
+        std::cout << it1->first << ": " << it1->second << std::endl;
+    }
     std::cout << "----- parsed fields -----" << std::endl;
     for (std::map<std::string, std::vector<std::string>>::iterator it1 =
              _data.field.fields.begin();
@@ -73,8 +77,8 @@ void ParseRequest::parseRequestLine() {
 void ParseRequest::splitRequestLine(std::string& line) {
     _data.requestLine.method = trim(line, http::SP);
     _data.requestLine.uri = trim(line, http::SP);
-    std::size_t q_pos = _data.requestLine.uri.find("?");
-    std::size_t f_pos = _data.requestLine.uri.find("#");
+    std::size_t q_pos = _data.requestLine.uri.find(http::QUESTION);
+    std::size_t f_pos = _data.requestLine.uri.find(http::SHARP);
     _data.requestLine.path = _data.requestLine.uri.substr(0, q_pos);
     if (q_pos > f_pos) {
         _data.errorCode = PARSE_INVALID_URI;
@@ -93,16 +97,21 @@ void ParseRequest::splitRequestLine(std::string& line) {
     _data.requestLine.version = trim(line, http::SP);
 }
 
-//?id=5&date=2023-04-09&author=yooshima&limit=10
-// chdeeeeck
 void ParseRequest::splitQuery(std::string& query) {
     query.erase(0, 1);
-    for (!query.empty) {
-        std::size_t e_pos = query.find("=");
-        std::size_t a_pos = query.find("&");
-        _data.requestLine.queryMap[query.substr(0, e_pos)] =
-            query.substr(e_pos, a_pos);
-        query.erase(0, a_pos);
+    std::cout << query << std::endl;
+    while (!query.empty()) {
+        std::size_t e_pos = query.find(http::EQUAL);
+        std::size_t a_pos = query.find(http::AMPERSAND);
+        if (a_pos != std::string::npos) {
+            _data.requestLine.queryMap[query.substr(0, e_pos)] =
+            query.substr(e_pos +1, a_pos - e_pos -1);
+            query.erase(0, a_pos +1);
+        } else {
+            _data.requestLine.queryMap[query.substr(0, e_pos)] =
+            query.substr(e_pos +1);
+            query.clear();
+        }
     }
 }
 
