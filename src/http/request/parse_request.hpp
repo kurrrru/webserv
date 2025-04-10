@@ -88,7 +88,7 @@ class ParseRequest {
     void validateVersion(std::string& version);
 
     void splitRequestLine(std::string& line);
-    void splitQuery(std::string& query);
+    void splitQuery(std::string query);
     std::pair<std::string, std::vector<std::string>> splitFieldLine(
         std::string& line);
 
