@@ -1,4 +1,7 @@
 #include <iostream>
+#include <vector>
+#include <string>
+#include <stdexcept>
 
 #include "../http_namespace.hpp"
 #include "../status_code.hpp"
@@ -36,40 +39,6 @@ void showAll(HTTPRequest& r) {
     std::cout << r.body.content << std::endl;
 }
 
-// int main(void) {
-//     try {
-//         RequestParser parse;
-//         std::string sample =
-//             "GET /index.html?id=5&date=2023-04-09&author=yooshima&limit=10 "
-//             "HTTP/1.1\r\nHost: example.com\r\nUser-Agent: "
-//             "Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\nAccept: "
-//             "text/html,application/xhtml+xml\r\nAccept-Language: "
-//             "en-US,en;q=0.9\r\nConnection: keep-alive\r\ncontent-length: "
-//             "10\r\n\r\nbodyy+++++bodyy+++++bodyy";
-//         std::cout << "----- sample request ----\n" << sample << std::endl;
-//         parse.run(sample);
-//         showAll(parse.get());
-//     } catch (std::exception &e) {
-//         std::cout << e.what() << std::endl;
-//     }
-// }
-
-#include <iostream>
-#include <vector>
-#include <string>
-#include <stdexcept>
-
-// RequestParserクラスのヘッダーをインクルード
-// #include "RequestParser.hpp"
-
-// テスト結果表示用の関数
-// void showAll(const std::map<std::string, std::string>& request) {
-//     std::cout << "\n----- Parsed Request -----\n";
-//     for (std::map<std::string, std::string>::const_iterator it = request.begin(); it != request.end(); ++it) {
-//         std::cout << it->first << ": " << it->second << std::endl;
-//     }
-//     std::cout << "-------------------------\n\n";
-// }
 
 // テストケースを実行する関数
 void runTest(const std::string& testName, const std::string& request) {
