@@ -82,6 +82,24 @@ std::pair<std::string, std::vector<std::string>> splitFieldLine(
     return pair;
 }
 
+void splitQuery(std::map<std::string, std::string>& queryMap,
+                std::string& fullQuery) {
+    std::size_t start_pos = 1;
+    for (;;) {
+        std::size_t e_pos = fullQuery.find(http::EQUAL, start_pos);
+        std::size_t a_pos = fullQuery.find(http::AMPERSAND, start_pos);
+        if (a_pos != std::string::npos) {
+            queryMap[fullQuery.substr(start_pos, e_pos - start_pos)] =
+                fullQuery.substr(e_pos + 1, a_pos - e_pos - 1);
+        } else {
+            queryMap[fullQuery.substr(start_pos, e_pos - start_pos)] =
+                fullQuery.substr(e_pos + 1);
+            break;
+        }
+        start_pos = a_pos + 1;
+    }
+}
+
 /*
 Class method
 */
@@ -111,10 +129,30 @@ void RequestParser::parseRequestLine() {
     _request.method = trim(line, http::SP);
     _request.uri.fullUri = trim(line, http::SP);
     _request.version = trim(line, http::SP);
+    parseURI();
     validateMethod();
     validateURI();
     validateVersion();
     _state = HEADERS;
+}
+
+/// index.html?id=5&date=2023-04-09&author=yooshima&limit=10
+// order query -> fragment?
+void RequestParser::parseURI() {
+    std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
+    std::size_t s_pos = _request.uri.fullUri.find(http::SHARP);
+    _request.uri.path =
+        _request.uri.fullUri.substr(0, (q_pos < s_pos) ? q_pos : s_pos);
+    if (q_pos != std::string::npos) {
+        std::size_t len = (s_pos != std::string::npos)
+                              ? s_pos - q_pos
+                              : _request.uri.fullUri.length() - q_pos;
+        _request.uri.fullQuery = _request.uri.fullUri.substr(q_pos, len);
+    }
+    if (s_pos != std::string::npos) {
+        _request.uri.fragment = _request.uri.fullUri.substr(s_pos);
+    }
+    splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
 }
 
 void RequestParser::validateMethod() {
@@ -168,6 +206,7 @@ void RequestParser::validateVersion() {
     return;
 }
 
+// if CRLF + CRLF nothing, don't work.
 void RequestParser::parseFields() {
     if (_state != HEADERS) {
         return;
@@ -188,6 +227,9 @@ void RequestParser::parseFields() {
             return;
         }
         std::string line = trim(_buf, http::CRLF);
+        if (hasCtlChar(line)) {
+            throw ParseException("Error: field value has ctlchar");
+        }
         std::pair<std::string, std::vector<std::string>> pair =
             splitFieldLine(line);
         _request.fields.add(pair);

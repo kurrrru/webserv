@@ -22,11 +22,13 @@ class RequestParser {
     RequestParser(RequestParser& other) {};
     RequestParser& operator=(RequestParser& other) { return *this; };
     void parseRequestLine();
+    void parseURI();
     void parseFields();
     void parseBody();
     void validateMethod();
     void validateURI();
     void validateVersion();
+
 
     std::string _buf;
     HTTPRequest _request;

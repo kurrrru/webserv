@@ -16,6 +16,6 @@ class HTTPFields {
     std::map<std::string, std::vector<std::string>> _fieldsMap;
 
    private:
-    HTTPFields(HTTPFields& other);
-    HTTPFields& operator=(HTTPFields& other);
+    HTTPFields(HTTPFields& other) {};
+    HTTPFields& operator=(HTTPFields& other) { return *this; };
 };

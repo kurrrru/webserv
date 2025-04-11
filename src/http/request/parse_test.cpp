@@ -12,8 +12,12 @@ sample
 void showAll(HTTPRequest& r) {
     std::cout << "----- Request line ----" << std::endl;
     std::cout << "method: " << r.method << std::endl;
-    std::cout << "path: " << r.uri.fullUri << std::endl;
+    std::cout << "path: " << r.uri.path << std::endl;
     std::cout << "version: " << r.version << std::endl;
+    std::cout << "----- URI query map ----" << std::endl;
+    for (std::map<std::string, std::string>::iterator it = r.uri.queryMap.begin(); it != r.uri.queryMap.end(); ++it) {
+        std::cout << it->first << ": " << it->second << std::endl;
+    }
     std::cout << "----- Fields ----" << std::endl;
     for (std::map<std::string, std::vector<std::string>>::iterator it1 =
              r.fields._fieldsMap.begin();
