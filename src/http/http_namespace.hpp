@@ -42,6 +42,6 @@ const std::string CRLF = "\r\n";
 const std::string SP = " ";
 const std::string EQUAL = "=";
 const std::string AMPERSAND = "&";
-const std::string SHARP = "#";
+const std::string HASH = "#";
 const std::string QUESTION = "?";
 }  // namespace http

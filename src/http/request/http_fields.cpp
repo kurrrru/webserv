@@ -2,7 +2,7 @@
 #include "request_parser.hpp"
 #include "../http_namespace.hpp"
 
-bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
+static bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
     if (str1.length() != str2.length()) {
         return false;
     }
@@ -39,6 +39,6 @@ bool HTTPFields::add(std::pair<std::string, std::vector<std::string>>& pair) {
     return false;
 }
 
-std::vector<std::string> HTTPFields::get(const std::string& key) {
+std::vector<std::string>& HTTPFields::get(const std::string& key) {
     return _fieldsMap[key];
 }

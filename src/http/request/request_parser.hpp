@@ -16,7 +16,7 @@ class RequestParser {
     };
     enum ParseState { REQUEST_LINE, HEADERS, BODY, COMPLETED, ERROR };
     void run(const std::string& buf);
-    HTTPRequest& get() { return _request; }; //debug
+    HTTPRequest& get() { return _request; };
 
    private:
     RequestParser(RequestParser& other) {};
@@ -28,7 +28,6 @@ class RequestParser {
     void validateMethod();
     void validateURI();
     void validateVersion();
-
 
     std::string _buf;
     HTTPRequest _request;

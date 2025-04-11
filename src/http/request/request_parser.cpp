@@ -84,19 +84,18 @@ std::pair<std::string, std::vector<std::string>> splitFieldLine(
 
 void splitQuery(std::map<std::string, std::string>& queryMap,
                 std::string& fullQuery) {
-    std::size_t start_pos = 1;
+    std::string line = fullQuery.substr(1);  // skip '?'
     for (;;) {
-        std::size_t e_pos = fullQuery.find(http::EQUAL, start_pos);
-        std::size_t a_pos = fullQuery.find(http::AMPERSAND, start_pos);
+        std::size_t e_pos = line.find(http::EQUAL);
+        std::size_t a_pos = line.find(http::AMPERSAND);
         if (a_pos != std::string::npos) {
-            queryMap[fullQuery.substr(start_pos, e_pos - start_pos)] =
-                fullQuery.substr(e_pos + 1, a_pos - e_pos - 1);
+            queryMap[line.substr(0, e_pos)] =
+                line.substr(e_pos + 1, a_pos - e_pos - 1);
         } else {
-            queryMap[fullQuery.substr(start_pos, e_pos - start_pos)] =
-                fullQuery.substr(e_pos + 1);
+            queryMap[line.substr(0, e_pos)] = line.substr(e_pos + 1);
             break;
         }
-        start_pos = a_pos + 1;
+        line.erase(0, a_pos + 1);
     }
 }
 
@@ -136,21 +135,31 @@ void RequestParser::parseRequestLine() {
     _state = HEADERS;
 }
 
-/// index.html?id=5&date=2023-04-09&author=yooshima&limit=10
-// order query -> fragment?
 void RequestParser::parseURI() {
+    std::size_t uriLen = _request.uri.fullUri.length();
     std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
-    std::size_t s_pos = _request.uri.fullUri.find(http::SHARP);
-    _request.uri.path =
-        _request.uri.fullUri.substr(0, (q_pos < s_pos) ? q_pos : s_pos);
-    if (q_pos != std::string::npos) {
-        std::size_t len = (s_pos != std::string::npos)
-                              ? s_pos - q_pos
-                              : _request.uri.fullUri.length() - q_pos;
-        _request.uri.fullQuery = _request.uri.fullUri.substr(q_pos, len);
+    std::size_t h_pos = _request.uri.fullUri.find(http::HASH);
+    // path
+    if (q_pos == h_pos) {  // no such
+        _request.uri.path = _request.uri.fullUri.substr(0);
+        return;
+    } else if (q_pos < h_pos) {  // front query
+        _request.uri.path = _request.uri.fullUri.substr(0, q_pos);
+    } else {  // front frag
+        _request.uri.path = _request.uri.fullUri.substr(0, h_pos);
     }
-    if (s_pos != std::string::npos) {
-        _request.uri.fragment = _request.uri.fullUri.substr(s_pos);
+    // frag
+    if (h_pos != std::string::npos) {
+        _request.uri.fragment = _request.uri.fullUri.substr(h_pos + 1);
+    }
+    // query
+    if (q_pos != std::string::npos) {
+        if (h_pos == std::string::npos) {
+            _request.uri.fullQuery = _request.uri.fullUri.substr(q_pos);
+        } else {
+            _request.uri.fullQuery =
+                _request.uri.fullUri.substr(q_pos, h_pos - q_pos);
+        }
     }
     splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
 }
@@ -173,7 +182,6 @@ void RequestParser::validateMethod() {
     return;
 }
 
-// need think normalizetion, query, fragment
 void RequestParser::validateURI() {
     if (_request.uri.fullUri.empty()) {
         _requestState = StatusCode::getStatusPair(BAD_REQUEST);
@@ -241,8 +249,14 @@ void RequestParser::parseBody() {
         return;
     }
     if (!_request.body.contentLength) {
-        _request.body.contentLength = std::atoi(
-            _request.fields.get(http::CONTENT_LENGTH).begin()->c_str());
+        std::vector<std::string>& contentLen =
+            _request.fields.get(http::CONTENT_LENGTH);
+        if (contentLen.empty()) {
+            _request.body.contentLength = 0;
+        } else {
+            _request.body.contentLength =
+                std::atoi(contentLen.begin()->c_str());
+        }
     }
     if (_request.body.contentLength > _request.body.recvedLength) {
         _request.body.content.append(_buf.substr(

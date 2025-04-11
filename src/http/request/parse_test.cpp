@@ -36,20 +36,168 @@ void showAll(HTTPRequest& r) {
     std::cout << r.body.content << std::endl;
 }
 
-int main(void) {
+// int main(void) {
+//     try {
+//         RequestParser parse;
+//         std::string sample =
+//             "GET /index.html?id=5&date=2023-04-09&author=yooshima&limit=10 "
+//             "HTTP/1.1\r\nHost: example.com\r\nUser-Agent: "
+//             "Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\nAccept: "
+//             "text/html,application/xhtml+xml\r\nAccept-Language: "
+//             "en-US,en;q=0.9\r\nConnection: keep-alive\r\ncontent-length: "
+//             "10\r\n\r\nbodyy+++++bodyy+++++bodyy";
+//         std::cout << "----- sample request ----\n" << sample << std::endl;
+//         parse.run(sample);
+//         showAll(parse.get());
+//     } catch (std::exception &e) {
+//         std::cout << e.what() << std::endl;
+//     }
+// }
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stdexcept>
+
+// RequestParserクラスのヘッダーをインクルード
+// #include "RequestParser.hpp"
+
+// テスト結果表示用の関数
+// void showAll(const std::map<std::string, std::string>& request) {
+//     std::cout << "\n----- Parsed Request -----\n";
+//     for (std::map<std::string, std::string>::const_iterator it = request.begin(); it != request.end(); ++it) {
+//         std::cout << it->first << ": " << it->second << std::endl;
+//     }
+//     std::cout << "-------------------------\n\n";
+// }
+
+// テストケースを実行する関数
+void runTest(const std::string& testName, const std::string& request) {
+    std::cout << "===== テストケース: " << testName << " =====\n";
+    std::cout << "リクエスト:\n" << request << "\n";
+    RequestParser r;
     try {
-        RequestParser parse;
-        std::string sample =
-            "GET /index.html?id=5&date=2023-04-09&author=yooshima&limit=10 "
-            "HTTP/1.1\r\nHost: example.com\r\nUser-Agent: "
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\nAccept: "
-            "text/html,application/xhtml+xml\r\nAccept-Language: "
-            "en-US,en;q=0.9\r\nConnection: keep-alive\r\ncontent-length: "
-            "10\r\n\r\nbodyy+++++bodyy+++++bodyy";
-        std::cout << "----- sample request ----\n" << sample << std::endl;
-        parse.run(sample);
-        showAll(parse.get());
-    } catch (std::exception &e) {
-        std::cout << e.what() << std::endl;
+        r.run(request);
+        showAll(r.get());
+        std::cout << "テスト成功!\n\n";
+    } catch (const std::exception& e) {
+        std::cout << "エラー発生: " << e.what() << "\n\n";
     }
+}
+
+int main(void) {
+    std::vector<std::pair<std::string, std::string> > tests;
+    
+    // テストケース1: 基本的なGETリクエスト（元の例）
+    tests.push_back(std::make_pair("基本的なGETリクエスト", 
+        "GET /index.html?id=5&date=2023-04-09&author=yooshima&limit=10 "
+        "HTTP/1.1\r\nHost: example.com\r\nUser-Agent: "
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\nAccept: "
+        "text/html,application/xhtml+xml\r\nAccept-Language: "
+        "en-US,en;q=0.9\r\nConnection: keep-alive\r\ncontent-length: "
+        "10\r\n\r\nbodyy+++++"
+    ));
+    
+    // テストケース2: POSTリクエスト
+    tests.push_back(std::make_pair("POSTリクエスト",
+        "POST /submit-form HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "Content-Length: 28\r\n"
+        "\r\n"
+        "username=admin&password=1234"
+    ));
+    
+    // テストケース3: DELETEリクエスト
+    tests.push_back(std::make_pair("DELETEリクエスト",
+        "DELETE /api/resources/123 HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Authorization: Bearer token123\r\n"
+        "\r\n"
+    ));
+    
+    // テストケース4: ヘッダーなしの無効なリクエスト
+    tests.push_back(std::make_pair("無効なリクエスト（ヘッダーなし）",
+        "GET / HTTP/1.1\r\n\r\n"
+    ));
+    
+    // テストケース5: 不正な形式のリクエストライン
+    tests.push_back(std::make_pair("不正なリクエストライン",
+        "INVALID REQUEST LINE\r\n"
+        "Host: example.com\r\n"
+        "\r\n"
+    ));
+    
+    // テストケース6: 複数のヘッダーを持つリクエスト
+    tests.push_back(std::make_pair("複数ヘッダー付きリクエスト",
+        "GET /api/data HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "User-Agent: Mozilla/5.0\r\n"
+        "Accept: application/json\r\n"
+        "Accept-Encoding: gzip, deflate\r\n"
+        "Accept-Language: ja-JP\r\n"
+        "Cookie: session=abc123; user=guest\r\n"
+        "Cache-Control: no-cache\r\n"
+        "\r\n"
+    ));
+    
+    // テストケース7: クエリパラメータなしのGETリクエスト
+    tests.push_back(std::make_pair("クエリパラメータなしのGETリクエスト",
+        "GET /index.html HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "\r\n"
+    ));
+    
+    // テストケース8: 大きなボディを持つPOSTリクエスト
+    std::string largeBody = "";
+    for (int i = 0; i < 1000; ++i) {
+        largeBody += "data" + std::to_string(i) + "=value" + std::to_string(i) + "&";
+    }
+    
+    tests.push_back(std::make_pair("大きなボディを持つPOSTリクエスト",
+        "POST /upload HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Content-Type: application/x-www-form-urlencoded\r\n"
+        "Content-Length: " + std::to_string(largeBody.size()) + "\r\n"
+        "\r\n" +
+        largeBody
+    ));
+    
+    // テストケース9: マルチパートフォームデータ（ファイルアップロード）
+    std::string boundary = "----WebKitFormBoundaryX7YA8HiPerfectBoundary";
+    std::string multipartBody = 
+        "--" + boundary + "\r\n"
+        "Content-Disposition: form-data; name=\"username\"\r\n"
+        "\r\n"
+        "admin\r\n"
+        "--" + boundary + "\r\n"
+        "Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n"
+        "Content-Type: text/plain\r\n"
+        "\r\n"
+        "This is the content of the uploaded file.\r\n"
+        "--" + boundary + "--\r\n";
+    
+    tests.push_back(std::make_pair("マルチパートフォームデータ",
+        "POST /upload HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Content-Type: multipart/form-data; boundary=" + boundary + "\r\n"
+        "Content-Length: " + std::to_string(multipartBody.size()) + "\r\n"
+        "\r\n" +
+        multipartBody
+    ));
+    
+    // テストケース10: 不完全なリクエスト（途中で切れている）
+    tests.push_back(std::make_pair("不完全なリクエスト",
+        "GET /index.html HTTP/1.1\r\n"
+        "Host: example.com\r\n"
+        "Content-Type: text/html\r\n"
+        "Cont"
+    ));
+    
+    // 全てのテストケースを実行
+    for (size_t i = 0; i < tests.size(); ++i) {
+        runTest(tests[i].first, tests[i].second);
+    }
+    
+    return 0;
 }
