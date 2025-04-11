@@ -12,7 +12,6 @@ class HTTPFields {
     void initFieldsMap();
     bool add(std::pair<std::string, std::vector<std::string>>& pair);
     std::vector<std::string> get(const std::string& key);
-    bool parse();
     std::map<std::string, std::vector<std::string>> _fieldsMap;
 
    private:
