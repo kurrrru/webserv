@@ -73,10 +73,10 @@ bool isTraversalAttack(std::string& path) {
 std::pair<std::string, std::vector<std::string>> splitFieldLine(
     std::string& line) {
     std::size_t pos = line.find_first_of(':');
-    if (pos == std::string::npos) {
-        throw RequestParser::ParseException("Error: invalid field line");
-    }
     std::pair<std::string, std::vector<std::string>> pair;
+    if (pos == std::string::npos) {
+        return pair;
+    }
     pair.first = trim(line, ": ");
     pair.second.push_back(line);
     return pair;
@@ -100,7 +100,8 @@ void splitQuery(std::map<std::string, std::string>& queryMap,
 }
 
 bool isChunkedEncoding(HTTPRequest& request) {
-    std::vector<std::string>& chunked = request.fields.getFieldValue(http::TRANSFER_ENCODING);
+    std::vector<std::string>& chunked =
+        request.fields.getFieldValue(http::TRANSFER_ENCODING);
     return (!(request.fields.getFieldValue(http::TRANSFER_ENCODING).empty()) &&
             *(request.fields.getFieldValue(http::TRANSFER_ENCODING).begin()) ==
                 "chunked");
@@ -142,50 +143,30 @@ void RequestParser::parseRequestLine() {
     _state = HEADERS;
 }
 
-// void RequestParser::parseURI() {
-//     std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
-//     std::size_t h_pos = _request.uri.fullUri.find(http::HASH);
-//     if (q_pos == h_pos) {  // no such
-//         _request.uri.path = _request.uri.fullUri.substr(0);
-//         return;
-//     }
-//     if (q_pos < h_pos) { //query -> front , hash -> end or none
-
-//     }
-//     splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
-// }
-
 void RequestParser::parseURI() {
     urlDecode();
-    std::size_t uriLen = _request.uri.fullUri.length();
     std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
     std::size_t h_pos = _request.uri.fullUri.find(http::HASH);
-    if (q_pos > h_pos) {
+    if (q_pos != std::string::npos && h_pos != std::string::npos &&
+        q_pos > h_pos) {
+        _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: uri invalid order");
     }
-    // path
-    if (q_pos == h_pos) {  // no such
-        _request.uri.path = _request.uri.fullUri.substr(0);
-        return;
-    } else if (q_pos < h_pos) {  // front query
-        _request.uri.path = _request.uri.fullUri.substr(0, q_pos);
-    } else {  // front frag
-        _request.uri.path = _request.uri.fullUri.substr(0, h_pos);
-    }
-    // frag
+    std::size_t path_end = std::min(
+        q_pos != std::string::npos ? q_pos : _request.uri.fullUri.length(),
+        h_pos != std::string::npos ? h_pos : _request.uri.fullUri.length());
+    _request.uri.path = _request.uri.fullUri.substr(0, path_end);
     if (h_pos != std::string::npos) {
-        _request.uri.fragment = _request.uri.fullUri.substr(h_pos + 1);
+        _request.uri.fragment = _request.uri.fullUri.substr(h_pos);
     }
-    // query
     if (q_pos != std::string::npos) {
-        if (h_pos == std::string::npos) {
-            _request.uri.fullQuery = _request.uri.fullUri.substr(q_pos);
-        } else {
-            _request.uri.fullQuery =
-                _request.uri.fullUri.substr(q_pos, h_pos - q_pos);
-        }
+        std::size_t query_end = (h_pos != std::string::npos && h_pos > q_pos)
+                                    ? h_pos
+                                    : _request.uri.fullUri.length();
+        _request.uri.fullQuery =
+            _request.uri.fullUri.substr(q_pos, query_end - q_pos);
+        splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
     }
-    splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
 }
 
 void RequestParser::urlDecode() {
@@ -285,8 +266,9 @@ void RequestParser::parseFields() {
         }
         std::pair<std::string, std::vector<std::string>> pair =
             splitFieldLine(line);
-        if (!_request.fields.addField(pair) ) {
-            //need check state; bad request?
+        if (pair.first.empty() || !_request.fields.addField(pair)) {
+            // need check state; bad request?
+            _requestState = StatusCode::getStatusPair(BAD_REQUEST);
             throw ParseException("Error: field value dup or nothing");
         }
     }
@@ -334,7 +316,13 @@ void RequestParser::parseChunkedEncoding() {
             return;
         }
         std::string hexStr = _buf.substr(0, pos);
-        std::size_t chunkSize = std::stoi(hexStr, nullptr, 16);
+        std::size_t chunkSize;
+        try {  // need change
+            chunkSize = std::stoi(hexStr, nullptr,
+                                  16);  // if not hexstr throw exception
+        } catch (std::exception& e) {
+            throw ParseException("Error: chunked encoding failed read hexStr");
+        };
         if (chunkSize == 0) {
             _request.body.lastChunk = true;
             _state = COMPLETED;

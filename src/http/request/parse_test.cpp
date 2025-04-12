@@ -91,12 +91,15 @@ int main(void) {
                        "Content-Type: application/x-www-form-urlencoded\r\n"
                        "Transfer-Encoding: chunked\r\n"
                        "\r\n"
-                       "1c\r\n"
-                       "username=admin&password=1234"
+                       "7\r\n"
+                       "Mozilla\r\n"
+                       "11\r\n"
+                       "Developer Network\r\n"
                        "0\r\n"
                        "\r\n"));
 
-    // テストケース1: URLにパーセントエンコードされたスペースを含むGETリクエスト
+    // テストケース1:
+    // URLにパーセントエンコードされたスペースを含むGETリクエスト
     tests.push_back(
         std::make_pair("パーセントエンコードされたスペースを含むURL",
                        "GET /hello%20world.html HTTP/1.1\r\n"
@@ -104,7 +107,8 @@ int main(void) {
                        "User-Agent: Mozilla/5.0\r\n"
                        "\r\n"));
 
-    // テストケース2: URLにパーセントエンコードされた日本語を含むGETリクエスト
+    // テストケース2:
+    // URLにパーセントエンコードされた日本語を含むGETリクエスト
     tests.push_back(
         std::make_pair("パーセントエンコードされた日本語を含むURL",
                        "GET /%E6%97%A5%E6%9C%AC%E8%AA%9E.html HTTP/1.1\r\n"
