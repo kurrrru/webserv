@@ -25,20 +25,29 @@ void HTTPFields::initFieldsMap() {
     }
 }
 
-bool HTTPFields::add(std::pair<std::string, std::vector<std::string>>& pair) {
+bool HTTPFields::addField(std::pair<std::string, std::vector<std::string>>& pair) {
     for (std::map<std::string, std::vector<std::string>>::iterator m_it =
              _fieldsMap.begin();
          m_it != _fieldsMap.end(); ++m_it) {
         if (caseInsensitiveCompare(m_it->first, pair.first)) {
+            if (!m_it->second.empty()) {
+                std::cout << "dup: " << m_it->first << std::endl;
+                return false;
+            }
             for (std::vector<std::string>::iterator it = pair.second.begin(); it != pair.second.end(); ++it) {
                 m_it->second.push_back(*it);
             }
             return true;
         }
     }
+    std::cout << "miss match : " << pair.first << std::endl;
     return false;
 }
 
-std::vector<std::string>& HTTPFields::get(const std::string& key) {
+std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
     return _fieldsMap[key];
+}
+
+std::map<std::string, std::vector<std::string>>& HTTPFields::get() {
+    return _fieldsMap;
 }

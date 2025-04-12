@@ -7,6 +7,9 @@
 class HTTPRequest {
    public:
     struct Body {
+        Body() : isChunked(0), lastChunk(0){};
+        bool isChunked;
+        bool lastChunk;
         std::string content;
         std::size_t contentLength;
         std::size_t recvedLength;

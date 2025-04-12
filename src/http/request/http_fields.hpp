@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <iostream>
 
 class HTTPFields {
    public:
@@ -10,11 +11,12 @@ class HTTPFields {
     ~HTTPFields() {};
     bool isInitialized();
     void initFieldsMap();
-    bool add(std::pair<std::string, std::vector<std::string>>& pair);
-    std::vector<std::string>& get(const std::string& key);
-    std::map<std::string, std::vector<std::string>> _fieldsMap;
-
-   private:
+    bool addField(std::pair<std::string, std::vector<std::string>>& pair);
+    std::vector<std::string>& getFieldValue(const std::string& key);
+    std::map<std::string, std::vector<std::string>>& get();
+    
+    private:
     HTTPFields(HTTPFields& other) {};
     HTTPFields& operator=(HTTPFields& other) { return *this; };
+    std::map<std::string, std::vector<std::string>> _fieldsMap;
 };

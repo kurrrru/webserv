@@ -99,6 +99,13 @@ void splitQuery(std::map<std::string, std::string>& queryMap,
     }
 }
 
+bool isChunkedEncoding(HTTPRequest& request) {
+    std::vector<std::string>& chunked = request.fields.getFieldValue(http::TRANSFER_ENCODING);
+    return (!(request.fields.getFieldValue(http::TRANSFER_ENCODING).empty()) &&
+            *(request.fields.getFieldValue(http::TRANSFER_ENCODING).begin()) ==
+                "chunked");
+}
+
 /*
 Class method
 */
@@ -135,10 +142,27 @@ void RequestParser::parseRequestLine() {
     _state = HEADERS;
 }
 
+// void RequestParser::parseURI() {
+//     std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
+//     std::size_t h_pos = _request.uri.fullUri.find(http::HASH);
+//     if (q_pos == h_pos) {  // no such
+//         _request.uri.path = _request.uri.fullUri.substr(0);
+//         return;
+//     }
+//     if (q_pos < h_pos) { //query -> front , hash -> end or none
+
+//     }
+//     splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
+// }
+
 void RequestParser::parseURI() {
+    urlDecode();
     std::size_t uriLen = _request.uri.fullUri.length();
     std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
     std::size_t h_pos = _request.uri.fullUri.find(http::HASH);
+    if (q_pos > h_pos) {
+        throw ParseException("Error: uri invalid order");
+    }
     // path
     if (q_pos == h_pos) {  // no such
         _request.uri.path = _request.uri.fullUri.substr(0);
@@ -162,6 +186,27 @@ void RequestParser::parseURI() {
         }
     }
     splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
+}
+
+void RequestParser::urlDecode() {
+    std::size_t p_pos = _request.uri.fullUri.find("%");
+    if (p_pos == std::string::npos) {
+        return;
+    }
+    std::string res;
+    std::size_t i = 0;
+    while (i < _request.uri.fullUri.length()) {
+        if (_request.uri.fullUri[i] == '%') {
+            std::string hexStr = _request.uri.fullUri.substr(i + 1, 2);
+            std::size_t hex = std::stoi(hexStr, nullptr, 16);
+            res += static_cast<char>(hex);
+            i += 3;
+        } else {
+            res += _request.uri.fullUri[i];
+            ++i;
+        }
+    }
+    _request.uri.fullUri = res;
 }
 
 void RequestParser::validateMethod() {
@@ -240,7 +285,10 @@ void RequestParser::parseFields() {
         }
         std::pair<std::string, std::vector<std::string>> pair =
             splitFieldLine(line);
-        _request.fields.add(pair);
+        if (!_request.fields.addField(pair) ) {
+            //need check state; bad request?
+            throw ParseException("Error: field value dup or nothing");
+        }
     }
 }
 
@@ -248,9 +296,13 @@ void RequestParser::parseBody() {
     if (_state != BODY) {
         return;
     }
+    if (_request.body.isChunked || isChunkedEncoding(_request)) {
+        parseChunkedEncoding();
+        return;
+    }
     if (!_request.body.contentLength) {
         std::vector<std::string>& contentLen =
-            _request.fields.get(http::CONTENT_LENGTH);
+            _request.fields.getFieldValue(http::CONTENT_LENGTH);
         if (contentLen.empty()) {
             _request.body.contentLength = 0;
         } else {
@@ -269,4 +321,32 @@ void RequestParser::parseBody() {
         _requestState = StatusCode::getStatusPair(OK);
     }
     _buf.clear();
+}
+
+void RequestParser::parseChunkedEncoding() {
+    if (!_request.body.isChunked) {
+        _request.body.isChunked = true;
+        _request.body.lastChunk = false;
+    }
+    while (!_buf.empty() && !_request.body.lastChunk) {
+        std::size_t pos = _buf.find(http::CRLF);
+        if (pos == std::string::npos) {
+            return;
+        }
+        std::string hexStr = _buf.substr(0, pos);
+        std::size_t chunkSize = std::stoi(hexStr, nullptr, 16);
+        if (chunkSize == 0) {
+            _request.body.lastChunk = true;
+            _state = COMPLETED;
+            return;
+        }
+        _buf = _buf.substr(pos + 2);
+        if (_buf.length() < chunkSize + 2) {  // buf + CRLF
+            return;
+        }
+        std::string chunkData = _buf.substr(0, chunkSize);
+        _request.body.content.append(chunkData);
+        _request.body.recvedLength += chunkSize;
+        _buf = _buf.substr(chunkSize + 2);
+    }
 }

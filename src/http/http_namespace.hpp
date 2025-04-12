@@ -21,6 +21,7 @@ const std::string TRANSFER_ENCODING = "Transfer-Encoding";
 // request fields
 const std::string HOST = "Host";
 const std::string ACCEPT = "Accept";
+const std::string ACCEPT_LANGUAGE = "Accept-Language";
 const std::string ACCEPT_ENCODING = "Accept-Encoding";
 const std::string AUTHORIZATION = "Authorization";
 const std::string USER_AGENT = "User-Agent";
@@ -31,11 +32,11 @@ const std::string SET_COOKIE = "Set-Cookie";
 const std::string LOCATION = "Location";
 const std::string WWW_AUTHENTICATE = "WWW-Authenticate";
 const std::string FIELDS[] = {
-    DATE,         CACHE_CONTROL,    CONNECTION,       CONTENT_LENGTH,
-    CONTENT_TYPE, CONTENT_ENCODING, CONTENT_LANGUAGE, TRANSFER_ENCODING,
-    HOST,         ACCEPT,           ACCEPT_ENCODING,  AUTHORIZATION,
-    USER_AGENT,   COOKIE,           SERVER,           SET_COOKIE,
-    LOCATION,     WWW_AUTHENTICATE};
+    DATE,          CACHE_CONTROL,    CONNECTION,       CONTENT_LENGTH,
+    CONTENT_TYPE,  CONTENT_ENCODING, CONTENT_LANGUAGE, TRANSFER_ENCODING,
+    HOST,          ACCEPT,           ACCEPT_ENCODING,  ACCEPT_LANGUAGE,
+    AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
+    SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE};
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 // other
 const std::string CRLF = "\r\n";

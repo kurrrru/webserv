@@ -1,10 +1,11 @@
 #pragma once
 
 #include "http_request.hpp"
+#include <ctime>
 
 class RequestParser {
    public:
-    RequestParser() : _state(REQUEST_LINE) {};
+    RequestParser() : _state(REQUEST_LINE), _time(0) {};
     ~RequestParser() {};
     class ParseException : public std::exception {
        public:
@@ -25,12 +26,15 @@ class RequestParser {
     void parseURI();
     void parseFields();
     void parseBody();
+    void parseChunkedEncoding();
     void validateMethod();
     void validateURI();
     void validateVersion();
+    void urlDecode();
 
     std::string _buf;
     HTTPRequest _request;
     ParseState _state;
     std::pair<std::string, std::string> _requestState;
+    std::time_t _time;
 };
