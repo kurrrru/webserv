@@ -7,13 +7,13 @@ namespace toolbox {
 
 namespace logger {
 
-typedef enum eStepmarkLevel {
+enum StepmarkLevel {
     DEBUG,
     INFO,
     WARNING,
     ERROR,
     CRITICAL
-} StepmarkLevel;
+};
 
 class StepMark {
  public:
