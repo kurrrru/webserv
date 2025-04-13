@@ -10,8 +10,10 @@ const std::pair<std::string, std::string> StatusCode::getStatusPair(
     if (it == statusMap.end()) {
         throw std::runtime_error("invalid status in getStatusPair");
     }
-    return std::make_pair(std::to_string(status),
-                          it->second);  // 98 forbidden to_string
+
+    std::ostringstream oss;
+    oss << status;
+    return std::make_pair(oss.str(), it->second);
 }
 
 std::map<EStatusCode, std::string>& StatusCode::getStatusMap() {

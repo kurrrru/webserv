@@ -88,6 +88,9 @@ void splitQuery(std::map<std::string, std::string>& queryMap,
     for (;;) {
         std::size_t e_pos = line.find(http::EQUAL);
         std::size_t a_pos = line.find(http::AMPERSAND);
+        if (e_pos == std::string::npos) {
+            RequestParser::ParseException("Error: invalid query oder"); // think
+        }
         if (a_pos != std::string::npos) {
             queryMap[line.substr(0, e_pos)] =
                 line.substr(e_pos + 1, a_pos - e_pos - 1);
@@ -267,7 +270,6 @@ void RequestParser::parseFields() {
         std::pair<std::string, std::vector<std::string>> pair =
             splitFieldLine(line);
         if (pair.first.empty() || !_request.fields.addField(pair)) {
-            // need check state; bad request?
             _requestState = StatusCode::getStatusPair(BAD_REQUEST);
             throw ParseException("Error: field value dup or nothing");
         }
