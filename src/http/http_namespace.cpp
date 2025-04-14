@@ -46,6 +46,7 @@ const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 }  // namespace fields
 
 namespace symbols {
+const char* CR = "\r";
 const char* CRLF = "\r\n";
 const char* SP = " ";
 const char* EQUAL = "=";

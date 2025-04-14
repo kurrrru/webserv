@@ -35,6 +35,6 @@ class HTTPRequest {
     Body body;
 
    private:
-    HTTPRequest(HTTPRequest& otheer) {};
-    HTTPRequest& operator=(HTTPRequest& other) { return *this; };
+    HTTPRequest(HTTPRequest& otheer);
+    HTTPRequest& operator=(HTTPRequest& other);
 };

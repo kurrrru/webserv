@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <cstdlib>
 
 #include "../../../toolbox/string.hpp"
 #include "http_request.hpp"
@@ -27,8 +28,8 @@ class RequestParser {
     HTTPRequest& get() { return _request; };
 
    private:
-    RequestParser(RequestParser& other) {};
-    RequestParser& operator=(RequestParser& other) { return *this; };
+    RequestParser(RequestParser& other);
+    RequestParser& operator=(RequestParser& other);
     void parseRequestLine();
     void parseURI();
     void parseFields();

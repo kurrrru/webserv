@@ -62,10 +62,10 @@ bool isTraversalAttack(const std::string& path) {
     return false;
 }
 
-std::pair<std::string, std::vector<std::string>> splitFieldLine(
+std::pair<std::string, std::vector<std::string> > splitFieldLine(
     std::string& line) {
     std::size_t pos = line.find_first_of(':');
-    std::pair<std::string, std::vector<std::string>> pair;
+    std::pair<std::string, std::vector<std::string> > pair;
     if (pos != std::string::npos) {
         pair.first = toolbox::trim(line, ": ");
         pair.second.push_back(line);
@@ -175,7 +175,7 @@ void RequestParser::urlDecode() {
     while (i < _request.uri.fullUri.length()) {
         if (_request.uri.fullUri[i] == '%') {
             std::string hexStr = _request.uri.fullUri.substr(i + 1, 2);
-            std::size_t hex = std::stoi(hexStr, nullptr, 16);  // change
+            std::size_t hex = strtol(hexStr.c_str(), NULL, 16);  // change
             res += static_cast<char>(hex);
             i += 3;
         } else {
@@ -247,10 +247,10 @@ void RequestParser::parseFields() {
     if (!_request.fields.isInitialized()) {
         _request.fields.initFieldsMap();
     }
-    for (;;) {
+    while (true) {
         if (_buf.find(symbols::CRLF) == 0) {
             _state = BODY;
-            _buf = _buf.substr(sizeof(symbols::CRLF));
+            _buf = _buf.substr(sizeof(*symbols::CRLF));
             return;
         }
         if (_buf.find(symbols::CRLF) == std::string::npos) {
@@ -260,7 +260,7 @@ void RequestParser::parseFields() {
         if (hasCtlChar(line)) {
             throw ParseException("Error: field value has ctlchar");
         }
-        std::pair<std::string, std::vector<std::string>> pair =
+        std::pair<std::string, std::vector<std::string> > pair =
             splitFieldLine(line);
         if (pair.first.empty() || !_request.fields.addField(pair)) {
             _requestState = StatusCode::getStatusPair(BAD_REQUEST);
@@ -310,12 +310,11 @@ void RequestParser::parseChunkedEncoding() {
         if (pos == std::string::npos) {
             return;
         }
-        std::string hexStr = _buf.substr(0, pos);
+        std::string hexStr = _buf.substr(0, pos + 1);
         std::size_t chunkSize;
-        try {  // need change
-            chunkSize = std::stoi(hexStr, nullptr,
-                                  16);  // if not hexstr throw exception
-        } catch (std::exception& e) {
+        char* endPtr;
+        chunkSize = strtol(hexStr.c_str(), &endPtr, 16);
+        if (*endPtr != *http::symbols::CR) {
             throw ParseException("Error: chunked encoding failed read hexStr");
         }
         if (chunkSize == 0) {

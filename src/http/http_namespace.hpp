@@ -42,6 +42,7 @@ extern const std::size_t FIELD_SIZE;
 }  // namespace fields
 
 namespace symbols {
+extern const char* CR;
 extern const char* CRLF;
 extern const char* SP;
 extern const char* EQUAL;

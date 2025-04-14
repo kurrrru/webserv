@@ -107,7 +107,7 @@ int main(void) {
                        "User-Agent: Mozilla/5.0\r\n"
                        "\r\n"));
 
-    // テストケース2:
+    // // テストケース2:
     // URLにパーセントエンコードされた日本語を含むGETリクエスト
     tests.push_back(
         std::make_pair("パーセントエンコードされた日本語を含むURL",
