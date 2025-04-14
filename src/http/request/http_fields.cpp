@@ -1,8 +1,5 @@
 #include "http_fields.hpp"
 
-#include "../http_namespace.hpp"
-#include "request_parser.hpp"
-
 bool HTTPFields::isInitialized() { return _isInitialized; }
 
 void HTTPFields::initFieldsMap() {
@@ -17,7 +14,7 @@ void HTTPFields::initFieldsMap() {
 }
 
 bool HTTPFields::addField(
-    std::pair<std::string, std::vector<std::string>>& pair) {
+    const std::pair<std::string, std::vector<std::string>>& pair) {
     for (std::map<std::string, std::vector<std::string>>::iterator m_it =
              _fieldsMap.begin();
          m_it != _fieldsMap.end(); ++m_it) {

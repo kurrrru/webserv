@@ -9,15 +9,17 @@
 
 #include "../../../toolbox/string.hpp"
 #include "http_request.hpp"
+#include "../http_namespace.hpp"
+#include "../status_code.hpp"
 
 namespace http {
 class RequestParser {
    public:
-    RequestParser() : _state(REQUEST_LINE), _time(0) {};
-    ~RequestParser() {};
+    RequestParser() : _state(REQUEST_LINE), _time(0) {}
+    ~RequestParser() {}
     class ParseException : public std::exception {
        public:
-        ParseException(const char* message);
+        explicit ParseException(const char* message);
         const char* what() const throw();
 
        private:
@@ -25,11 +27,11 @@ class RequestParser {
     };
     enum ParseState { REQUEST_LINE, HEADERS, BODY, COMPLETED, ERROR };
     void run(const std::string& buf);
-    HTTPRequest& get() { return _request; };
+    HTTPRequest& get() { return _request; }
 
    private:
-    RequestParser(RequestParser& other);
-    RequestParser& operator=(RequestParser& other);
+    RequestParser(const RequestParser& other);
+    RequestParser& operator=(const RequestParser& other);
     void parseRequestLine();
     void parseURI();
     void parseFields();

@@ -1,9 +1,9 @@
 #include "request_parser.hpp"
 
-#include <iostream>
+// #include <iostream>
 
-#include "../http_namespace.hpp"
-#include "../status_code.hpp"
+// #include "../http_namespace.hpp"
+// #include "../status_code.hpp"
 
 namespace http {
 
@@ -63,19 +63,19 @@ bool isTraversalAttack(const std::string& path) {
 }
 
 std::pair<std::string, std::vector<std::string> > splitFieldLine(
-    std::string& line) {
-    std::size_t pos = line.find_first_of(':');
+    std::string* line) {
+    std::size_t pos = line->find_first_of(':');
     std::pair<std::string, std::vector<std::string> > pair;
     if (pos != std::string::npos) {
-        pair.first = toolbox::trim(line, ": ");
-        pair.second.push_back(line);
+        pair.first = toolbox::trim(*line, ": ");
+        pair.second.push_back(*line);
     }
     return pair;
 }
 
-void splitQuery(std::map<std::string, std::string>& queryMap,
-                std::string& fullQuery) {
-    std::string line = fullQuery.substr(1);  // skip '?'
+void splitQuery(std::map<std::string, std::string>* queryMap,
+                std::string* fullQuery) {
+    std::string line = fullQuery->substr(1);  // skip '?'
     while (true) {
         std::size_t e_pos = line.find(symbols::EQUAL);
         std::size_t a_pos = line.find(symbols::AMPERSAND);
@@ -84,22 +84,22 @@ void splitQuery(std::map<std::string, std::string>& queryMap,
                 "Error: invalid query oder");  // think
         }
         if (a_pos != std::string::npos) {
-            queryMap[line.substr(0, e_pos)] =
+            (*queryMap)[line.substr(0, e_pos)] =
                 line.substr(e_pos + 1, a_pos - e_pos - 1);
         } else {
-            queryMap[line.substr(0, e_pos)] = line.substr(e_pos + 1);
+            (*queryMap)[line.substr(0, e_pos)] = line.substr(e_pos + 1);
             break;
         }
         line.erase(0, a_pos + 1);
     }
 }
 
-bool isChunkedEncoding(HTTPRequest& request) {
+bool isChunkedEncoding(HTTPRequest* request) {
     std::vector<std::string>& chunked =
-        request.fields.getFieldValue(fields::TRANSFER_ENCODING);
+        request->fields.getFieldValue(fields::TRANSFER_ENCODING);
     return (
-        !(request.fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
-        *(request.fields.getFieldValue(fields::TRANSFER_ENCODING).begin()) ==
+        !(request->fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
+        *(request->fields.getFieldValue(fields::TRANSFER_ENCODING).begin()) ==
             "chunked");
 }
 
@@ -161,7 +161,7 @@ void RequestParser::parseURI() {
                                     : _request.uri.fullUri.length();
         _request.uri.fullQuery =
             _request.uri.fullUri.substr(q_pos, query_end - q_pos);
-        splitQuery(_request.uri.queryMap, _request.uri.fullQuery);
+        splitQuery(&_request.uri.queryMap, &_request.uri.fullQuery);
     }
 }
 
@@ -261,7 +261,7 @@ void RequestParser::parseFields() {
             throw ParseException("Error: field value has ctlchar");
         }
         std::pair<std::string, std::vector<std::string> > pair =
-            splitFieldLine(line);
+            splitFieldLine(&line);
         if (pair.first.empty() || !_request.fields.addField(pair)) {
             _requestState = StatusCode::getStatusPair(BAD_REQUEST);
             throw ParseException("Error: field value dup or nothing");
@@ -273,7 +273,7 @@ void RequestParser::parseBody() {
     if (_state != BODY) {
         return;
     }
-    if (_request.body.isChunked || isChunkedEncoding(_request)) {
+    if (_request.body.isChunked || isChunkedEncoding(&_request)) {
         parseChunkedEncoding();
         return;
     }

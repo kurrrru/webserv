@@ -10,7 +10,6 @@ const std::pair<std::string, std::string> StatusCode::getStatusPair(
     if (it == statusMap.end()) {
         throw std::runtime_error("invalid status getStatusPair");
     }
-
     std::ostringstream oss;
     oss << status;
     return std::make_pair(oss.str(), it->second);

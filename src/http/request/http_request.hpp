@@ -1,13 +1,14 @@
 #pragma once
 
 #include <string>
+#include <map>
 
 #include "http_fields.hpp"
 
 class HTTPRequest {
    public:
     struct Body {
-        Body() : isChunked(0), lastChunk(0){};
+        Body() : isChunked(0), lastChunk(0) {}
         bool isChunked;
         bool lastChunk;
         std::string content;
@@ -17,7 +18,7 @@ class HTTPRequest {
     struct URI {
         std::string fullUri;
         std::string path;
-        std::string fullQuery;  //
+        std::string fullQuery;
         std::map<std::string, std::string> queryMap;
         std::string fragment;  // client dependent
     };
@@ -25,8 +26,8 @@ class HTTPRequest {
     HTTPRequest() {
         body.contentLength = 0;
         body.recvedLength = 0;
-    };
-    ~HTTPRequest() {};
+    }
+    ~HTTPRequest() {}
 
     std::string method;
     URI uri;
@@ -35,6 +36,6 @@ class HTTPRequest {
     Body body;
 
    private:
-    HTTPRequest(HTTPRequest& otheer);
-    HTTPRequest& operator=(HTTPRequest& other);
+    HTTPRequest(const HTTPRequest& otheer);
+    HTTPRequest& operator=(const HTTPRequest& other);
 };
