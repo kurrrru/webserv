@@ -1,8 +1,15 @@
 #pragma once
 
-#include "http_request.hpp"
 #include <ctime>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include "../../../toolbox/string.hpp"
+#include "http_request.hpp"
+
+namespace http {
 class RequestParser {
    public:
     RequestParser() : _state(REQUEST_LINE), _time(0) {};
@@ -38,3 +45,4 @@ class RequestParser {
     std::pair<std::string, std::string> _requestState;
     std::time_t _time;
 };
+}  // namespace http

@@ -8,7 +8,7 @@ const std::pair<std::string, std::string> StatusCode::getStatusPair(
     std::map<EStatusCode, std::string>& statusMap = getStatusMap();
     std::map<EStatusCode, std::string>::iterator it = statusMap.find(status);
     if (it == statusMap.end()) {
-        throw std::runtime_error("invalid status in getStatusPair");
+        throw std::runtime_error("invalid status getStatusPair");
     }
 
     std::ostringstream oss;

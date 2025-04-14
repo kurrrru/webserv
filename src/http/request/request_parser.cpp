@@ -5,39 +5,31 @@
 #include "../http_namespace.hpp"
 #include "../status_code.hpp"
 
+namespace http {
+
 /*
 Parser utils
 */
 
-std::string trim(std::string& src, const std::string& sep) {
-    std::size_t pos = src.find(sep);
-    if (pos == std::string::npos && src.length() == 0) {
-        return "";
-    }
-    std::string newStr = src.substr(0, pos);
-    src.erase(0, pos + sep.length());
-    return newStr;
-}
-
-bool hasCtlChar(std::string& str) {
-    for (std::string::iterator it = str.begin(); it != str.end(); ++it) {
-        if (std::iscntrl(*it)) {
+bool hasCtlChar(const std::string& str) {
+    for (std::size_t i = 0; i < str.length(); ++i) {
+        if (std::iscntrl(str[i])) {
             return true;
         }
     }
     return false;
 }
 
-bool isUppStr(std::string& str) {
-    for (std::string::iterator it = str.begin(); it != str.end(); ++it) {
-        if (!std::isupper(*it)) {
+bool isUppStr(const std::string& str) {
+    for (std::size_t i = 0; i < str.length(); ++i) {
+        if (!std::isupper(str[i])) {
             return false;
         }
     }
     return true;
 }
 
-bool isTraversalAttack(std::string& path) {
+bool isTraversalAttack(const std::string& path) {
     std::string normalizePath = path;
     std::size_t pos = 0;
     while ((pos = normalizePath.find("//", pos)) != std::string::npos) {
@@ -74,22 +66,22 @@ std::pair<std::string, std::vector<std::string>> splitFieldLine(
     std::string& line) {
     std::size_t pos = line.find_first_of(':');
     std::pair<std::string, std::vector<std::string>> pair;
-    if (pos == std::string::npos) {
-        return pair;
+    if (pos != std::string::npos) {
+        pair.first = toolbox::trim(line, ": ");
+        pair.second.push_back(line);
     }
-    pair.first = trim(line, ": ");
-    pair.second.push_back(line);
     return pair;
 }
 
 void splitQuery(std::map<std::string, std::string>& queryMap,
                 std::string& fullQuery) {
     std::string line = fullQuery.substr(1);  // skip '?'
-    for (;;) {
-        std::size_t e_pos = line.find(http::EQUAL);
-        std::size_t a_pos = line.find(http::AMPERSAND);
+    while (true) {
+        std::size_t e_pos = line.find(symbols::EQUAL);
+        std::size_t a_pos = line.find(symbols::AMPERSAND);
         if (e_pos == std::string::npos) {
-            RequestParser::ParseException("Error: invalid query oder"); // think
+            RequestParser::ParseException(
+                "Error: invalid query oder");  // think
         }
         if (a_pos != std::string::npos) {
             queryMap[line.substr(0, e_pos)] =
@@ -104,10 +96,11 @@ void splitQuery(std::map<std::string, std::string>& queryMap,
 
 bool isChunkedEncoding(HTTPRequest& request) {
     std::vector<std::string>& chunked =
-        request.fields.getFieldValue(http::TRANSFER_ENCODING);
-    return (!(request.fields.getFieldValue(http::TRANSFER_ENCODING).empty()) &&
-            *(request.fields.getFieldValue(http::TRANSFER_ENCODING).begin()) ==
-                "chunked");
+        request.fields.getFieldValue(fields::TRANSFER_ENCODING);
+    return (
+        !(request.fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
+        *(request.fields.getFieldValue(fields::TRANSFER_ENCODING).begin()) ==
+            "chunked");
 }
 
 /*
@@ -132,13 +125,13 @@ void RequestParser::parseRequestLine() {
     if (_state != REQUEST_LINE) {
         return;
     }
-    if (_buf.find(http::CRLF) == std::string::npos) {
+    if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
-    std::string line = trim(_buf, http::CRLF);
-    _request.method = trim(line, http::SP);
-    _request.uri.fullUri = trim(line, http::SP);
-    _request.version = trim(line, http::SP);
+    std::string line = toolbox::trim(_buf, symbols::CRLF);
+    _request.method = toolbox::trim(line, symbols::SP);
+    _request.uri.fullUri = toolbox::trim(line, symbols::SP);
+    _request.version = toolbox::trim(line, symbols::SP);
     parseURI();
     validateMethod();
     validateURI();
@@ -148,8 +141,8 @@ void RequestParser::parseRequestLine() {
 
 void RequestParser::parseURI() {
     urlDecode();
-    std::size_t q_pos = _request.uri.fullUri.find(http::QUESTION);
-    std::size_t h_pos = _request.uri.fullUri.find(http::HASH);
+    std::size_t q_pos = _request.uri.fullUri.find(symbols::QUESTION);
+    std::size_t h_pos = _request.uri.fullUri.find(symbols::HASH);
     if (q_pos != std::string::npos && h_pos != std::string::npos &&
         q_pos > h_pos) {
         _requestState = StatusCode::getStatusPair(BAD_REQUEST);
@@ -173,7 +166,7 @@ void RequestParser::parseURI() {
 }
 
 void RequestParser::urlDecode() {
-    std::size_t p_pos = _request.uri.fullUri.find("%");
+    std::size_t p_pos = _request.uri.fullUri.find(symbols::PERCENT);
     if (p_pos == std::string::npos) {
         return;
     }
@@ -182,7 +175,7 @@ void RequestParser::urlDecode() {
     while (i < _request.uri.fullUri.length()) {
         if (_request.uri.fullUri[i] == '%') {
             std::string hexStr = _request.uri.fullUri.substr(i + 1, 2);
-            std::size_t hex = std::stoi(hexStr, nullptr, 16);
+            std::size_t hex = std::stoi(hexStr, nullptr, 16);  // change
             res += static_cast<char>(hex);
             i += 3;
         } else {
@@ -203,8 +196,8 @@ void RequestParser::validateMethod() {
         throw ParseException(
             "Error: method has control or lowercase character");
     }
-    if (_request.method != http::GET && _request.method != http::POST &&
-        _request.method != http::DELETE) {
+    if (_request.method != method::GET && _request.method != method::POST &&
+        _request.method != method::DELETE) {
         _requestState = StatusCode::getStatusPair(METHOD_NOT_ALLOWED);
         throw ParseException("Error: method isn't supported");
     }
@@ -230,13 +223,13 @@ void RequestParser::validateURI() {
 
 void RequestParser::validateVersion() {
     if (_request.version.empty()) {
-        _request.version = http::HTTP_VERSION;
+        _request.version = version::HTTP_VERSION;
     }
     if (hasCtlChar(_request.version)) {
         _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: version has control character");
     }
-    if (_request.version != http::HTTP_VERSION) {
+    if (_request.version != version::HTTP_VERSION) {
         _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: version isn't supported");
     }
@@ -248,22 +241,22 @@ void RequestParser::parseFields() {
     if (_state != HEADERS) {
         return;
     }
-    if (_buf.find(http::CRLF) == std::string::npos) {
+    if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
     if (!_request.fields.isInitialized()) {
         _request.fields.initFieldsMap();
     }
     for (;;) {
-        if (_buf.find(http::CRLF) == 0) {
+        if (_buf.find(symbols::CRLF) == 0) {
             _state = BODY;
-            _buf = _buf.substr(http::CRLF.length());
+            _buf = _buf.substr(sizeof(symbols::CRLF));
             return;
         }
-        if (_buf.find(http::CRLF) == std::string::npos) {
+        if (_buf.find(symbols::CRLF) == std::string::npos) {
             return;
         }
-        std::string line = trim(_buf, http::CRLF);
+        std::string line = toolbox::trim(_buf, symbols::CRLF);
         if (hasCtlChar(line)) {
             throw ParseException("Error: field value has ctlchar");
         }
@@ -286,7 +279,7 @@ void RequestParser::parseBody() {
     }
     if (!_request.body.contentLength) {
         std::vector<std::string>& contentLen =
-            _request.fields.getFieldValue(http::CONTENT_LENGTH);
+            _request.fields.getFieldValue(fields::CONTENT_LENGTH);
         if (contentLen.empty()) {
             _request.body.contentLength = 0;
         } else {
@@ -313,7 +306,7 @@ void RequestParser::parseChunkedEncoding() {
         _request.body.lastChunk = false;
     }
     while (!_buf.empty() && !_request.body.lastChunk) {
-        std::size_t pos = _buf.find(http::CRLF);
+        std::size_t pos = _buf.find(symbols::CRLF);
         if (pos == std::string::npos) {
             return;
         }
@@ -324,7 +317,7 @@ void RequestParser::parseChunkedEncoding() {
                                   16);  // if not hexstr throw exception
         } catch (std::exception& e) {
             throw ParseException("Error: chunked encoding failed read hexStr");
-        };
+        }
         if (chunkSize == 0) {
             _request.body.lastChunk = true;
             _state = COMPLETED;
@@ -340,3 +333,4 @@ void RequestParser::parseChunkedEncoding() {
         _buf = _buf.substr(chunkSize + 2);
     }
 }
+}  // namespace http

@@ -45,7 +45,7 @@ void showAll(HTTPRequest& r) {
 void runTest(const std::string& testName, const std::string& request) {
     std::cout << "===== テストケース: " << testName << " =====\n";
     std::cout << "リクエスト:\n" << request << "\n";
-    RequestParser r;
+    http::RequestParser r;
     try {
         r.run(request);
         showAll(r.get());
