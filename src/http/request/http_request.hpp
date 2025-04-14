@@ -6,7 +6,7 @@
 #include "http_fields.hpp"
 
 class HTTPRequest {
-   public:
+ public:
     struct Body {
         Body() : isChunked(0), lastChunk(0) {}
         bool isChunked;
@@ -35,7 +35,7 @@ class HTTPRequest {
     HTTPFields fields;
     Body body;
 
-   private:
+ private:
     HTTPRequest(const HTTPRequest& otheer);
     HTTPRequest& operator=(const HTTPRequest& other);
 };

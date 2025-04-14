@@ -14,22 +14,27 @@
 
 namespace http {
 class RequestParser {
-   public:
-    RequestParser() : _state(REQUEST_LINE), _time(0) {}
+ public:
+    RequestParser() : _validatePos(REQUEST_LINE), _time(0) {}
     ~RequestParser() {}
     class ParseException : public std::exception {
-       public:
+     public:
         explicit ParseException(const char* message);
         const char* what() const throw();
 
-       private:
+     private:
         const char* _message;
     };
-    enum ParseState { REQUEST_LINE, HEADERS, BODY, COMPLETED, ERROR };
+    enum ParseState { REQUEST_LINE  = 0,
+                        HEADERS     = 1,
+                        BODY        = 2,
+                        COMPLETED   = 3,
+                        ERROR       = 4
+                    };
     void run(const std::string& buf);
     HTTPRequest& get() { return _request; }
 
-   private:
+ private:
     RequestParser(const RequestParser& other);
     RequestParser& operator=(const RequestParser& other);
     void parseRequestLine();
@@ -44,8 +49,8 @@ class RequestParser {
 
     std::string _buf;
     HTTPRequest _request;
-    ParseState _state;
-    std::pair<std::string, std::string> _requestState;
+    ParseState _validatePos;
+    std::pair<std::string, std::string> _requestState;//リクエストについては一旦置いておく　消す
     std::time_t _time;
 };
 }  // namespace http

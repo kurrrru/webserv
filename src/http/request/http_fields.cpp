@@ -8,16 +8,17 @@ void HTTPFields::initFieldsMap() {
     }
     for (std::size_t i = 0; i < http::fields::FIELD_SIZE; ++i) {
         _fieldsMap.insert(std::make_pair(http::fields::FIELDS[i],
-                                         std::vector<std::string>()));
+                                        std::vector<std::string>()));
     }
     _isInitialized = true;
 }
 
+//responseを参考に
 bool HTTPFields::addField(
     const std::pair<std::string, std::vector<std::string>>& pair) {
+
     for (std::map<std::string, std::vector<std::string>>::iterator m_it =
-             _fieldsMap.begin();
-         m_it != _fieldsMap.end(); ++m_it) {
+        _fieldsMap.begin(); m_it != _fieldsMap.end(); ++m_it) {
         if (toolbox::caseInsensitiveCompare(m_it->first, pair.first)) {
             if (!m_it->second.empty()) {
                 return false;

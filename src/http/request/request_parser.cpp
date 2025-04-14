@@ -1,10 +1,5 @@
 #include "request_parser.hpp"
 
-// #include <iostream>
-
-// #include "../http_namespace.hpp"
-// #include "../status_code.hpp"
-
 namespace http {
 
 /*
@@ -12,7 +7,7 @@ Parser utils
 */
 
 bool hasCtlChar(const std::string& str) {
-    for (std::size_t i = 0; i < str.length(); ++i) {
+    for (std::size_t i = 0; i < str.size(); ++i) {
         if (std::iscntrl(str[i])) {
             return true;
         }
@@ -21,7 +16,7 @@ bool hasCtlChar(const std::string& str) {
 }
 
 bool isUppStr(const std::string& str) {
-    for (std::size_t i = 0; i < str.length(); ++i) {
+    for (std::size_t i = 0; i < str.size(); ++i) {
         if (!std::isupper(str[i])) {
             return false;
         }
@@ -37,7 +32,7 @@ bool isTraversalAttack(const std::string& path) {
     }
     std::vector<std::string> splitPath;
     std::string parts;
-    for (std::size_t i = 0; i < normalizePath.length(); ++i) {
+    for (std::size_t i = 0; i < normalizePath.size(); ++i) {
         if (normalizePath[i] == '/' && !parts.empty()) {
             splitPath.push_back(parts);
             parts.clear();
@@ -116,16 +111,17 @@ const char* RequestParser::ParseException::what() const throw() {
 
 void RequestParser::run(const std::string& buf) {
     _buf.append(buf);
+    // bufにCRLFが存在するか確認し、存在しなければすぐに返す
     parseRequestLine();
     parseFields();
     parseBody();
 }
 
 void RequestParser::parseRequestLine() {
-    if (_state != REQUEST_LINE) {
+    if (_validatePos != REQUEST_LINE) {
         return;
     }
-    if (_buf.find(symbols::CRLF) == std::string::npos) {
+    if (_buf.find(symbols::CRLF) == std::string::npos) {  // 消去できる
         return;
     }
     std::string line = toolbox::trim(_buf, symbols::CRLF);
@@ -136,29 +132,32 @@ void RequestParser::parseRequestLine() {
     validateMethod();
     validateURI();
     validateVersion();
-    _state = HEADERS;
+    _validatePos = HEADERS;
 }
 
+// query, fragmentの順番
+// ?が２つの場合
+// decodeする前にparseしないと解釈の結果?が複数存在してしまう場合がある
 void RequestParser::parseURI() {
     urlDecode();
     std::size_t q_pos = _request.uri.fullUri.find(symbols::QUESTION);
     std::size_t h_pos = _request.uri.fullUri.find(symbols::HASH);
-    if (q_pos != std::string::npos && h_pos != std::string::npos &&
-        q_pos > h_pos) {
+    if (q_pos != std::string::npos && q_pos > h_pos) {  // 確認する
         _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: uri invalid order");
     }
     std::size_t path_end = std::min(
-        q_pos != std::string::npos ? q_pos : _request.uri.fullUri.length(),
-        h_pos != std::string::npos ? h_pos : _request.uri.fullUri.length());
+        q_pos != std::string::npos ? q_pos : _request.uri.fullUri.size(),
+        h_pos != std::string::npos ? h_pos : _request.uri.fullUri.size());
     _request.uri.path = _request.uri.fullUri.substr(0, path_end);
     if (h_pos != std::string::npos) {
         _request.uri.fragment = _request.uri.fullUri.substr(h_pos);
     }
     if (q_pos != std::string::npos) {
-        std::size_t query_end = (h_pos != std::string::npos && h_pos > q_pos)
-                                    ? h_pos
-                                    : _request.uri.fullUri.length();
+        std::size_t query_end = h_pos;
+        if (h_pos == std::string::npos) {
+            query_end = _request.uri.fullUri.size();
+        }
         _request.uri.fullQuery =
             _request.uri.fullUri.substr(q_pos, query_end - q_pos);
         splitQuery(&_request.uri.queryMap, &_request.uri.fullQuery);
@@ -172,8 +171,8 @@ void RequestParser::urlDecode() {
     }
     std::string res;
     std::size_t i = 0;
-    while (i < _request.uri.fullUri.length()) {
-        if (_request.uri.fullUri[i] == '%') {
+    while (i < _request.uri.fullUri.size()) {
+        if (_request.uri.fullUri[i] == *http::symbols::PERCENT) {
             std::string hexStr = _request.uri.fullUri.substr(i + 1, 2);
             std::size_t hex = strtol(hexStr.c_str(), NULL, 16);  // change
             res += static_cast<char>(hex);
@@ -236,9 +235,9 @@ void RequestParser::validateVersion() {
     return;
 }
 
-// if CRLF + CRLF nothing, don't work.
+// fieldの重複について話す。nginxと統一する
 void RequestParser::parseFields() {
-    if (_state != HEADERS) {
+    if (_validatePos != HEADERS) {
         return;
     }
     if (_buf.find(symbols::CRLF) == std::string::npos) {
@@ -249,7 +248,7 @@ void RequestParser::parseFields() {
     }
     while (true) {
         if (_buf.find(symbols::CRLF) == 0) {
-            _state = BODY;
+            _validatePos = BODY;
             _buf = _buf.substr(sizeof(*symbols::CRLF));
             return;
         }
@@ -270,7 +269,7 @@ void RequestParser::parseFields() {
 }
 
 void RequestParser::parseBody() {
-    if (_state != BODY) {
+    if (_validatePos != BODY) {
         return;
     }
     if (_request.body.isChunked || isChunkedEncoding(&_request)) {
@@ -290,11 +289,11 @@ void RequestParser::parseBody() {
     if (_request.body.contentLength > _request.body.recvedLength) {
         _request.body.content.append(_buf.substr(
             0, _request.body.contentLength - _request.body.recvedLength));
-        _request.body.recvedLength += _buf.length();
+        _request.body.recvedLength += _buf.size();
     }
     if (_request.body.contentLength <= _request.body.recvedLength ||
         _buf.empty()) {
-        _state = COMPLETED;
+        _validatePos = COMPLETED;
         _requestState = StatusCode::getStatusPair(OK);
     }
     _buf.clear();
@@ -319,11 +318,11 @@ void RequestParser::parseChunkedEncoding() {
         }
         if (chunkSize == 0) {
             _request.body.lastChunk = true;
-            _state = COMPLETED;
+            _validatePos = COMPLETED;
             return;
         }
         _buf = _buf.substr(pos + 2);
-        if (_buf.length() < chunkSize + 2) {  // buf + CRLF
+        if (_buf.size() < chunkSize + 2) {  // buf + CRLF
             return;
         }
         std::string chunkData = _buf.substr(0, chunkSize);

@@ -34,11 +34,11 @@ enum EStatusCode {
 };
 
 class StatusCode {
-   public:
+ public:
     static const std::pair<std::string, std::string> getStatusPair(
         EStatusCode state);
 
-   private:
+ private:
     static std::map<EStatusCode, std::string>& getStatusMap();
     static bool _isInitialized;
     static std::map<EStatusCode, std::string> _statusMap;

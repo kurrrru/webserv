@@ -10,7 +10,7 @@
 #include "../http_namespace.hpp"
 
 class HTTPFields {
-   public:
+ public:
     HTTPFields() : _isInitialized(false) {}
     ~HTTPFields() {}
     bool isInitialized();
@@ -21,7 +21,7 @@ class HTTPFields {
     std::vector<std::string>& getFieldValue(const std::string& key);
     std::map<std::string, std::vector<std::string> >& get();
 
-   private:
+ private:
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
 
