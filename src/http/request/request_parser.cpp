@@ -76,7 +76,7 @@ void splitQuery(std::map<std::string, std::string>* queryMap,
         std::size_t a_pos = line.find(symbols::AMPERSAND);
         if (e_pos == std::string::npos) {
             RequestParser::ParseException(
-                "Error: invalid query oder");  // think
+                "Error: invalid query oder");
         }
         if (a_pos != std::string::npos) {
             (*queryMap)[line.substr(0, e_pos)] =
@@ -110,8 +110,7 @@ const char* RequestParser::ParseException::what() const throw() {
 }
 
 void RequestParser::run(const std::string& buf) {
-    _buf.append(buf);
-    // bufにCRLFが存在するか確認し、存在しなければすぐに返す
+    _buf += buf;
     parseRequestLine();
     parseFields();
     parseBody();
@@ -121,7 +120,7 @@ void RequestParser::parseRequestLine() {
     if (_validatePos != REQUEST_LINE) {
         return;
     }
-    if (_buf.find(symbols::CRLF) == std::string::npos) {  // 消去できる
+    if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
     std::string line = toolbox::trim(_buf, symbols::CRLF);
@@ -135,15 +134,11 @@ void RequestParser::parseRequestLine() {
     _validatePos = HEADERS;
 }
 
-// query, fragmentの順番
-// ?が２つの場合
-// decodeする前にparseしないと解釈の結果?が複数存在してしまう場合がある
 void RequestParser::parseURI() {
     urlDecode();
     std::size_t q_pos = _request.uri.fullUri.find(symbols::QUESTION);
     std::size_t h_pos = _request.uri.fullUri.find(symbols::HASH);
     if (q_pos != std::string::npos && q_pos > h_pos) {  // 確認する
-        _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: uri invalid order");
     }
     std::size_t path_end = std::min(
@@ -172,9 +167,9 @@ void RequestParser::urlDecode() {
     std::string res;
     std::size_t i = 0;
     while (i < _request.uri.fullUri.size()) {
-        if (_request.uri.fullUri[i] == *http::symbols::PERCENT) {
+        if (_request.uri.fullUri[i] == *symbols::PERCENT) {
             std::string hexStr = _request.uri.fullUri.substr(i + 1, 2);
-            std::size_t hex = strtol(hexStr.c_str(), NULL, 16);  // change
+            std::size_t hex = strtol(hexStr.c_str(), NULL, 16);
             res += static_cast<char>(hex);
             i += 3;
         } else {
@@ -187,17 +182,14 @@ void RequestParser::urlDecode() {
 
 void RequestParser::validateMethod() {
     if (_request.method.empty()) {
-        _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: method doesn't exist");
     }
     if (hasCtlChar(_request.method) || !isUppStr(_request.method)) {
-        _requestState = StatusCode::getStatusPair(METHOD_NOT_ALLOWED);
         throw ParseException(
             "Error: method has control or lowercase character");
     }
     if (_request.method != method::GET && _request.method != method::POST &&
         _request.method != method::DELETE) {
-        _requestState = StatusCode::getStatusPair(METHOD_NOT_ALLOWED);
         throw ParseException("Error: method isn't supported");
     }
     return;
@@ -205,16 +197,13 @@ void RequestParser::validateMethod() {
 
 void RequestParser::validateURI() {
     if (_request.uri.fullUri.empty()) {
-        _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: uri doesn't exist");
     }
-    if (*(_request.uri.fullUri.begin()) != '/' ||
+    if (_request.uri.fullUri[0] != *symbols::SLASH ||
         hasCtlChar(_request.uri.fullUri)) {
-        _requestState = StatusCode::getStatusPair(NOT_FOUND);
         throw ParseException("Error: missing '/' or uri has control character");
     }
     if (isTraversalAttack(_request.uri.path)) {
-        _requestState = StatusCode::getStatusPair(FOUND);
         throw ParseException("Error: warning! path is TraversalAttack");
     }
     return;
@@ -225,17 +214,14 @@ void RequestParser::validateVersion() {
         _request.version = version::HTTP_VERSION;
     }
     if (hasCtlChar(_request.version)) {
-        _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: version has control character");
     }
     if (_request.version != version::HTTP_VERSION) {
-        _requestState = StatusCode::getStatusPair(BAD_REQUEST);
         throw ParseException("Error: version isn't supported");
     }
     return;
 }
 
-// fieldの重複について話す。nginxと統一する
 void RequestParser::parseFields() {
     if (_validatePos != HEADERS) {
         return;
@@ -262,8 +248,7 @@ void RequestParser::parseFields() {
         std::pair<std::string, std::vector<std::string> > pair =
             splitFieldLine(&line);
         if (pair.first.empty() || !_request.fields.addField(pair)) {
-            _requestState = StatusCode::getStatusPair(BAD_REQUEST);
-            throw ParseException("Error: field value dup or nothing");
+            throw ParseException("Error: field value dup or nothing");  // error
         }
     }
 }
@@ -294,7 +279,6 @@ void RequestParser::parseBody() {
     if (_request.body.contentLength <= _request.body.recvedLength ||
         _buf.empty()) {
         _validatePos = COMPLETED;
-        _requestState = StatusCode::getStatusPair(OK);
     }
     _buf.clear();
 }

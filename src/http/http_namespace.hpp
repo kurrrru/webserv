@@ -49,6 +49,7 @@ extern const char* SP;
 extern const char* EQUAL;
 extern const char* AMPERSAND;
 extern const char* HASH;
+extern const char* SLASH;
 extern const char* QUESTION;
 extern const char* PERCENT;
 }  // namespace symbols

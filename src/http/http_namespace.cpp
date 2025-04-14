@@ -51,6 +51,7 @@ const char* SP = " ";
 const char* EQUAL = "=";
 const char* AMPERSAND = "&";
 const char* HASH = "#";
+const char* SLASH = "/";
 const char* QUESTION = "?";
 const char* PERCENT = "%";
 }  // namespace symbols

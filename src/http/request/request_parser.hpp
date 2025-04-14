@@ -10,7 +10,6 @@
 #include "../../../toolbox/string.hpp"
 #include "http_request.hpp"
 #include "../http_namespace.hpp"
-#include "../status_code.hpp"
 
 namespace http {
 class RequestParser {
@@ -50,7 +49,6 @@ class RequestParser {
     std::string _buf;
     HTTPRequest _request;
     ParseState _validatePos;
-    std::pair<std::string, std::string> _requestState;//リクエストについては一旦置いておく　消す
     std::time_t _time;
 };
 }  // namespace http
