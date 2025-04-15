@@ -10,7 +10,8 @@
 class HTTPRequest {
  public:
     struct Body {
-        Body() : isChunked(false), lastChunk(false) {}
+        Body() : isChunked(false), lastChunk(false),
+                    contentLength(0), recvedLength(0) {}
         bool isChunked;
         bool lastChunk;
         std::string content;
@@ -25,10 +26,7 @@ class HTTPRequest {
         std::string fragment;  // client dependent
     };
 
-    HTTPRequest() {
-        body.contentLength = 0;
-        body.recvedLength = 0;
-    }
+    HTTPRequest() {}
     ~HTTPRequest() {}
 
     std::string method;
