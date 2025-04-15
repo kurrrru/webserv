@@ -17,7 +17,7 @@ bool HTTPFields::addField(
     const std::pair<std::string, std::vector<std::string>>& pair) {
     for (std::map<std::string, std::vector<std::string>>::iterator m_it =
         _fieldsMap.begin(); m_it != _fieldsMap.end(); ++m_it) {
-        if (toolbox::caseInsensitiveCompare(m_it->first, pair.first)) {
+        if (toolbox::isEqualIgnoreCase(m_it->first, pair.first)) {
             if (!m_it->second.empty()) {
                 return false;
             }

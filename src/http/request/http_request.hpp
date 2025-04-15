@@ -36,6 +36,6 @@ class HTTPRequest {
     Body body;
 
  private:
-    HTTPRequest(const HTTPRequest& otheer);
+    HTTPRequest(const HTTPRequest& other);
     HTTPRequest& operator=(const HTTPRequest& other);
 };

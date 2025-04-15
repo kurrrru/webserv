@@ -27,7 +27,7 @@ namespace toolbox {
                 std::tolower(static_cast<unsigned char>(c2));
     }
 
-    bool caseInsensitiveCompare(const std::string& str1, const std::string& str2) {
+    bool isEqualIgnoreCase(const std::string& str1, const std::string& str2) {
         if (str1.length() != str2.length()) {
             return false;
         }
