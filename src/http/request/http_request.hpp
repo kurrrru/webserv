@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-#include "request/http_fields.hpp"
+#include "http_fields.hpp"
 
 class HTTPRequest {
  public:

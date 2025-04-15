@@ -6,8 +6,8 @@
 #include <iostream>
 #include <map>
 
-#include "event/epoll.hpp"
-#include "event/tagged_epoll_event.hpp"
+#include "epoll.hpp"
+#include "tagged_epoll_event.hpp"
 
 
 namespace toolbox {

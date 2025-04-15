@@ -1,6 +1,6 @@
 // Copyright 2025 Ideal Broccoli
 
-#include "socket/client.hpp"
+#include "client.hpp"
 
 #include <sys/socket.h>
 #include <unistd.h>

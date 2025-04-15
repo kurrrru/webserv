@@ -10,7 +10,7 @@
 #include <cstdlib>
 
 #include "../../../toolbox/string.hpp"
-#include "request/http_request.hpp"
+#include "http_request.hpp"
 #include "../http_namespace.hpp"
 
 namespace http {

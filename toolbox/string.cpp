@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-#include "toolbox/string.hpp"
+#include "string.hpp"
 
 namespace toolbox {
 std::string to_string(int val) {

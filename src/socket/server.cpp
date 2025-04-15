@@ -1,6 +1,6 @@
 // Copyright 2025 Ideal Broccoli
 
-#include "socket/server.hpp"
+#include "server.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>

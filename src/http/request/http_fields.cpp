@@ -5,7 +5,7 @@
 #include <map>
 #include <vector>
 
-#include "request/http_fields.hpp"
+#include "http_fields.hpp"
 
 void HTTPFields::initFieldsMap() {
     for (std::size_t i = 0; i < http::fields::FIELD_SIZE; ++i) {
