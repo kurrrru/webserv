@@ -8,7 +8,7 @@
 class HTTPRequest {
  public:
     struct Body {
-        Body() : isChunked(0), lastChunk(0) {}
+        Body() : isChunked(false), lastChunk(false) {}
         bool isChunked;
         bool lastChunk;
         std::string content;

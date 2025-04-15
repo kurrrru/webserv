@@ -62,7 +62,7 @@ std::pair<std::string, std::vector<std::string> > splitFieldLine(
     std::size_t pos = line->find_first_of(':');
     std::pair<std::string, std::vector<std::string> > pair;
     if (pos != std::string::npos) {
-        pair.first = toolbox::trim(*line, ": ");
+        pair.first = toolbox::trim(line, ": ");
         pair.second.push_back(*line);
     }
     return pair;
@@ -123,10 +123,10 @@ void RequestParser::parseRequestLine() {
     if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
-    std::string line = toolbox::trim(_buf, symbols::CRLF);
-    _request.method = toolbox::trim(line, symbols::SP);
-    _request.uri.fullUri = toolbox::trim(line, symbols::SP);
-    _request.version = toolbox::trim(line, symbols::SP);
+    std::string line = toolbox::trim(&_buf, symbols::CRLF);
+    _request.method = toolbox::trim(&line, symbols::SP);
+    _request.uri.fullUri = toolbox::trim(&line, symbols::SP);
+    _request.version = toolbox::trim(&line, symbols::SP);
     parseURI();
     validateMethod();
     validateURI();
@@ -241,7 +241,7 @@ void RequestParser::parseFields() {
         if (_buf.find(symbols::CRLF) == std::string::npos) {
             return;
         }
-        std::string line = toolbox::trim(_buf, symbols::CRLF);
+        std::string line = toolbox::trim(&_buf, symbols::CRLF);
         if (hasCtlChar(line)) {
             throw ParseException("Error: field value has ctlchar");
         }

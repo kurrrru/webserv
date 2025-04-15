@@ -11,14 +11,14 @@ namespace toolbox {
         return ss.str();
     }
 
-    std::string trim(std::string& src, const std::string& sep) {
-        std::size_t pos = src.find(sep);
+    std::string trim(std::string* src, const std::string& sep) {
+        std::size_t pos = src->find(sep);
         std::string formerPart;
         if (pos != std::string::npos) {
-            formerPart = src.substr(pos + sep.size());
-            src.erase(pos);
+            formerPart = src->substr(pos + sep.size());
+            src->erase(pos);
         }
-        src.swap(formerPart);
+        src->swap(formerPart);
         return formerPart;
     }
 
