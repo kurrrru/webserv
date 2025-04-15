@@ -1,16 +1,17 @@
-#include "http_fields.hpp"
+// Copyright 2025 Ideal Broccoli
 
-bool HTTPFields::isInitialized() { return _isInitialized; }
+#include <string>
+#include <utility>
+#include <map>
+#include <vector>
+
+#include "request/http_fields.hpp"
 
 void HTTPFields::initFieldsMap() {
-    if (_isInitialized) {
-        return;
-    }
     for (std::size_t i = 0; i < http::fields::FIELD_SIZE; ++i) {
         _fieldsMap.insert(std::make_pair(http::fields::FIELDS[i],
                                         std::vector<std::string>()));
     }
-    _isInitialized = true;
 }
 
 bool HTTPFields::addField(
@@ -31,7 +32,11 @@ bool HTTPFields::addField(
 }
 
 std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
-    return _fieldsMap[key];
+    static std::vector<std::string> emptyVector;
+    if (_fieldsMap.find(key) != _fieldsMap.end()) {
+        return _fieldsMap[key];
+    }
+    return emptyVector;
 }
 
 std::map<std::string, std::vector<std::string>>& HTTPFields::get() {

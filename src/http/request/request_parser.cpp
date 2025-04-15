@@ -1,4 +1,11 @@
-#include "request_parser.hpp"
+// Copyright 2025 Ideal Broccoli
+
+#include "request/request_parser.hpp"
+
+#include <map>
+#include <vector>
+#include <string>
+#include <utility>
 
 namespace http {
 
@@ -103,7 +110,7 @@ Class method
 */
 
 RequestParser::ParseException::ParseException(const char* message)
-    : _message(message) {}
+: _message(message) {}
 
 const char* RequestParser::ParseException::what() const throw() {
     return _message;
@@ -229,7 +236,7 @@ void RequestParser::parseFields() {
     if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
-    if (!_request.fields.isInitialized()) {
+    if (!_request.fields.get().empty()) {
         _request.fields.initFieldsMap();
     }
     while (true) {
@@ -247,7 +254,8 @@ void RequestParser::parseFields() {
         }
         std::pair<std::string, std::vector<std::string> > pair =
             splitFieldLine(&line);
-        if (pair.first.empty() || !_request.fields.addField(pair)) {
+        if (pair.first.empty() || pair.second.empty() ||
+                !_request.fields.addField(pair)) {
             throw ParseException("Error: field value dup or nothing");  // error
         }
     }

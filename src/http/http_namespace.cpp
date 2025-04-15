@@ -1,4 +1,6 @@
-#include "http_namespace.hpp"
+// Copyright 2025 Ideal Broccoli
+
+#include "http/http_namespace.hpp"
 
 namespace http {
 // method
@@ -36,11 +38,12 @@ const char* SET_COOKIE = "Set-Cookie";
 const char* LOCATION = "Location";
 const char* WWW_AUTHENTICATE = "WWW-Authenticate";
 const char* FIELDS[] = {
-    DATE,          CACHE_CONTROL,    CONNECTION,       CONTENT_LENGTH,
-    CONTENT_TYPE,  CONTENT_ENCODING, CONTENT_LANGUAGE, TRANSFER_ENCODING,
-    HOST,          ACCEPT,           ACCEPT_ENCODING,  ACCEPT_LANGUAGE,
-    AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
-    SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE};
+DATE,          CACHE_CONTROL,    CONNECTION,       CONTENT_LENGTH,
+CONTENT_TYPE,  CONTENT_ENCODING, CONTENT_LANGUAGE, TRANSFER_ENCODING,
+HOST,          ACCEPT,           ACCEPT_ENCODING,  ACCEPT_LANGUAGE,
+AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
+SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE
+};
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 }  // namespace fields
 

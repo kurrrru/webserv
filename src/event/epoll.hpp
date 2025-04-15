@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #pragma once
 
 #include <sys/epoll.h>
@@ -12,7 +14,7 @@ class Epoll {
  public:
     class EpollException : public std::exception {
      public:
-        EpollException(const char* message);
+        explicit EpollException(const char* message);
         const char* what() const throw();
      private:
         const char* _message;

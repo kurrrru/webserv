@@ -1,9 +1,11 @@
+// Copyright 2025 Ideal Broccoli
 // Description: This file is a mimic of SharedPtr in C++11.
 // std::SharedPtr cannot be used in C++98, so I mimic it.
 
 #pragma once
 
 #include <algorithm>
+#include <utility>
 
 namespace toolbox {
 template <typename T>
@@ -28,18 +30,18 @@ class SharedPtr {
     // if other._ptr == NULL allocate new memory and assign 0
     SharedPtr& operator=(const SharedPtr& other) {
         if (this != &other) {
-			int *tmp_count = other._count;
-			if (other._ptr != NULL) {
-				++(*tmp_count);
-			} else {
-				tmp_count = new int(0);
-			}
+            int *tmp_count = other._count;
+            if (other._ptr != NULL) {
+                ++(*tmp_count);
+            } else {
+                tmp_count = new int(0);
+            }
             if (--(*_count) <= 0) {
                 delete _ptr;
                 delete _count;
             }
             _ptr = other._ptr;
-			_count = tmp_count;
+            _count = tmp_count;
         }
         return *this;
     }

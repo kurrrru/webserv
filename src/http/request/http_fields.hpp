@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #pragma once
 
 #include <iostream>
@@ -11,9 +13,8 @@
 
 class HTTPFields {
  public:
-    HTTPFields() : _isInitialized(false) {}
+    HTTPFields() {}
     ~HTTPFields() {}
-    bool isInitialized();
     void initFieldsMap();
     bool addField(
         const std::pair<std::string, std::vector<std::string> >& pair);
@@ -25,6 +26,5 @@ class HTTPFields {
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
 
-    bool _isInitialized;
     std::map<std::string, std::vector<std::string> > _fieldsMap;
 };

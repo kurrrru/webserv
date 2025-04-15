@@ -1,8 +1,10 @@
-#include "client.hpp"
+// Copyright 2025 Ideal Broccoli
 
-#include <iostream>
+#include "socket/client.hpp"
+
 #include <sys/socket.h>
 #include <unistd.h>
+#include <iostream>
 
 Client::Client() : _socket_fd(-1) {
 }
@@ -26,7 +28,8 @@ Client::~Client() {
     }
 }
 
-Client::ClientException::ClientException(const char* message) : _message(message) {}
+Client::ClientException::ClientException(const char* message) :
+                            _message(message) {}
 
 const char* Client::ClientException::what() const throw() {
     return _message;

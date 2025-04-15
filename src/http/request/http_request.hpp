@@ -1,9 +1,11 @@
+// Copyright 2025 Ideal Broccoli
+
 #pragma once
 
 #include <string>
 #include <map>
 
-#include "http_fields.hpp"
+#include "request/http_fields.hpp"
 
 class HTTPRequest {
  public:

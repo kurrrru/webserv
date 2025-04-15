@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #pragma once
 
 #include <ctime>
@@ -8,7 +10,7 @@
 #include <cstdlib>
 
 #include "../../../toolbox/string.hpp"
-#include "http_request.hpp"
+#include "request/http_request.hpp"
 #include "../http_namespace.hpp"
 
 namespace http {
@@ -24,12 +26,13 @@ class RequestParser {
      private:
         const char* _message;
     };
-    enum ParseState { REQUEST_LINE  = 0,
-                        HEADERS     = 1,
-                        BODY        = 2,
-                        COMPLETED   = 3,
-                        ERROR       = 4
-                    };
+    enum ParseState {
+        REQUEST_LINE  = 0,
+        HEADERS     = 1,
+        BODY        = 2,
+        COMPLETED   = 3,
+        ERROR       = 4
+    };
     void run(const std::string& buf);
     HTTPRequest& get() { return _request; }
 

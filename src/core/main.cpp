@@ -1,10 +1,12 @@
-#include <string>
-#include <iostream>
-#include <sys/socket.h>
+// Copyright 2025 Ideal Broccoli
+
 #include <netinet/in.h>
-#include <unistd.h>
+#include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
+#include <unistd.h>
+#include <string>
+#include <iostream>
 #include <cerrno>
 #include <cstdio>
 #include <sstream>
@@ -27,7 +29,7 @@ int main() {
         server2->setName("server2");
         epoll.addServer(server2->getFd(), server2);
 
-        int cnt = 0; // for debug
+        int cnt = 0;  // for debug
         struct epoll_event events[1000];
         while (1) {
             try {
@@ -36,10 +38,11 @@ int main() {
                     throw std::runtime_error("epoll_wait failed");
                 }
                 for (int i = 0; i < nfds; i++) {
-                    taggedEventData* tagged = static_cast<taggedEventData*>(events[i].data.ptr);
+                    taggedEventData* tagged =
+                        static_cast<taggedEventData*>(events[i].data.ptr);
                     if (tagged->server) {
                         try {
-                            std::cout << "---------------   server   ---------------" <<std::endl;
+                            std::cout <<"---------------   server   ---------------" <<std::endl;
                             toolbox::SharedPtr<Server> server = tagged->server;
                             struct sockaddr_in client_addr;
                             socklen_t addr_len = sizeof(client_addr);

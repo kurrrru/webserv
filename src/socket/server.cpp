@@ -1,12 +1,15 @@
-#include "server.hpp"
+// Copyright 2025 Ideal Broccoli
 
-#include <iostream>
+#include "socket/server.hpp"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string>
 #include <cstdlib>
 #include <cstdio>
+#include <iostream>
 
 Server::Server() {
     _port = default_port;
@@ -35,7 +38,8 @@ Server::~Server() {
     close(_server_sock);
 }
 
-Server::ServerException::ServerException(const char* message) : _message(message) {}
+Server::ServerException::ServerException(const char* message) :
+                            _message(message) {}
 
 const char* Server::ServerException::what() const throw() {
     return _message;
@@ -52,7 +56,8 @@ void Server::createServerSocket() {
     }
 
     int opt = 1;
-    if (setsockopt(_server_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1) {
+    if (setsockopt(_server_sock, SOL_SOCKET, SO_REUSEADDR,
+                    &opt, sizeof(opt)) == -1) {
         throw ServerException("setsockopt failed");
     }
 
@@ -61,7 +66,8 @@ void Server::createServerSocket() {
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(_port);
 
-    if (bind(_server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+    if (bind(_server_sock, (struct sockaddr*)&server_addr,
+                sizeof(server_addr)) == -1) {
         throw ServerException("bind failed");
     }
 
