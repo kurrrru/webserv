@@ -24,7 +24,7 @@ void showAll(HTTPRequest& r) {
         std::cout << it->first << ": " << it->second << std::endl;
     }
     std::cout << "----- Fields ----" << std::endl;
-    for (std::map<std::string, std::vector<std::string>>::iterator it1 =
+    for (std::map<std::string, std::vector<std::string> >::iterator it1 =
             r.fields.get().begin(); it1 != r.fields.get().end(); ++it1) {
         if (it1->second.empty()) {
             continue;
@@ -54,7 +54,7 @@ void runTest(const std::string& testName, const std::string& request) {
 }
 
 // int main(void) {
-//     std::vector<std::pair<std::string, std::string>> tests;
+//     std::vector<std::pair<std::string, std::string> > tests;
 
 //     // テストケース1: 基本的なGETリクエスト（元の例）
 //     tests.push_back(std::make_pair(

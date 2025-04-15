@@ -15,8 +15,8 @@ void HTTPFields::initFieldsMap() {
 }
 
 bool HTTPFields::addField(
-    const std::pair<std::string, std::vector<std::string>>& pair) {
-    for (std::map<std::string, std::vector<std::string>>::iterator m_it =
+    const std::pair<std::string, std::vector<std::string> >& pair) {
+    for (std::map<std::string, std::vector<std::string> >::iterator m_it =
         _fieldsMap.begin(); m_it != _fieldsMap.end(); ++m_it) {
         if (toolbox::isEqualIgnoreCase(m_it->first, pair.first)) {
             if (!m_it->second.empty()) {
@@ -39,6 +39,6 @@ std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
     return emptyVector;
 }
 
-std::map<std::string, std::vector<std::string>>& HTTPFields::get() {
+std::map<std::string, std::vector<std::string> >& HTTPFields::get() {
     return _fieldsMap;
 }
