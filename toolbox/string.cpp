@@ -13,8 +13,8 @@ std::string to_string(int val) {
     return ss.str();
 }
 
-// directly manipulates input string minimize
-// new memory allocations for efficiency.
+// This function removes the latter part of the string rather than the former
+// when calling std::string::erase in the hope of improving efficiency.
 std::string trim(std::string* src, const std::string& sep) {
     std::size_t pos = src->find(sep);
     std::string formerPart;
