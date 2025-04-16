@@ -1,14 +1,17 @@
-#include "epoll.hpp"
+// Copyright 2025 Ideal Broccoli
 
-#include <iostream>
-#include <sys/socket.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <sys/socket.h>
+#include <iostream>
+#include <map>
 
+#include "epoll.hpp"
 #include "tagged_epoll_event.hpp"
 
+
 namespace toolbox {
-    static void setNonBlocking(int fd);
+static void setNonBlocking(int fd);
 }
 
 Epoll::Epoll() {
@@ -19,7 +22,8 @@ Epoll::Epoll() {
 }
 
 Epoll::~Epoll() {
-    for (std::map<int, struct epoll_event*>::iterator it = _events.begin(); it != _events.end(); ++it) {
+    for (std::map<int, struct epoll_event*>::iterator it = _events.begin();
+            it != _events.end(); ++it) {
         struct epoll_event* ev = it->second;
         taggedEventData* tagged = static_cast<taggedEventData*>(ev->data.ptr);
         delete tagged;
@@ -70,7 +74,7 @@ void Epoll::del(int fd) {
         _events.erase(it);
     }
     if (epoll_ctl(_epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-        close (fd);
+        close(fd);
         throw EpollException("epoll_ctl failed");
     }
     close(fd);
@@ -80,7 +84,8 @@ int Epoll::wait(struct epoll_event* events, int maxevents, int timeout) {
     return epoll_wait(_epfd, events, maxevents, timeout);
 }
 
-Epoll::EpollException::EpollException(const char* message) : _message(message) {}
+Epoll::EpollException::EpollException(const char* message) :
+                        _message(message) {}
 
 const char* Epoll::EpollException::what() const throw() {
     return _message;
