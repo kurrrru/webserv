@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "http_fields.hpp"
+#include "request_parser.hpp"
 
 void HTTPFields::initFieldsMap() {
     for (std::size_t i = 0; i < http::fields::FIELD_SIZE; ++i) {
@@ -14,21 +15,28 @@ void HTTPFields::initFieldsMap() {
     }
 }
 
-bool HTTPFields::addField(
-    const std::pair<std::string, std::vector<std::string> >& pair) {
-    for (std::map<std::string, std::vector<std::string> >::iterator m_it =
-        _fieldsMap.begin(); m_it != _fieldsMap.end(); ++m_it) {
+void HTTPFields::addField(
+    const FieldPair& pair) {
+        for (FieldMap::iterator m_it =
+            _fieldsMap.begin(); m_it != _fieldsMap.end(); ++m_it) {
         if (toolbox::isEqualIgnoreCase(m_it->first, pair.first)) {
-            if (!m_it->second.empty()) {
-                return false;
-            }
             for (std::size_t i = 0; i < pair.second.size(); ++i) {
                 m_it->second.push_back(pair.second[i]);
             }
-            return true;
+            if (m_it->first == http::fields::HOST && m_it->second.size() != 1) {
+                throw http::RequestParser::ParseException
+                                ("Error: Host has too many value");
+            } else if (m_it->first == http::fields::CONTENT_LENGTH) {
+                for (std::size_t i = 0; i < m_it->second.size(); ++i) {
+                    if (m_it->second[0] != m_it->second[i]) {
+                        throw http::RequestParser::ParseException
+                            ("Error: Content-Length has different values");
+                    }
+                }
+            }
+            return;
         }
     }
-    return false;
 }
 
 std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
@@ -39,6 +47,6 @@ std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
     return emptyVector;
 }
 
-std::map<std::string, std::vector<std::string> >& HTTPFields::get() {
+HTTPFields::FieldMap& HTTPFields::get() {
     return _fieldsMap;
 }

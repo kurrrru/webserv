@@ -13,18 +13,20 @@
 
 class HTTPFields {
  public:
+    typedef std::pair<std::string, std::vector<std::string> > FieldPair;
+    typedef std::map<std::string, std::vector<std::string> > FieldMap;
     HTTPFields() {}
     ~HTTPFields() {}
     void initFieldsMap();
-    bool addField(
-        const std::pair<std::string, std::vector<std::string> >& pair);
+    void addField(
+        const FieldPair& pair);
 
     std::vector<std::string>& getFieldValue(const std::string& key);
-    std::map<std::string, std::vector<std::string> >& get();
+    FieldMap& get();
 
  private:
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
 
-    std::map<std::string, std::vector<std::string> > _fieldsMap;
+    FieldMap _fieldsMap;
 };
