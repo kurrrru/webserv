@@ -14,12 +14,14 @@
 
 namespace config {
 
-// コンストラクタ
 ConfigParser::ConfigParser() : _directiveParser() {
 }
 
+ConfigParser::~ConfigParser() {
+}
+
 // ファイルを解析してConfigオブジェクトを生成する
-Config ConfigParser::parseFile(const std::string& filepath) {
+toolbox::SharedPtr<Config> ConfigParser::parseFile(const std::string& filepath) {
     ConfigParser parser;
     // ファイルを読み込む
     if (!parser.readFile(filepath)) {
@@ -42,10 +44,10 @@ Config ConfigParser::parseFile(const std::string& filepath) {
     if (!parser.parse()) {
         throw ConfigException("Failed to parse configuration");
     }
-    Config config;
+    toolbox::SharedPtr<Config> config(new Config());
     // 解析結果をConfigオブジェクトにセット
-    config.setConfig(parser._config);
-    config.setTokenCount(parser._tokens.size());
+    config->setConfig(parser._config);
+    config->setTokenCount(parser._tokens.size());
     return config;
 }
 

@@ -10,9 +10,12 @@ namespace config {
 class ConfigLexer {
  public:
     ConfigLexer();
+    ~ConfigLexer();
     std::vector<std::string> tokenize(const std::string& input);
-
+ 
  private:
+    ConfigLexer(const ConfigLexer&);
+    ConfigLexer& operator=(const ConfigLexer&);
     void skipWhitespace(const std::string& input, size_t* pos);
     bool isWhitespace(char c) const;
     void skipComment(const std::string& input, size_t* pos);

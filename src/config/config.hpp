@@ -28,8 +28,9 @@ class Config {
  private:
     config::HttpConfig _config;
     size_t _token_count;
-    // 代入演算子
+    Config(const Config& other);
     Config& operator=(const Config& other);
+
 };
 
 class ConfigException : public std::exception {

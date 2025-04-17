@@ -13,7 +13,11 @@
 
 namespace config {
 
-ConfigLexer::ConfigLexer() {}
+ConfigLexer::ConfigLexer() {
+}
+
+ConfigLexer::~ConfigLexer() {
+}
 
 // トークン化を行うメソッド
 std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
