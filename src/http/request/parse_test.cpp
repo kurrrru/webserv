@@ -60,11 +60,11 @@ void runTest(const std::string& testName, const std::string& request) {
 //     tests.push_back(std::make_pair(
 //         "基本的なGETリクエスト",
 //         "GET /index.html?id=5&date=2023-04-09&author=yooshima&limit=10 "
-//         "HTTP/1.1\r\nHost: example.com\r\nUser-Agent: "
+//         "HTTP/1.1\r\nHost: example.com\r\nHost: two\r\nUser-Agent: "
 //         "Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\nAccept: "
 //         "text/html,application/xhtml+xml\r\nAccept-Language: "
 //         "en-US,en;q=0.9\r\nConnection: keep-alive\r\ncontent-length: "
-//         "10\r\n\r\nbodyy+++++"));
+//         "10\r\ncontent-Length: 10\r\nbodyy+++++"));
 
 //     // テストケース2: POSTリクエスト
 //     tests.push_back(

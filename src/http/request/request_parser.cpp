@@ -64,13 +64,26 @@ bool isTraversalAttack(const std::string& path) {
     return false;
 }
 
+void trimSpace(std::string &line) {
+    if (line.find(symbols::SP) == std::string::npos) {
+        return;
+    }
+    std::size_t front_pos = line.find_first_not_of(symbols::SP);
+    std::size_t rear_pos = line.find_last_not_of(symbols::SP);
+    line = line.substr(front_pos, rear_pos);
+}
+
 std::pair<std::string, std::vector<std::string> > splitFieldLine(
     std::string* line) {
     std::size_t pos = line->find_first_of(':');
     std::pair<std::string, std::vector<std::string> > pair;
     if (pos != std::string::npos) {
-        pair.first = toolbox::trim(line, ": ");
-        pair.second.push_back(*line);
+        pair.first = toolbox::trim(line, ":");
+        while (!line->empty()) {
+            std::string value = toolbox::trim(line, ",");
+            trimSpace(value);
+            pair.second.push_back(value);
+        }
     }
     return pair;
 }
@@ -97,8 +110,6 @@ void splitQuery(std::map<std::string, std::string>* queryMap,
 }
 
 bool isChunkedEncoding(HTTPRequest* request) {
-    std::vector<std::string>& chunked =
-        request->fields.getFieldValue(fields::TRANSFER_ENCODING);
     return (
         !(request->fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
         *(request->fields.getFieldValue(fields::TRANSFER_ENCODING).begin()) ==
@@ -236,7 +247,7 @@ void RequestParser::parseFields() {
     if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
-    if (!_request.fields.get().empty()) {
+    if (_request.fields.get().empty()) {
         _request.fields.initFieldsMap();
     }
     while (true) {
@@ -254,10 +265,10 @@ void RequestParser::parseFields() {
         }
         std::pair<std::string, std::vector<std::string> > pair =
             splitFieldLine(&line);
-        if (pair.first.empty() || pair.second.empty() ||
-                !_request.fields.addField(pair)) {
-            throw ParseException("Error: field value dup or nothing");  // error
+        if (pair.first.empty()) {
+            throw ParseException("Error: field key is nothing");
         }
+        _request.fields.addField(pair);
     }
 }
 
