@@ -6,10 +6,10 @@
 
 #include "config_lexer.hpp"
 #include "config_namespace.hpp"
-#include "config/config.hpp"
+#include "config.hpp"
 
-#include "../toolbox/stepmark.hpp"
-#include "../toolbox/string.hpp"
+#include "../../toolbox/stepmark.hpp"
+#include "../../toolbox/string.hpp"
 
 namespace config {
 

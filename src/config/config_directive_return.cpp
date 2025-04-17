@@ -7,8 +7,9 @@
 #include "config_directive_handler.hpp"
 #include "config_namespace.hpp"
 
-#include "../toolbox/stepmark.hpp"
-#include "../toolbox/string.hpp"
+#include "../../toolbox/stepmark.hpp"
+#include "../../toolbox/string.hpp"
+
 namespace config {
 
 bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, int* return_code, std::string* return_url) {

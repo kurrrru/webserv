@@ -8,7 +8,8 @@
 #include "config_directive_handler.hpp"
 #include "config_namespace.hpp"
 
-#include "../toolbox/stepmark.hpp"
+#include "../../toolbox/stepmark.hpp"
+
 namespace config {
 
 bool DirectiveParser::parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, int* port) {

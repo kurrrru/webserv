@@ -51,7 +51,7 @@ const char METHOD_HEAD[] = "HEAD";
 
 const int DEFAULT_PORT = 80;
 const size_t DEFAULT_CLIENT_MAX_BODY_SIZE = 1024 * 1024;
-const char DEFAULT_FILE[] = "/conf/default.conf";
+const char DEFAULT_FILE[] = "conf/default.conf";
 
 struct ErrorPage {
     std::vector<int> codes;

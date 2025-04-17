@@ -5,8 +5,8 @@
 #include "config_parser.hpp"
 #include "config_namespace.hpp"
 
-#include "../toolbox/stepmark.hpp"
-#include "../toolbox/string.hpp"
+#include "../../toolbox/stepmark.hpp"
+#include "../../toolbox/string.hpp"
 
 namespace config {
 
