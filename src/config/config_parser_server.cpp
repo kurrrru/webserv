@@ -41,7 +41,7 @@ bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens,
             if (!parseLocationBlock(tokens, pos, &location_config)) {
                 return false;
             }
-            config->locations.push_back(location_config); 
+            config->locations.push_back(location_config);
         // 対象のディレクティブ
         } else if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_SERVER)) {
             // TODO(yootsubo) : 重複チェック

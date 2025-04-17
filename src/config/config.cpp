@@ -30,8 +30,7 @@ void Config::setTokenCount(const size_t token_count) {
     _token_count = token_count;
 }
 
-ConfigException::ConfigException(const std::string& message)
-    : _message(message) {}
+ConfigException::ConfigException(const std::string& message): _message(message) {}
 
 ConfigException::~ConfigException() throw() {}
 

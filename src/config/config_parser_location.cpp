@@ -10,22 +10,18 @@ namespace config {
 
 bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* config) {
     toolbox::logger::StepMark::debug("Parsing Location block starting at token " + toolbox::to_string(static_cast<int>(*pos)) + ": " + tokens[*pos]);
-    
     // locationブロックの開始とパスを検証
     if (!validateAndParseLocationBlockStart(tokens, pos, config)) {
         return false;
     }
-    
     // locationブロック内のディレクティブを解析
     if (!parseLocationDirectives(tokens, pos, config)) {
         return false;
     }
-    
     // locationブロックの終了を確認
     if (!validateBlockEnd(tokens, pos)) {
         return false;
     }
-    
     toolbox::logger::StepMark::debug("Finished parsing Location block.");
     return true;
 }
