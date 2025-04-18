@@ -11,6 +11,7 @@
 typedef std::vector<FieldTest> TestVector;
 
 void showField(http::RequestParser& r) {
+    std::cout << "----- field -----" << std::endl;
     for (HTTPFields::FieldMap::iterator it = r.get().fields.get().begin();
                 it != r.get().fields.get().end(); ++it) {
         if (!it->second.empty()) {
@@ -32,6 +33,7 @@ bool runTest(FieldTest& t) {
         } else {
             std::cout << "==== Failed: false->true " \
                 << t._name << " ====" << std::endl;
+            std::cout << t._request;
             showField(r);
             return false;
         }
@@ -42,6 +44,7 @@ bool runTest(FieldTest& t) {
             std::cout << "==== Failed: true->false " \
                 << t._name << " ====" << std::endl;
             std::cout << e.what() << std::endl;
+            std::cout << t._request;
             showField(r);
             return false;
         }
@@ -137,6 +140,11 @@ void makeFieldTest(TestVector& tests) {
     f._isSuccessTest = false;  // 400 Bad Request
     tests.push_back(f);
 
+    f._name = "Host重複";
+    f._request = "GET / HTTP/1.1\r\nHost: sample, samplee\r\n\r\n";
+    f._isSuccessTest = false;  // 400 Bad Request
+    tests.push_back(f);
+
     f._name = "Host重複（大文字小文字混在）";
     f._request = "GET / HTTP/1.1\r\nHost: sample\r\nhost: sample\r\n\r\n";
     f._isSuccessTest = false;  // 400 Bad Request
@@ -186,10 +194,10 @@ void makeFieldTest(TestVector& tests) {
     f._isSuccessTest = true;  // 200 OK
     tests.push_back(f);
 
-    f._name = "Content-Lengthが複数成功";
+    f._name = "Content-Lengthが複数失敗";
     f._request = "POST / HTTP/1.1\r\nHost: sample\r\nContent-Length: 20\r\n"
                     "Content-Length: 20\r\n\r\n";
-    f._isSuccessTest = true;  // 200 OK
+    f._isSuccessTest = false;  // 400 Bad Request
     tests.push_back(f);
 
     f._name = "Content-Lengthが複数成功";
