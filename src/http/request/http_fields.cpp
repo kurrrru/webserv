@@ -27,10 +27,19 @@ void HTTPFields::addField(
                 throw http::RequestParser::ParseException
                                 ("Error: Host has too many value");
             } else if (m_it->first == http::fields::CONTENT_LENGTH) {
+                if (!http::isDigitStr(m_it->second[0])) {
+                    throw http::RequestParser::ParseException
+                            ("Error: Content-Length has string");
+                }
+                // need change 1048576 to Config client_max_body_size
+                if (std::strtol(m_it->second[0].c_str(), NULL, 10) > 1048576) {
+                    throw http::RequestParser::ParseException
+                            ("Error: content_length too large");
+                }
                 for (std::size_t i = 0; i < m_it->second.size(); ++i) {
                     if (m_it->second[0] != m_it->second[i]) {
                         throw http::RequestParser::ParseException
-                            ("Error: Content-Length has different values");
+                                ("Error: Content-Length has different values");
                     }
                 }
             }
