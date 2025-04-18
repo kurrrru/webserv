@@ -18,8 +18,10 @@ class HTTPFields {
     HTTPFields() {}
     ~HTTPFields() {}
     void initFieldsMap();
-    void addField(
-        const FieldPair& pair);
+    bool addField(const FieldPair& pair);
+    bool validateField(const std::string& key,
+            const std::vector<std::string>& values);
+    bool validateAllFields();
 
     std::vector<std::string>& getFieldValue(const std::string& key);
     FieldMap& get();
@@ -28,5 +30,9 @@ class HTTPFields {
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
 
+    bool isValidFieldKey(const std::string& key);
+    bool isValidFieldValue(const std::string& value);
+    bool validateContentLength(const std::vector<std::string>& values);
+    bool validateHost(const std::vector<std::string>& values);
     FieldMap _fieldsMap;
 };
