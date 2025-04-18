@@ -259,41 +259,41 @@ void RequestParser::validateVersion() {
 }
 
 void RequestParser::parseFields() {
-    if (_validatePos != HEADERS) {
-        return;
-    }
-    if (_buf.find(symbols::CRLF) == std::string::npos) {
+    if (_validatePos != HEADERS ||
+            _buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
     if (_request.fields.get().empty()) {
         _request.fields.initFieldsMap();
     }
-    while (true) {
+    while (_buf.find(symbols::CRLF) != std::string::npos) {
         if (_buf.find(symbols::CRLF) == 0) {
             _validatePos = BODY;
             _buf = _buf.substr(sizeof(*symbols::CRLF));
             break;
         }
-        if (_buf.find(symbols::CRLF) == std::string::npos) {
-            break;
-        }
         std::string line = toolbox::trim(&_buf, symbols::CRLF);
-        if (line.size() > fields::FIELD_MAX_LENGTH) {
-            throw ParseException("Error: field line too long");
+        validateFieldLine(line);
+        HTTPFields::FieldPair pair = splitFieldLine(&line);
+        if (!_request.fields.addField(pair)) {
+            // response state 400
+            throw ParseException("Error: bad request");
         }
-        if (hasCtlChar(line)) {
-            throw ParseException("Error: field value has ctlchar");
-        }
-        std::pair<std::string, std::vector<std::string> > pair =
-            splitFieldLine(&line);
-        if (pair.first.empty() || hasWhiteSpace(pair.first)) {
-            throw ParseException("Error: invalid field key");
-        }
-        _request.fields.addField(pair);
     }
-    if (_request.fields.getFieldValue(fields::HOST).empty() ||
-        hasWhiteSpace(_request.fields.getFieldValue(fields::HOST)[0])) {
-        throw ParseException("Error: Host does not exist");
+    if (!_request.fields.validateAllFields()) {
+        // response state 400, 413(content-length > 8kb)
+        throw ParseException("Error: failed validateAllFields");
+    }
+}
+
+void RequestParser::validateFieldLine(std::string& line) {
+    if (hasCtlChar(line)) {
+        // response status 400
+        throw ParseException("Error: field line has ctl char");
+    }
+    if (line.size() > fields::MAX_FIELDLINE_SIZE) {
+        // response status 431
+        throw ParseException("Error: field line too long");
     }
 }
 

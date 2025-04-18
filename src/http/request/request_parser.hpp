@@ -44,6 +44,7 @@ class RequestParser {
     void parseFields();
     void parseBody();
     void parseChunkedEncoding();
+    void validateFieldLine(std::string& line);
     void validateMethod();
     void validateURI();
     void validateVersion();
@@ -56,4 +57,5 @@ class RequestParser {
 };
 
 bool isDigitStr(const std::string& str);
+bool hasWhiteSpace(const std::string& str);
 }  // namespace http
