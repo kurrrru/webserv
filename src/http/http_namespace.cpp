@@ -45,6 +45,7 @@ AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
 SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE
 };
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
+const std::size_t FIELD_MAX_LENGTH = 8192;
 }  // namespace fields
 
 namespace symbols {

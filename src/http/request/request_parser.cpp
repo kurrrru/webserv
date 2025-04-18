@@ -15,7 +15,16 @@ Parser utils
 
 bool hasCtlChar(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
-        if (std::iscntrl(str[i])) {
+        if (std::iscntrl(str[i]) != 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool hasWhiteSpace(const std::string& str) {
+    for (std::size_t i = 0; i < str.size(); ++i) {
+        if (std::isspace(str[i])) {
             return true;
         }
     }
@@ -25,6 +34,15 @@ bool hasCtlChar(const std::string& str) {
 bool isUppStr(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
         if (!std::isupper(str[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isDigitStr(const std::string& str) {
+    for (std::size_t i = 0; i < str.size(); ++i) {
+        if (!std::isdigit(str[i])) {
             return false;
         }
     }
@@ -254,21 +272,28 @@ void RequestParser::parseFields() {
         if (_buf.find(symbols::CRLF) == 0) {
             _validatePos = BODY;
             _buf = _buf.substr(sizeof(*symbols::CRLF));
-            return;
+            break;
         }
         if (_buf.find(symbols::CRLF) == std::string::npos) {
-            return;
+            break;
         }
         std::string line = toolbox::trim(&_buf, symbols::CRLF);
+        if (line.size() > fields::FIELD_MAX_LENGTH) {
+            throw ParseException("Error: field line too long");
+        }
         if (hasCtlChar(line)) {
             throw ParseException("Error: field value has ctlchar");
         }
         std::pair<std::string, std::vector<std::string> > pair =
             splitFieldLine(&line);
-        if (pair.first.empty()) {
-            throw ParseException("Error: field key is nothing");
+        if (pair.first.empty() || hasWhiteSpace(pair.first)) {
+            throw ParseException("Error: invalid field key");
         }
         _request.fields.addField(pair);
+    }
+    if (_request.fields.getFieldValue(fields::HOST).empty() ||
+        hasWhiteSpace(_request.fields.getFieldValue(fields::HOST)[0])) {
+        throw ParseException("Error: Host does not exist");
     }
 }
 

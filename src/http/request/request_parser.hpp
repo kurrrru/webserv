@@ -54,4 +54,6 @@ class RequestParser {
     ParseState _validatePos;
     std::time_t _time;
 };
+
+bool isDigitStr(const std::string& str);
 }  // namespace http
