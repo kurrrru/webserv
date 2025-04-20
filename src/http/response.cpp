@@ -1,10 +1,12 @@
 #include "response.hpp"
 
+#include <sys/socket.h>
+
 #include <string>
 #include <map>
 #include <sstream>
 #include <vector>
-#include <sys/socket.h>
+#include <utility>
 
 #include "../../toolbox/stepmark.hpp"
 
@@ -13,7 +15,7 @@ namespace http {
 Response::Response() : _status(200), _headers(), _body() {
 }
 Response::Response(const Response& other)
-    : _status(other._status), _headers(other._headers), _body(other._body) {
+: _status(other._status), _headers(other._headers), _body(other._body) {
 }
 Response& Response::operator=(const Response& other) {
     if (this != &other) {
@@ -31,16 +33,15 @@ void Response::setStatus(int code) {
 
 // - Content-Length can be calculated from the body size, so it is not
 //   necessary to set it explicitly.
-void Response::setHeader(const FieldName& name, const FieldContent& value,
-                          ResponseFlag enabled) {
+void Response::setHeader(const FieldName& name,
+const FieldContent& value, ResponseFlag enabled) {
     _headers[name] = std::make_pair(enabled, value);
 }
 
 // - Content-Length can be calculated from the body size, so it is not
 //   necessary to set it explicitly.
 void Response::setHeader(const FieldName& name,
-                          const std::vector<FieldContent>& values,
-                          ResponseFlag enabled) {
+const std::vector<FieldContent>& values, ResponseFlag enabled) {
     std::ostringstream oss;
     for (size_t i = 0; i < values.size(); ++i) {
         if (i > 0) oss << ", ";
@@ -60,7 +61,8 @@ void Response::sendResponse(int client_fd) const {
     const char* data = response.c_str();
 
     while (total_sent < to_send) {
-        ssize_t sent = send(client_fd, data + total_sent, to_send - total_sent, 0);
+        ssize_t sent = send(client_fd, data + total_sent,
+            to_send - total_sent, 0);
         if (sent <= 0) {
             std::ostringstream oss;
             oss << "Failed to send response:\n";
@@ -142,4 +144,4 @@ std::string Response::getStatusMessage(int code) const {
     }
 }
 
-} // namespace http
+}  // namespace http
