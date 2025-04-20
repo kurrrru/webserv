@@ -89,7 +89,6 @@ std::string Response::buildResponse() const {
     return oss.str();
 }
 
-// Refer to RFC9110
 std::string Response::getStatusMessage(int code) const {
     switch (code) {
         case 200: return "OK";
