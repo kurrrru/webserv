@@ -17,11 +17,143 @@ bool hasWhiteSpace(const std::string& str) {
     return false;
 }
 
+
+bool otherFieldLine() {
+    /*
+    対象のフィールドのリストに追加する
+    */
+}
+
+std::string ngx_http_read_request_header() {
+    /*
+    bufを読み込んで、CRLFが存在する場所までを切り取りreturnする
+    */
+}
+
+bool ngx_http_process_request_header() {
+    /*
+    ホストの確認
+    content-lengthの数値化
+    transfer-encodingの確認
+    同時にcontent-lengthを送ってきた場合
+    ログを残す
+    レスポンスの数値を設定 400
+    */
+}
+
+bool ngx_http_parse_request_line() {
+    /*
+    start:
+    method:
+    uri:
+    slash
+    schema
+    sw_http_09
+    */
+}
+
 void HTTPFields::initFieldsMap() {
     for (std::size_t i = 0; i < http::fields::FIELD_SIZE; ++i) {
-        _fieldsMap.insert(std::make_pair(http::fields::FIELDS[i],
-                                        std::vector<std::string>()));
+        _fieldsMap.insert(
+            std::make_pair(http::fields::FIELDS[i], FieldValue()));
+        }
     }
+
+bool HTTPFields::parse_header_line(const FieldPair& pair) {
+    if (pair.first.empty() || hasWhiteSpace(pair.first)) {
+        // response status 400 すぐに返す
+        return false;
+    }
+    if (pair.first == http::fields::HOST) {
+        hostFieldLine(pair);
+    } else if (pair.first == http::fields::CONTENT_LENGTH ||
+                pair.first == http::fields::TRANSFER_ENCODING) {
+        uniqueFieldLine(pair);
+    } else {
+        nomalFieldLine();
+    }
+}
+
+bool HTTPFields::hostFieldLine(const FieldPair& pair) {
+/*
+    ホストフィールドが存在するか確認
+        存在する場合
+            ログを残す
+            レスポンスの数値を設定  400
+        存在し無い場合
+            値のバリデート
+            フィールドに値を追加する
+*/
+    if (_fieldsMap.find(http::fields::HOST) != _fieldsMap.end()) {
+        // ログ記録
+        // レスポンス値設定
+        return false;
+    }
+    if (!validateHost(pair.second)) {
+        // ログ記録
+        return false;
+    }
+    _fieldsMap[pair.first] = pair.second;
+}
+
+bool HTTPFields::validateHost(const FieldValue& values) {
+    if (values.empty()) {
+        // 値がないログ
+        return false;
+    }
+    if (values.size() != 1) {
+        // 値が多すぎるログ
+        return false;
+    }
+    // 追加英数字以外を弾く
+    if (http::hasWhiteSpace(values[0])) {
+        // 無効な値ログ
+        return false;
+    }
+    return true;
+}
+
+bool HTTPFields::uniqueFieldLine(const FieldPair& pair) {
+    /*
+        対象のフィールドが存在するか確認
+            存在する場合
+                ログを残す
+                レスポンスの数値を設定  400
+            存在し無い場合
+                フィールドに値を追加する
+    */
+    FieldMap::iterator field = _fieldsMap.find(pair.first);
+    // 対象のフィールドが存在しない場合
+    if (field == _fieldsMap.end()) {
+        // ログ記録
+        return false;  // boolでは情報が足り無いかもしれ無いenum作る？
+    }
+    // 対象のフィールドが存在し、すでに値が設定されている
+    if (!field->second.empty()) {
+        // ログ記録
+        // レスポンス数値設定 400
+        return false;
+    }
+    field->second = pair.second;
+    return true;
+}
+
+bool HTTPFields::nomalFieldLine(const FieldPair& pair) {
+    /*
+    対象のフィールドが存在するか確認
+        存在する場合
+            追加する
+        存在し無い場合
+            ログ記録
+            無視する
+    */
+    FieldMap::iterator field = _fieldsMap.find(pair.first);
+    // 対象のフィールドが存在しない場合
+    if (field == _fieldsMap.end()) {
+        // ログ記録
+        return false;
+    }
+    for ()
 }
 
 bool HTTPFields::addField(const FieldPair& pair) {
@@ -65,6 +197,10 @@ bool HTTPFields::validateAllFields() {
     if (getFieldValue(http::fields::HOST).empty()) {
         return false;
     }
+    if (!getFieldValue(http::fields::CONTENT_LENGTH).empty() &&
+            !getFieldValue(http::fields::TRANSFER_ENCODING).empty()) {
+                return false;
+    }
     for (FieldMap::iterator it = _fieldsMap.begin();
             it != _fieldsMap.end(); ++it) {
         if (!it->second.empty() && !validateField(it->first, it->second)) {
@@ -87,13 +223,6 @@ bool HTTPFields::validateField(const std::string& key,
     } else if (toolbox::isEqualIgnoreCase(key, http::fields::HOST)) {
         // response status 400
         return validateHost(values);
-    }
-    return true;
-}
-
-bool HTTPFields::validateHost(const std::vector<std::string>& values) {
-    if (values.empty() || http::hasWhiteSpace(values[0])) {
-        return false;
     }
     return true;
 }
