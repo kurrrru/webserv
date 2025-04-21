@@ -19,7 +19,6 @@ int main() {
     response.setHeader("Server", "MyServer/1.0");
     response.setHeader("Date", "Wed, 21 Oct 2015 07:28:00 GMT");
     response.setHeader("Location", "http://example.com");
-    response.setHeader("Content-Length", "1234");
     response.setHeader("Content-Type", "text/html");
     response.setHeader("Connection", "keep-alive");
 
