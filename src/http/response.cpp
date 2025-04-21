@@ -68,6 +68,7 @@ void Response::sendResponse(int client_fd) const {
             oss << "Failed to send response:\n";
             oss << "  Sent: " << total_sent << "\n";
             oss << "  Total: " << to_send << "\n";
+            oss << "  Error: " << (sent == -1 ? "send() failed" : "Connection closed");
             throw std::runtime_error(oss.str());
         }
         total_sent += sent;
@@ -78,9 +79,10 @@ std::string Response::buildResponse() const {
     std::ostringstream oss;
     oss << "HTTP/1.1 " << _status << " " << getStatusMessage(_status) << "\r\n";
 
-    for (const auto& header : _headers) {
-        if (header.second.first) {
-            oss << header.first << ": " << header.second.second << "\r\n";
+    for (std::map<FieldName, HeaderField>::const_iterator header = _headers.begin();
+         header != _headers.end(); ++header) {
+        if (header->second.first) {
+            oss << header->first << ": " << header->second.second << "\r\n";
         }
     }
 
