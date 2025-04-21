@@ -6,7 +6,7 @@
 #include <string>
 #include <iostream>
 
-#include "../../src/http/response.hpp"
+#include "../../../src/http/response/response.hpp"
 
 int main() {
     // Create a Response object
