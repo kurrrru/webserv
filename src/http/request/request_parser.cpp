@@ -15,7 +15,7 @@ Parser utils
 
 bool hasCtlChar(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
-        if (std::iscntrl(str[i]) != 0) {
+        if (std::iscntrl(str[i])) {
             return true;
         }
     }
