@@ -150,6 +150,10 @@ void RequestParser::run(const std::string& buf) {
     parseRequestLine();
     parseFields();
     parseBody();
+    if (_validatePos == COMPLETED) {
+        _request.httpStatus = OK;
+        toolbox::logger::StepMark::info("Request parser: 200 OK");
+    }
 }
 
 void RequestParser::parseRequestLine() {
@@ -273,27 +277,27 @@ void RequestParser::parseFields() {
             break;
         }
         std::string line = toolbox::trim(&_buf, symbols::CRLF);
-        validateFieldLine(line);
+        validateFieldLine(line, _request.httpStatus);
         HTTPFields::FieldPair pair = splitFieldLine(&line);
-        if (!_request.fields.addField(pair)) {
-            // response state 400
-            throw ParseException("Error: bad request");
+        if (!_request.fields.parseHeaderLine(pair, _request.httpStatus)) {
+            throw ParseException("");
         }
     }
-    if (!_request.fields.validateAllFields()) {
-        // response state 400, 413(content-length > 8kb)
-        throw ParseException("Error: failed validateAllFields");
+    if (!_request.fields.validateRequestHeaders(_request.httpStatus)) {
+        throw ParseException("Error: failed validateRequestHeaders");
     }
 }
 
-void RequestParser::validateFieldLine(std::string& line) {
+void RequestParser::validateFieldLine(std::string& line, HttpStatus& hs) {
     if (hasCtlChar(line)) {
-        // response status 400
-        throw ParseException("Error: field line has ctl char");
+        hs = BAD_REQUEST;
+        toolbox::logger::StepMark::info("Field parse: line has CtlChar");
+        throw ParseException("");
     }
     if (line.size() > fields::MAX_FIELDLINE_SIZE) {
-        // response status 431
-        throw ParseException("Error: field line too long");
+        hs = FIELDS_TOO_LARGE;
+        toolbox::logger::StepMark::info("Field parse: line is too large");
+        throw ParseException("");
     }
 }
 
