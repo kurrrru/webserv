@@ -67,7 +67,7 @@ bool runTest(FieldTest& t) {
         if (t._isSuccessTest && compareFields(r, t)) {
             return true;
         } else {
-            std::cout << "==== Failed: false->true " \
+            std::cout << "==== Failed: false->true "
                 << t._name << " ====" << std::endl;
             std::cout << t._request;
             showField(r, t);
@@ -77,7 +77,7 @@ bool runTest(FieldTest& t) {
         if (!t._isSuccessTest) {
             return true;
         } else {
-            std::cout << "==== Failed: true->false " \
+            std::cout << "==== Failed: true->false "
                 << t._name << " ====" << std::endl;
             std::cout << e.what() << std::endl;
             std::cout << t._request;

@@ -12,8 +12,11 @@ namespace http {
 class HTTPRequest {
  public:
     struct Body {
-        Body() : isChunked(false), lastChunk(false),
-                    contentLength(0), recvedLength(0) {}
+        Body() :
+            isChunked(false),
+            lastChunk(false),
+            contentLength(0),
+            recvedLength(0) {}
         bool isChunked;
         bool lastChunk;
         std::string content;

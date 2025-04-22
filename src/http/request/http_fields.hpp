@@ -35,11 +35,11 @@ class HTTPFields {
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
 
-    bool hostFieldLine(FieldMap::iterator& taeget,
+    bool hostFieldLine(FieldMap::iterator& target,
                         const FieldPair& pair, HttpStatus& hs);
     bool uniqueFieldLine(FieldMap::iterator& target,
                         const FieldPair& pair, HttpStatus& hs);
-    void nomalFieldLine(FieldMap::iterator& target, const FieldPair& pair);
+    void normalFieldLine(FieldMap::iterator& target, const FieldPair& pair);
     bool validateHost(const FieldValue& values);
     bool validateHostExists(HttpStatus& hs);
     bool validateContentHeaders(HttpStatus& hs);

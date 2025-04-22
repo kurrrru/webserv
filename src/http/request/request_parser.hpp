@@ -60,5 +60,6 @@ class RequestParser {
 };
 
 bool hasCtlChar(const std::string& str);
+void logInfo(HttpStatus status, const std::string& message);
 
 }  // namespace http
