@@ -59,6 +59,9 @@ const char* HASH = "#";
 const char* SLASH = "/";
 const char* QUESTION = "?";
 const char* PERCENT = "%";
+const char* COLON = ":";
+const char* COMMA = ",";
+const char* COMMASP = ", ";
 }  // namespace symbols
 
 }  // namespace http

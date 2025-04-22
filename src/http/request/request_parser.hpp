@@ -10,13 +10,13 @@
 #include <cstdlib>
 
 #include "../../../toolbox/string.hpp"
-#include "http_request.hpp"
 #include "../http_namespace.hpp"
+#include "http_request.hpp"
 
 namespace http {
 class RequestParser {
  public:
- class ParseException : public std::exception {
+    class ParseException : public std::exception {
      public:
      explicit ParseException(const char* message);
      const char* what() const throw();
@@ -59,6 +59,6 @@ class RequestParser {
     std::time_t _time;
 };
 
-bool isDigitStr(const std::string& str);
-bool hasWhiteSpace(const std::string& str);
+bool hasCtlChar(const std::string& str);
+
 }  // namespace http

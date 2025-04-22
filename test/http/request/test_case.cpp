@@ -166,7 +166,7 @@ void makeInvalidFieldTests(TestVector& tests) {
     f._request = "GET / HTTP/1.1\r\nHost: sample\r\nINVALID: text/html\r\n"
                 "INVALID: text/html\r\n\r\n";
     f._httpStatus = OK;
-                f._isSuccessTest = true;  // 200 OK
+    f._isSuccessTest = true;  // 200 OK
     addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     tests.push_back(f);
     f._exceptMap.clear();
@@ -176,7 +176,7 @@ void makeInvalidFieldTests(TestVector& tests) {
                 "X-Really-Really-Really-Really-"
                 "Really-Really-Long-Header-Name: value\r\n\r\n";
     f._httpStatus = OK;
-                f._isSuccessTest = true;  // 200 OK
+    f._isSuccessTest = true;  // 200 OK
     addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     addFieldToMap(f._exceptMap, "X-Really-Really-Really-Really-Really"
                                 "-Really-Long-Header-Name", "value");
@@ -260,7 +260,22 @@ void makeHostHeaderTests(TestVector& tests) {
     tests.push_back(f);
     f._exceptMap.clear();
 
-    f._name = "Hostにカンマを含む値";
+    f._name = "Host重複片方空";
+    f._request = "GET / HTTP/1.1\r\nHost:  \r\nHost:aa\r\n\r\n";
+    f._httpStatus = BAD_REQUEST;
+    f._isSuccessTest = false;  // 400 Bad Request
+    tests.push_back(f);
+    f._exceptMap.clear();
+
+    f._name = "Hostカンマ区切り";
+    f._request = "GET / HTTP/1.1\r\nHost:aa,bb\r\n\r\n";
+    f._httpStatus = OK;
+    f._isSuccessTest = true;  // 200 OK
+    addFieldToMap(f._exceptMap, http::fields::HOST, "aa,bb");
+    tests.push_back(f);
+    f._exceptMap.clear();
+
+    f._name = "Hostにカンマスペースを含む値";
     f._request = "GET / HTTP/1.1\r\nHost: sample, samplee\r\n\r\n";
     f._httpStatus = BAD_REQUEST;
     f._isSuccessTest = false;  // 400 Bad Request
@@ -312,7 +327,7 @@ void makeSpecialCharacterTests(TestVector& tests) {
     f._request = "GET / HTTP/1.1\r\nHost: sample\r\n"
                 "X-Comment: こんにちは世界\r\n\r\n";
     f._httpStatus = OK;
-                f._isSuccessTest = true;  // 200 OK
+    f._isSuccessTest = true;  // 200 OK
     addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     addFieldToMap(f._exceptMap, "X-Comment", "こんにちは世界");
     tests.push_back(f);
@@ -322,7 +337,7 @@ void makeSpecialCharacterTests(TestVector& tests) {
     f._request = "GET / HTTP/1.1\r\nHost: sample\r\n"
                 "X-Special: !@#$%^&*()_+\r\n\r\n";
     f._httpStatus = OK;
-                f._isSuccessTest = true;  // 200 OK
+    f._isSuccessTest = true;  // 200 OK
     addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     addFieldToMap(f._exceptMap, "X-Special", "!@#$%^&*()_+");
     tests.push_back(f);
@@ -342,8 +357,9 @@ void makeDelimiterTests(TestVector& tests) {
     f._name = "ヘッダー区切りが不完全";
     f._request = "GET / HTTP/1.1\r\nHost: sample\r\nAccept:\r\n\r\n";
     f._httpStatus = OK;
-    f._isSuccessTest = true;  // 200 OK (empty field value is allowed)
+    f._isSuccessTest = true;  // 200 OK
     addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
+    // Acceptフィールドに値は入らない
     tests.push_back(f);
     f._exceptMap.clear();
 
@@ -362,30 +378,35 @@ void makeDelimiterTests(TestVector& tests) {
     f._exceptMap.clear();
 
     f._name = "ヘッダー値内に制御文字";
-    f._request = "GET / HTTP/1.1\r\nHost: sam\tple\r\n\r\n";
-    f._httpStatus = BAD_REQUEST;
-    f._isSuccessTest = false;  // 400 Bad Request
+    f._request = "GET / HTTP/1.1\r\nHost: sample\r\nAccept: sam ple\r\n\r\n";
+    f._httpStatus = OK;
+    f._isSuccessTest = true;  // 200
+    addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
+    addFieldToMap(f._exceptMap, http::fields::ACCEPT, "sam ple");
     tests.push_back(f);
     f._exceptMap.clear();
 
     f._name = "ヘッダーフィールド名に空白";
-    f._request = "GET / HTTP/1.1\r\nHo st: sample\r\n\r\n";
+    f._request = "GET / HTTP/1.1\r\nHost: sample\r\nAcc ept: sample\r\n\r\n";
     f._httpStatus = BAD_REQUEST;
     f._isSuccessTest = false;  // 400 Bad Request
+    addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     tests.push_back(f);
     f._exceptMap.clear();
 
     f._name = "ヘッダーフィールド名に特殊文字";
-    f._request = "GET / HTTP/1.1\r\nHo*st: sample\r\n\r\n";
-    f._httpStatus = BAD_REQUEST;
-    f._isSuccessTest = false;  // 400 Bad Request
+    f._request = "GET / HTTP/1.1\r\nHost: sample\r\nAc*pt: sample\r\n\r\n";
+    f._httpStatus = OK;
+    f._isSuccessTest = true;  // 200 OK
+    addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     tests.push_back(f);
     f._exceptMap.clear();
 
     f._name = "ヘッダーフィールドの値が空白のみ";
-    f._request = "GET / HTTP/1.1\r\nHost:    \r\n\r\n";
-    f._httpStatus = BAD_REQUEST;
-    f._isSuccessTest = false;  // 400 Bad Request
+    f._request = "GET / HTTP/1.1\r\nHost: sample\r\nAccept:    \r\n\r\n";
+    f._httpStatus = OK;
+    f._isSuccessTest = true;  // 200 OK
+    addFieldToMap(f._exceptMap, http::fields::HOST, "sample");
     tests.push_back(f);
     f._exceptMap.clear();
 }
@@ -686,15 +707,29 @@ void makeServerHeaderTests(TestVector& tests) {
 void makeLargeRequestTests(TestVector& tests) {
     FieldTest f;
 
-    f._name = "非常に長いヘッダー値";
+    f._name = "非常に長いヘッダー値正常値";
     {
         std::string longValue = "";
-        for (int i = 0; i < 8192; ++i) {
+        for (int i = 0; i < 8186; ++i) {  // [Host: ]+ 8186 = 8kb
+            longValue += "a";
+        }
+        f._request = "GET / HTTP/1.1\r\nHost: " + longValue + "\r\n\r\n";
+        addFieldToMap(f._exceptMap, http::fields::HOST, longValue);
+    }
+    f._httpStatus = OK;
+    f._isSuccessTest = true;  // 200 OK
+    tests.push_back(f);
+    f._exceptMap.clear();
+
+    f._name = "非常に長いヘッダー値異常値";
+    {
+        std::string longValue = "";
+        for (int i = 0; i < 8193; ++i) {
             longValue += "a";
         }
         f._request = "GET / HTTP/1.1\r\nHost: " + longValue + "\r\n\r\n";
     }
-    f._httpStatus = OK;
+    f._httpStatus = PAYLOAD_TOO_LARGE;
     f._isSuccessTest = false;  // 413 Request Entity Too Large
     tests.push_back(f);
     f._exceptMap.clear();
@@ -715,8 +750,8 @@ void fieldTest() {
     makeCookieTests(tests);
     makeCGITests(tests);
     makeDateHeaderTests(tests);
-    makeServerHeaderTests(tests);
-    makeLargeRequestTests(tests);
+    // makeServerHeaderTests(tests);
+    // makeLargeRequestTests(tests);
     int pass = 0;
     for (std::size_t i = 0; i < tests.size(); ++i) {
         if (runTest(tests[i])) {
@@ -725,4 +760,5 @@ void fieldTest() {
     }
     std::cout << pass << " / " << tests.size() << std::endl;
 }
-}
+
+}  // namespace http

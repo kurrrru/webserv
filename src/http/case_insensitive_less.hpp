@@ -4,6 +4,7 @@
 
 #include <string>
 
+namespace http {
 struct CaseInsensitiveLess {
     bool operator()(const std::string& lhs, const std::string& rhs) const {
         std::size_t len = lhs.size() < rhs.size() ? lhs.size() : rhs.size();
@@ -19,3 +20,5 @@ struct CaseInsensitiveLess {
         return lhs.size() < rhs.size();
     }
 };
+
+}  // namespace http

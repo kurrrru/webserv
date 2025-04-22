@@ -22,27 +22,9 @@ bool hasCtlChar(const std::string& str) {
     return false;
 }
 
-bool hasWhiteSpace(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (std::isspace(str[i])) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool isUppStr(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
         if (!std::isupper(str[i])) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool isDigitStr(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (!std::isdigit(str[i])) {
             return false;
         }
     }
@@ -83,24 +65,31 @@ bool isTraversalAttack(const std::string& path) {
 }
 
 void trimSpace(std::string &line) {
-    if (line.find(symbols::SP) == std::string::npos) {
+    if (line.empty()) {
         return;
     }
     std::size_t front_pos = line.find_first_not_of(symbols::SP);
+    // if all space string
+    if (front_pos == std::string::npos) {
+        line.clear();
+        return;
+    }
     std::size_t rear_pos = line.find_last_not_of(symbols::SP);
-    line = line.substr(front_pos, rear_pos);
+    line = line.substr(front_pos, rear_pos - front_pos + 1);
 }
 
-std::pair<std::string, std::vector<std::string> > splitFieldLine(
+HTTPFields::FieldPair splitFieldLine(
     std::string* line) {
-    std::size_t pos = line->find_first_of(':');
-    std::pair<std::string, std::vector<std::string> > pair;
+        HTTPFields::FieldPair pair;
+        std::size_t pos = line->find_first_of(symbols::COLON);
     if (pos != std::string::npos) {
-        pair.first = toolbox::trim(line, ":");
+        pair.first = toolbox::trim(line, symbols::COLON);
         while (!line->empty()) {
-            std::string value = toolbox::trim(line, ",");
+            std::string value = toolbox::trim(line, symbols::COMMASP);
             trimSpace(value);
-            pair.second.push_back(value);
+            if (!value.empty()) {
+                pair.second.push_back(value);
+            }
         }
     }
     return pair;
@@ -284,19 +273,19 @@ void RequestParser::parseFields() {
         }
     }
     if (!_request.fields.validateRequestHeaders(_request.httpStatus)) {
-        throw ParseException("Error: failed validateRequestHeaders");
+        throw ParseException("");
     }
 }
 
 void RequestParser::validateFieldLine(std::string& line, HttpStatus& hs) {
     if (hasCtlChar(line)) {
         hs = BAD_REQUEST;
-        toolbox::logger::StepMark::info("Field parse: line has CtlChar");
+        toolbox::logger::StepMark::info("Field parse[400]: line has CtlChar");
         throw ParseException("");
     }
     if (line.size() > fields::MAX_FIELDLINE_SIZE) {
         hs = FIELDS_TOO_LARGE;
-        toolbox::logger::StepMark::info("Field parse: line is too large");
+        toolbox::logger::StepMark::info("Field parse[400]: line is too large");
         throw ParseException("");
     }
 }
@@ -363,4 +352,5 @@ void RequestParser::parseChunkedEncoding() {
         _buf = _buf.substr(chunkSize + 2);
     }
 }
+
 }  // namespace http
