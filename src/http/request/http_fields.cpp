@@ -175,7 +175,7 @@ bool HTTPFields::validateContentLength(
             return false;
         }
     }
-    int64_t size = std::strtol(content_length->second[0].c_str(), NULL, 10);
+    std::size_t size = std::strtol(content_length->second[0].c_str(), NULL, 10);
     if (size > fields::MAX_BODY_SIZE) {
         logInfo(PAYLOAD_TOO_LARGE, "content-length is too large");
         hs = PAYLOAD_TOO_LARGE;
@@ -188,7 +188,7 @@ bool HTTPFields::validateTransferEncoding \
         (FieldMap::iterator& transfer_encoding, HttpStatus& hs) {
     for (std::size_t i = 0; i < transfer_encoding->second.size(); ++i) {
         if ("chunked" != transfer_encoding->second[i]) {
-            logInfo(NOT_IMPLEMENTED, "transfer-encoding has invalid velue");
+            logInfo(NOT_IMPLEMENTED, "transfer-encoding has invalid value");
             hs = NOT_IMPLEMENTED;
             return false;
         }
@@ -196,8 +196,8 @@ bool HTTPFields::validateTransferEncoding \
     return true;
 }
 
-std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
-    static std::vector<std::string> emptyVector;
+HTTPFields::FieldValue& HTTPFields::getFieldValue(const std::string& key) {
+    static HTTPFields::FieldValue emptyVector;
     if (_fieldsMap.find(key) != _fieldsMap.end()) {
         return _fieldsMap[key];
     }

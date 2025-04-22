@@ -43,7 +43,7 @@ extern const char* WWW_AUTHENTICATE;
 extern const char* FIELDS[];
 extern const std::size_t FIELD_SIZE;
 extern const std::size_t MAX_FIELDLINE_SIZE;
-extern const int MAX_BODY_SIZE;
+extern const std::size_t MAX_BODY_SIZE;
 }  // namespace fields
 
 namespace symbols {

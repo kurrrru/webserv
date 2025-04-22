@@ -31,7 +31,7 @@ class HTTPRequest {
         std::string fragment;
     };
 
-    HTTPRequest() : httpStatus(OK) {}
+    HTTPRequest() : httpStatus(http::OK) {}
     ~HTTPRequest() {}
 
     HttpStatus httpStatus;
