@@ -123,8 +123,6 @@ void HTTPFields::normalFieldLine(FieldMap::iterator& target,
 return;
 }
 
-
-
 bool HTTPFields::validateRequestHeaders(HttpStatus& hs) {
     if (!validateHostExists(hs)) {
         return false;
