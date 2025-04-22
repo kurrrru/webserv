@@ -20,7 +20,7 @@ void showField(RequestParser& r, FieldTest& t) {
         if (!it->second.empty()) {
             std::cout << "webserv: " << it->first << " ";
             for (std::size_t i = 0; i < it->second.size(); ++i) {
-                std::cout << it->second[i] << " ";
+                std::cout << it->second[i] << ", ";
             }
             std::cout << std::endl;
             HTTPFields::FieldMap::iterator it_t =
@@ -30,7 +30,7 @@ void showField(RequestParser& r, FieldTest& t) {
             }
             std::cout << "nginx  : " << it_t->first << " ";
             for (std::size_t i = 0; i < it_t->second.size(); ++i) {
-                std::cout << it_t->second[i] << " ";
+                std::cout << it_t->second[i] << ", ";
             }
             std::cout << std::endl;
         }
@@ -750,8 +750,8 @@ void fieldTest() {
     makeCookieTests(tests);
     makeCGITests(tests);
     makeDateHeaderTests(tests);
-    // makeServerHeaderTests(tests);
-    // makeLargeRequestTests(tests);
+    makeServerHeaderTests(tests);
+    makeLargeRequestTests(tests);
     int pass = 0;
     for (std::size_t i = 0; i < tests.size(); ++i) {
         if (runTest(tests[i])) {

@@ -38,66 +38,15 @@ bool isAlnumStr(const std::string& str) {
 namespace http {
 
 void HTTPFields::initFieldsMap() {
-    for (std::size_t i = 0; i < http::fields::FIELD_SIZE; ++i) {
+    for (std::size_t i = 0; i < fields::FIELD_SIZE; ++i) {
         _fieldsMap.insert(
-            std::make_pair(http::fields::FIELDS[i], FieldValue()));
+            std::make_pair(fields::FIELDS[i], FieldValue()));
         }
-}
-
-bool HTTPFields::validateRequestHeaders(HttpStatus& hs) {
-    if (_fieldsMap.find(http::fields::HOST)->second.empty()) {
-        toolbox::logger::StepMark::info("Field parse[400]: "
-                                        "host does not exist");
-        hs = BAD_REQUEST;
-        return false;
-    }
-    FieldMap::iterator content_length =
-        _fieldsMap.find(http::fields::CONTENT_LENGTH);
-    FieldMap::iterator transfer_encoding =
-        _fieldsMap.find(http::fields::TRANSFER_ENCODING);
-    if (!content_length->second.empty() && !transfer_encoding->second.empty()) {
-        toolbox::logger::StepMark::info("Field parse[400]: content-length and"
-            " transfer-encoding must not coexist");
-        hs = BAD_REQUEST;
-        return false;
-    } else if (!content_length->second.empty()) {
-        if (!isDigitStr(content_length->second[0])) {
-            toolbox::logger::StepMark::info("Field parse[400]: "
-                "content-length is not number");
-            hs = BAD_REQUEST;
-            return false;
-        }
-        for (std::size_t i = 1; i < content_length->second.size(); ++i) {
-            if (content_length->second[0] != content_length->second[i]) {
-                toolbox::logger::StepMark::info("Field parse[400]: "
-                    "content_length has multiple number");
-                hs = BAD_REQUEST;
-                return false;
-            }
-        }
-        int64_t size = std::strtol(content_length->second[0].c_str(), NULL, 10);
-        if (size > http::fields::MAX_BODY_SIZE) {
-            toolbox::logger::StepMark::info("Field parse[413]: "
-                "content-length is too large");
-            hs = PAYLOAD_TOO_LARGE;
-            return false;
-        }
-    } else if (!transfer_encoding->second.empty()) {
-        for (std::size_t i = 0; i < transfer_encoding->second.size(); ++i) {
-            if ("chunked" != transfer_encoding->second[i]) {
-                toolbox::logger::StepMark::info("Field parse[501]: "
-                    "transfer-encoding has invalid value");
-                hs = NOT_IMPLEMENTED;
-                return false;
-            }
-        }
-    }
-    return true;
 }
 
 bool HTTPFields::parseHeaderLine(const FieldPair& pair, HttpStatus& hs) {
     if (pair.first.empty() || hasWhiteSpace(pair.first) ||
-            http::hasCtlChar(pair.first)) {
+            hasCtlChar(pair.first)) {
         toolbox::logger::StepMark::info("Field parse[400]: "
             "invalid header field key");
             hs = BAD_REQUEST;
@@ -109,10 +58,10 @@ bool HTTPFields::parseHeaderLine(const FieldPair& pair, HttpStatus& hs) {
             "does not exist field key");
         return true;
     }
-    if (target->first == http::fields::HOST) {
+    if (target->first == fields::HOST) {
         return hostFieldLine(target, pair, hs);
-    } else if (target->first == http::fields::CONTENT_LENGTH ||
-        target->first == http::fields::TRANSFER_ENCODING) {
+    } else if (target->first == fields::CONTENT_LENGTH ||
+        target->first == fields::TRANSFER_ENCODING) {
         return uniqueFieldLine(target, pair, hs);
     } else {
         nomalFieldLine(target, pair);
@@ -120,8 +69,9 @@ bool HTTPFields::parseHeaderLine(const FieldPair& pair, HttpStatus& hs) {
     return true;
 }
 
+
 bool HTTPFields::hostFieldLine(FieldMap::iterator& target,
-        const FieldPair& pair, HttpStatus& hs) {
+    const FieldPair& pair, HttpStatus& hs) {
     if (!target->second.empty()) {
         toolbox::logger::StepMark::info("Field parse[400]: "
                                         "duplicate host field");
@@ -155,7 +105,7 @@ bool HTTPFields::validateHost(const FieldValue& values) {
 }
 
 bool HTTPFields::uniqueFieldLine(FieldMap::iterator& target,
-            const FieldPair& pair, HttpStatus& hs) {
+    const FieldPair& pair, HttpStatus& hs) {
     if (!target->second.empty()) {
         toolbox::logger::StepMark::info("Field parse[400]: " + pair.first
                                         + " is already set");
@@ -166,17 +116,99 @@ bool HTTPFields::uniqueFieldLine(FieldMap::iterator& target,
     return true;
 }
 
+
 void HTTPFields::nomalFieldLine(FieldMap::iterator& target,
-                                    const FieldPair& pair) {
+    const FieldPair& pair) {
     if (target == _fieldsMap.end()) {
         toolbox::logger::StepMark::info("Field parse[200]: " + pair.first
-                    + " not found field");
+        + " not found field");
         return;
     }
     for (std::size_t i = 0; i < pair.second.size(); ++i) {
         target->second.push_back(pair.second[i]);
     }
-    return;
+return;
+}
+
+
+
+bool HTTPFields::validateRequestHeaders(HttpStatus& hs) {
+    if (!validateHostExists(hs)) {
+        return false;
+    }
+    if (!validateContentHeaders(hs)) {
+        return false;
+    }
+    return true;
+}
+
+bool HTTPFields::validateHostExists(HttpStatus& hs) {
+    if (_fieldsMap.find(fields::HOST)->second.empty()) {
+        toolbox::logger::StepMark::info("Field parse[400]: "
+                                        "host does not exist");
+        hs = BAD_REQUEST;
+        return false;
+    }
+    return true;
+}
+
+bool HTTPFields::validateContentHeaders(HttpStatus& hs) {
+    FieldMap::iterator content_length =
+                        _fieldsMap.find(fields::CONTENT_LENGTH);
+    FieldMap::iterator transfer_encoding =
+                        _fieldsMap.find(fields::TRANSFER_ENCODING);
+    if (!content_length->second.empty() && !transfer_encoding->second.empty()) {
+        toolbox::logger::StepMark::info("Field parse[400]: content-length and"
+                                        " transfer-encoding must not coexist");
+        hs = BAD_REQUEST;
+        return false;
+    }
+    if (!content_length->second.empty()) {
+        return validateContentLength(content_length, hs);
+    }
+    if (!transfer_encoding->second.empty()) {
+        return validateTransferEncoding(transfer_encoding, hs);
+    }
+    return true;
+}
+
+bool HTTPFields::validateContentLength \
+        (FieldMap::iterator& content_length, HttpStatus& hs) {
+    if (!isDigitStr(content_length->second[0])) {
+        toolbox::logger::StepMark::info("Field parse[400]: "
+            "content-length is not number");
+        hs = BAD_REQUEST;
+        return false;
+    }
+    for (std::size_t i = 1; i < content_length->second.size(); ++i) {
+        if (content_length->second[0] != content_length->second[i]) {
+            toolbox::logger::StepMark::info("Field parse[400]: "
+                "content_length has multiple number");
+            hs = BAD_REQUEST;
+            return false;
+        }
+    }
+    int64_t size = std::strtol(content_length->second[0].c_str(), NULL, 10);
+    if (size > fields::MAX_BODY_SIZE) {
+        toolbox::logger::StepMark::info("Field parse[413]: "
+            "content-length is too large");
+        hs = PAYLOAD_TOO_LARGE;
+        return false;
+    }
+    return true;
+}
+
+bool HTTPFields::validateTransferEncoding \
+        (FieldMap::iterator& transfer_encoding, HttpStatus& hs) {
+    for (std::size_t i = 0; i < transfer_encoding->second.size(); ++i) {
+        if ("chunked" != transfer_encoding->second[i]) {
+            toolbox::logger::StepMark::info("Field parse[501]: "
+                "transfer-encoding has invalid value");
+            hs = NOT_IMPLEMENTED;
+            return false;
+        }
+    }
+    return true;
 }
 
 std::vector<std::string>& HTTPFields::getFieldValue(const std::string& key) {
