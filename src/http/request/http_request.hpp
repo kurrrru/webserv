@@ -25,7 +25,7 @@ class HTTPRequest {
         std::string path;
         std::string fullQuery;
         std::map<std::string, std::string> queryMap;
-        std::string fragment;  // client dependent
+        std::string fragment;
     };
 
     HTTPRequest() : httpStatus(OK) {}
@@ -42,4 +42,5 @@ class HTTPRequest {
     HTTPRequest(const HTTPRequest& other);
     HTTPRequest& operator=(const HTTPRequest& other);
 };
-}
+
+}  // namespace http
