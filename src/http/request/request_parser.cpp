@@ -22,6 +22,11 @@ bool hasCtlChar(const std::string& str) {
     return false;
 }
 
+void logInfo(HttpStatus status, const std::string& message) {
+    toolbox::logger::StepMark::info("HTTP " +
+        toolbox::to_string(static_cast<int>(status)) + ": " + message);
+}
+
 bool isUppStr(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
         if (!std::isupper(str[i])) {
@@ -69,7 +74,6 @@ void trimSpace(std::string &line) {
         return;
     }
     std::size_t front_pos = line.find_first_not_of(symbols::SP);
-    // if all space string
     if (front_pos == std::string::npos) {
         line.clear();
         return;
@@ -140,8 +144,8 @@ void RequestParser::run(const std::string& buf) {
     parseFields();
     parseBody();
     if (_validatePos == COMPLETED) {
+        logInfo(OK, "OK");
         _request.httpStatus = OK;
-        toolbox::logger::StepMark::info("Request parser: 200 OK");
     }
 }
 
@@ -280,12 +284,12 @@ void RequestParser::parseFields() {
 void RequestParser::validateFieldLine(std::string& line, HttpStatus& hs) {
     if (hasCtlChar(line)) {
         hs = BAD_REQUEST;
-        toolbox::logger::StepMark::info("Field parse[400]: line has CtlChar");
+        logInfo(BAD_REQUEST, "line has CtlChar");
         throw ParseException("");
     }
     if (line.size() > fields::MAX_FIELDLINE_SIZE) {
         hs = FIELDS_TOO_LARGE;
-        toolbox::logger::StepMark::info("Field parse[400]: line is too large");
+        logInfo(FIELDS_TOO_LARGE, "line is too long");
         throw ParseException("");
     }
 }

@@ -6,7 +6,6 @@ namespace http {
 void fieldTest();
 }
 
-// グローバルスコープのmain関数
 int main(void) {
     toolbox::logger::StepMark::setLogFile("field_test.log");
     toolbox::logger::StepMark::setLevel(toolbox::logger::DEBUG);
