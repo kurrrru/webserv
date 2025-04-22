@@ -9,10 +9,13 @@
 #include <vector>
 
 #include "../../../toolbox/string.hpp"
+#include "../../../toolbox/stepmark.hpp"
 #include "../case_insensitive_less.hpp"
 #include "../http_namespace.hpp"
+#include "../http_status.hpp"
 
-class HTTPFields {  // will change Request class
+namespace http {
+class HTTPFields {
  public:
     typedef std::string FieldKey;
     typedef std::vector<std::string> FieldValue;
@@ -22,11 +25,8 @@ class HTTPFields {  // will change Request class
     HTTPFields() {}
     ~HTTPFields() {}
     void initFieldsMap();
-    bool parse_header_line(const FieldPair& pair);
-    bool addField(const FieldPair& pair);
-    bool validateField(const std::string& key,
-            const FieldValue& values);
-    bool validateAllFields();
+    bool parseHeaderLine(const FieldPair& pair, HttpStatus& hs);
+    bool validateRequestHeaders(HttpStatus& hs);
 
     FieldValue& getFieldValue(const std::string& key);
     FieldMap& get();
@@ -35,13 +35,12 @@ class HTTPFields {  // will change Request class
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
 
-    bool hostFieldLine(const FieldPair& pair);
-    bool uniqueFieldLine(const FieldPair& pair);
-    bool nomalFieldLine(const FieldPair& pair);
-
-    bool isValidFieldKey(const std::string& key);
-    bool isValidFieldValue(const std::string& value);
-    bool validateContentLength(const std::vector<std::string>& values);
-    bool validateHost(const std::vector<std::string>& values);
+    bool hostFieldLine(FieldMap::iterator& taeget,
+            const FieldPair& pair, HttpStatus& hs);
+    bool uniqueFieldLine(FieldMap::iterator& target,
+            const FieldPair& pair, HttpStatus& hs);
+    void nomalFieldLine(FieldMap::iterator& target, const FieldPair& pair);
+    bool validateHost(const FieldValue& values);
     FieldMap _fieldsMap;
 };
+}

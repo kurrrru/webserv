@@ -16,16 +16,15 @@
 namespace http {
 class RequestParser {
  public:
-    RequestParser() : _validatePos(REQUEST_LINE), _time(0) {}
-    ~RequestParser() {}
-    class ParseException : public std::exception {
+ class ParseException : public std::exception {
      public:
-        explicit ParseException(const char* message);
-        const char* what() const throw();
+     explicit ParseException(const char* message);
+     const char* what() const throw();
 
      private:
-        const char* _message;
+     const char* _message;
     };
+
     enum ParseState {
         REQUEST_LINE  = 0,
         HEADERS     = 1,
@@ -33,18 +32,22 @@ class RequestParser {
         COMPLETED   = 3,
         ERROR       = 4
     };
+
+    RequestParser() : _validatePos(REQUEST_LINE), _time(0) {}
+    ~RequestParser() {}
     void run(const std::string& buf);
     HTTPRequest& get() { return _request; }
 
  private:
     RequestParser(const RequestParser& other);
     RequestParser& operator=(const RequestParser& other);
+
     void parseRequestLine();
     void parseURI();
     void parseFields();
     void parseBody();
     void parseChunkedEncoding();
-    void validateFieldLine(std::string& line);
+    void validateFieldLine(std::string& line, HttpStatus& hs);
     void validateMethod();
     void validateURI();
     void validateVersion();

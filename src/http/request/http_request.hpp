@@ -6,7 +6,9 @@
 #include <map>
 
 #include "http_fields.hpp"
+#include "../http_status.hpp"
 
+namespace http {
 class HTTPRequest {
  public:
     struct Body {
@@ -26,9 +28,10 @@ class HTTPRequest {
         std::string fragment;  // client dependent
     };
 
-    HTTPRequest() {}
+    HTTPRequest() : httpStatus(OK) {}
     ~HTTPRequest() {}
 
+    HttpStatus httpStatus;
     std::string method;
     URI uri;
     std::string version;
@@ -39,3 +42,4 @@ class HTTPRequest {
     HTTPRequest(const HTTPRequest& other);
     HTTPRequest& operator=(const HTTPRequest& other);
 };
+}
