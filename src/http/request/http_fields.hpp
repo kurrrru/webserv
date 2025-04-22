@@ -38,9 +38,16 @@ class HTTPFields {
     bool hostFieldLine(FieldMap::iterator& taeget,
                         const FieldPair& pair, HttpStatus& hs);
     bool uniqueFieldLine(FieldMap::iterator& target,
-                            const FieldPair& pair, HttpStatus& hs);
+                        const FieldPair& pair, HttpStatus& hs);
     void nomalFieldLine(FieldMap::iterator& target, const FieldPair& pair);
     bool validateHost(const FieldValue& values);
+    bool validateHostExists(HttpStatus& hs);
+    bool validateContentHeaders(HttpStatus& hs);
+    bool validateContentLength
+                        (FieldMap::iterator& content_length, HttpStatus& hs);
+    bool validateTransferEncoding
+                        (FieldMap::iterator& transfer_encoding, HttpStatus& hs);
+
     FieldMap _fieldsMap;
 };
 
