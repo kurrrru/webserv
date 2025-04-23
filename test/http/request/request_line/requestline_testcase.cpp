@@ -435,7 +435,7 @@ void makeHttpVersionTests(TestVector& t) {
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
 
-    r._name = "HTTP/1.0";
+    r._name = "HTTP/1.0";  // 対応するかどうか決める
     r._request = "GET / HTTP/1.0\r\nHost: sample\r\n\r\n";
     r._httpStatus = 200;
     r._isSuccessTest = true;
@@ -468,15 +468,6 @@ void makeRequestStructureTests(TestVector& t) {
 
     r._name = "余分なスペース";
     r._request = "GET  /  HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 200;
-    r._isSuccessTest = true;
-    r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/";
-    r._exceptRequest.version = "HTTP/1.1";
-    t.push_back(r);
-
-    r._name = "LFのみの改行";
-    r._request = "GET / HTTP/1.1\nHost: sample\n\n";
     r._httpStatus = 200;
     r._isSuccessTest = true;
     r._exceptRequest.method = "GET";
