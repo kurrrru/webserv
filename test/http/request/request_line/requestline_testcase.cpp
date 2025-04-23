@@ -121,12 +121,6 @@ void makeMethodTests(TestVector& t) {
     r._isSuccessTest = false;
     t.push_back(r);
 
-    r._name = "メソッド%エンコーディング";
-    r._request = "%47%45%54 / HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 400;  // Bad Request
-    r._isSuccessTest = false;
-    t.push_back(r);
-
     r._name = "空のメソッド";
     r._request = " / HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 400;  // Bad Request
@@ -173,7 +167,7 @@ void makePathTests(TestVector& t) {
     t.push_back(r);
 
     std::string longPath = "/";
-    for (int i = 0; i < 2000; ++i) {
+    for (int i = 0; i < 8192; ++i) {
         longPath += "a";
     }
     r._name = "非常に長いURI";  // 8kb8192made
@@ -189,12 +183,6 @@ void makeDirectoryTraversalTests(TestVector& t) {
 
     r._name = "基本的なディレクトリトラバーサル";
     r._request = "GET /../etc/passwd HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
-    r._isSuccessTest = false;
-    t.push_back(r);
-
-    r._name = "エンコードされたディレクトリトラバーサル";
-    r._request = "GET /%2e%2e/etc/passwd HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 403;  // Forbidden
     r._isSuccessTest = false;
     t.push_back(r);
@@ -216,20 +204,6 @@ void makeDirectoryTraversalTests(TestVector& t) {
     r._name = "バックスラッシュを使用したディレクトリトラバーサル";
     r._request = "GET /..\\..\\etc\\passwd HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 403;  // Forbidden
-    r._isSuccessTest = false;
-    t.push_back(r);
-
-    r._name = "NULLバイトを使用したディレクトリトラバーサル";
-    r._request = "GET /public/%00/../../../etc/passwd HTTP/1.1\r\n"
-                    "Host: sample\r\n\r\n";
-    r._httpStatus = 400;  // Bad Request
-    r._isSuccessTest = false;
-    t.push_back(r);
-
-    r._name = "パスの途中にNULLバイトを含むディレクトリトラバーサル";
-    r._request = "GET /../../etc/passwd%00.html HTTP/1.1\r\n"
-                    "Host: sample\r\n\r\n";
-    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 }
@@ -309,15 +283,6 @@ void makePathNormalizationTests(TestVector& t) {
     r._exceptRequest.path = "/a/c/d/e";
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
-
-    r._name = "エンコードされたスラッシュと現在ディレクトリ";
-    r._request = "GET /a%2F.%2Fb HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 200;
-    r._isSuccessTest = true;
-    r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/a/.b";
-    r._exceptRequest.version = "HTTP/1.1";
-    t.push_back(r);
 }
 
 void makeMultipleDotPathTests(TestVector& t) {
@@ -386,15 +351,6 @@ void makeMultipleDotPathTests(TestVector& t) {
     r._exceptRequest.path = "/a.../b.../c.../index.html";
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
-
-    r._name = "URLエンコードされた複数ドット";
-    r._request = "GET /%2E%2E%2E HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 200;
-    r._isSuccessTest = true;
-    r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/...";
-    r._exceptRequest.version = "HTTP/1.1";
-    t.push_back(r);
 }
 
 void makeQueryParameterTests(TestVector& t) {
@@ -422,17 +378,6 @@ void makeQueryParameterTests(TestVector& t) {
     r._exceptRequest.queryVec.push_back(QueryPair("q", "test"));
     r._exceptRequest.queryVec.push_back(QueryPair("page", "1"));
     r._exceptRequest.queryVec.push_back(QueryPair("limit", "10"));
-    t.push_back(r);
-    r._exceptRequest.queryVec.clear();
-
-    r._name = "URLエンコード";
-    r._request = "GET /search?q=hello%20world HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 200;
-    r._isSuccessTest = true;
-    r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/search";
-    r._exceptRequest.version = "HTTP/1.1";
-    r._exceptRequest.queryVec.push_back(QueryPair("q", "hello world"));
     t.push_back(r);
     r._exceptRequest.queryVec.clear();
 
@@ -548,6 +493,282 @@ void makeRequestStructureTests(TestVector& t) {
     t.push_back(r);
 }
 
+void makePercentEncodingTests(TestVector& t) {
+    RequestLineTest r;
+
+    r._name = "基本的なパーセントエンコーディング";
+    r._request = "GET /hello%20world HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/hello world";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "エンコードされたGETメソッド";
+    r._request = "%47%45%54 /index.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "部分的にエンコードされたPOSTメソッド";
+    r._request = "P%4FST /form.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "空白文字をエンコードしたメソッド";
+    r._request = "GET%20 /index.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "パーセントエンコーディングされた特殊文字";
+    r._request = "GET /file%3Fname%3Dvalue%26id%3D123 HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/file?name=value&id=123";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "URLとクエリ文字列両方にエンコーディング";
+    r._request = "GET /search%20page?q=hello%20world&lang=ja%2Den HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/search page";
+    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.queryVec.push_back(QueryPair("q", "hello world"));
+    r._exceptRequest.queryVec.push_back(QueryPair("lang", "ja-en"));
+    t.push_back(r);
+    r._exceptRequest.queryVec.clear();
+
+    r._name = "16進数の大文字小文字混在";
+    r._request = "GET /test%2a%2A%2d%2D HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/test**--";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "複数バイト文字のエンコーディング";
+    r._request = "GET /%E6%97%A5%E6%9C%AC%E8%AA%9E HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/日本語";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "エンコーディングされたスラッシュ";
+    r._request = "GET /path1%2Fpath2%2Ffile.html HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/path1/path2/file.html";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "エンコーディングされたドット";
+    r._request = "GET /path1%2E%2Epath2%2Efile%2Ehtml HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/path1..path2.file.html";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "パーセント記号自体のエンコーディング";
+    r._request = "GET /discount%2550%25 HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/discount%50%";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "不完全なパーセントエンコーディング（16進数1桁）";
+    r._request = "GET /test%3 HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "パーセント記号の後に16進数以外の文字";
+    r._request = "GET /test%XY HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "エンコーディングされたNULL文字";
+    r._request = "GET /test%00.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "エンコーディングされた制御文字";
+    r._request = "GET /test%0A%0D.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "エンコードされたディレクトリトラバーサル";
+    r._request = "GET /%252e%252e/%252e%252e/etc/passwd HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 403;  // Forbidden
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "UTF-8のオーバーロングエンコーディング";
+    r._request = "GET /%C0%AE%C0%AE/etc/passwd HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "クエリ文字列内の+記号（スペースを表す）";
+    r._request = "GET /search?q=hello+world HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/search";
+    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.queryVec.push_back(QueryPair("q", "hello world"));
+    t.push_back(r);
+    r._exceptRequest.queryVec.clear();
+
+    r._name = "パス内の+記号（+記号そのもの）";
+    r._request = "GET /file+name.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/file+name.html";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "エンコードされたURLスキーム";
+    r._request = "GET /redirect?url=http%3A%2F%2Fexample.com HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/redirect";
+    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.queryVec.push_back(QueryPair("url", "http://example.com"));
+    t.push_back(r);
+    r._exceptRequest.queryVec.clear();
+
+    std::string longEncodedPath = "/";
+    for (int i = 0; i < 1000; ++i) {
+        longEncodedPath += "%41";
+    }
+    r._name = "非常に長いエンコードされたパス";
+    r._request = "GET " + longEncodedPath + " HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 414;  // URI Too Long
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "エンコードされたリクエストラインの全要素";
+    r._request = "%47%45%54 %2F%69%6E%64%65%78%2E%68%74%6D%6C "
+                    "%48%54%54%50%2F%31%2E%31\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "エンコードされた日本語のパス";
+    r._request = "GET /%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB.html HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/ファイル.html";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "パス中の特殊文字の複合エンコーディング";
+    r._request = "GET /path/%3C%3E%22%27%60%7B%7D%5B%5D%5C%7C "
+                    "HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/path/<>\"'`{}[]\\|";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "URIエンコードされたディレクトリ区切り文字の特殊ケース";
+    r._request = "GET /dir%2F..%2Fsecret.txt HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 403;  // Forbidden
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "マルチレベルエンコードURIのディレクトリトラバーサル";
+    r._request = "GET /safe/..%252F..%252F..%252Fetc%252Fpasswd HTTP/1.1\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 403;  // Forbidden
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "Unicode正規化考慮のURI";
+    r._request = "GET /caf%C3%A9.html HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/café.html";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "エンコードされたHTTPバージョン";
+    r._request = "GET /index.html %48%54%54%50%2F%31%2E%31\r\n"
+                    "Host: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "部分的にエンコードされたHTTPバージョン";
+    r._request = "GET /index.html HTTP%2F1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "数字をエンコードしたHTTPバージョン";
+    r._request = "GET /index.html HTTP/%31.%31\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "複合的なエンコーディングケース";
+    r._request = "GET /path%20with%20spaces.php?param=%22quoted%22&japanese"
+            "=%E6%97%A5%E6%9C%AC%E8%AA%9E HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/path with spaces.php";
+    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.queryVec.push_back(QueryPair("param", "\"quoted\""));
+    r._exceptRequest.queryVec.push_back(QueryPair("japanese", "日本語"));
+    t.push_back(r);
+    r._exceptRequest.queryVec.clear();
+
+    r._name = "混合エンコーディングスキーム";
+    r._request = "GET /path/with/mixed%20encoding+and+plus?"
+                "q=test%20query+with+spaces HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/path/with/mixed encoding+and+plus";
+    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.queryVec.push_back(
+                                QueryPair("q", "test query with spaces"));
+    t.push_back(r);
+    r._exceptRequest.queryVec.clear();
+}
+
 void requestLineTest() {
     TestVector tests;
     makeMethodTests(tests);
@@ -558,6 +779,7 @@ void requestLineTest() {
     makeQueryParameterTests(tests);
     makeHttpVersionTests(tests);
     makeRequestStructureTests(tests);
+    makePercentEncodingTests(tests);
 
     int pass = 0;
     for (std::size_t i = 0; i < tests.size(); ++i) {
