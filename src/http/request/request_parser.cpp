@@ -288,8 +288,8 @@ void RequestParser::validateFieldLine(std::string& line, HttpStatus& hs) {
         throw ParseException("");
     }
     if (line.size() > fields::MAX_FIELDLINE_SIZE) {
-        hs = FIELDS_TOO_LARGE;
-        logInfo(FIELDS_TOO_LARGE, "line is too long");
+        hs = BAD_REQUEST;
+        logInfo(BAD_REQUEST, "line is too long");
         throw ParseException("");
     }
 }
