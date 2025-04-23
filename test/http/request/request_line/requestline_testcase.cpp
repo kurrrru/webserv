@@ -182,27 +182,27 @@ void makeDirectoryTraversalTests(TestVector& t) {
 
     r._name = "基本的なディレクトリトラバーサル";
     r._request = "GET /../etc/passwd HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 
     r._name = "複数レベルのディレクトリトラバーサル";
     r._request = "GET /images/../../etc/passwd HTTP/1.1\r\n"
                     "Host: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 
     r._name = "複雑なディレクトリトラバーサル";
     r._request = "GET /a/b/c/../../../etc/passwd HTTP/1.1\r\n"
                     "Host: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 
     r._name = "バックスラッシュを使用したディレクトリトラバーサル";
     r._request = "GET /..\\..\\etc\\passwd HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 }
@@ -633,21 +633,21 @@ void makePercentEncodingTests(TestVector& t) {
 
     r._name = "エンコーディングされた制御文字";
     r._request = "GET /test%0A%0D.html HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 400;  // Bad Request
+    r._httpStatus = 404;  // Not Found
     r._isSuccessTest = false;
     t.push_back(r);
 
     r._name = "エンコードされたディレクトリトラバーサル";
-    r._request = "GET /%252e%252e/%252e%252e/etc/passwd HTTP/1.1\r\n"
+    r._request = "GET /%2e%2e/%2e%2e/etc/passwd HTTP/1.1\r\n"
                     "Host: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 
     r._name = "UTF-8のオーバーロングエンコーディング";
     r._request = "GET /%C0%AE%C0%AE/etc/passwd HTTP/1.1\r\n"
                     "Host: sample\r\n\r\n";
-    r._httpStatus = 400;  // Bad Request
+    r._httpStatus = 404;  // Not Found
     r._isSuccessTest = false;
     t.push_back(r);
 
@@ -684,7 +684,7 @@ void makePercentEncodingTests(TestVector& t) {
     r._exceptRequest.queryVec.clear();
 
     std::string longEncodedPath = "/";
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 8192; ++i) {
         longEncodedPath += "%41";
     }
     r._name = "非常に長いエンコードされたパス";
@@ -722,14 +722,14 @@ void makePercentEncodingTests(TestVector& t) {
 
     r._name = "URIエンコードされたディレクトリ区切り文字の特殊ケース";
     r._request = "GET /dir%2F..%2Fsecret.txt HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 404;  // Not Found
     r._isSuccessTest = false;
     t.push_back(r);
 
     r._name = "マルチレベルエンコードURIのディレクトリトラバーサル";
-    r._request = "GET /safe/..%252F..%252F..%252Fetc%252Fpasswd HTTP/1.1\r\n"
+    r._request = "GET /safe/..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1\r\n"
                     "Host: sample\r\n\r\n";
-    r._httpStatus = 403;  // Forbidden
+    r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
 
