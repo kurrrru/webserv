@@ -22,6 +22,11 @@ bool hasCtlChar(const std::string& str) {
     return false;
 }
 
+void logInfo(HttpStatus status, const std::string& message) {
+    toolbox::logger::StepMark::info("HTTP " +
+        toolbox::to_string(static_cast<int>(status)) + ": " + message);
+}
+
 bool isUppStr(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
         if (!std::isupper(str[i])) {
@@ -64,13 +69,32 @@ bool isTraversalAttack(const std::string& path) {
     return false;
 }
 
-std::pair<std::string, std::vector<std::string> > splitFieldLine(
+void trimSpace(std::string &line) {
+    if (line.empty()) {
+        return;
+    }
+    std::size_t front_pos = line.find_first_not_of(symbols::SP);
+    if (front_pos == std::string::npos) {
+        line.clear();
+        return;
+    }
+    std::size_t rear_pos = line.find_last_not_of(symbols::SP);
+    line = line.substr(front_pos, rear_pos - front_pos + 1);
+}
+
+HTTPFields::FieldPair splitFieldLine(
     std::string* line) {
-    std::size_t pos = line->find_first_of(':');
-    std::pair<std::string, std::vector<std::string> > pair;
+        HTTPFields::FieldPair pair;
+        std::size_t pos = line->find_first_of(symbols::COLON);
     if (pos != std::string::npos) {
-        pair.first = toolbox::trim(line, ": ");
-        pair.second.push_back(*line);
+        pair.first = toolbox::trim(line, symbols::COLON);
+        while (!line->empty()) {
+            std::string value = toolbox::trim(line, symbols::COMMASP);
+            trimSpace(value);
+            if (!value.empty()) {
+                pair.second.push_back(value);
+            }
+        }
     }
     return pair;
 }
@@ -97,8 +121,6 @@ void splitQuery(std::map<std::string, std::string>* queryMap,
 }
 
 bool isChunkedEncoding(HTTPRequest* request) {
-    std::vector<std::string>& chunked =
-        request->fields.getFieldValue(fields::TRANSFER_ENCODING);
     return (
         !(request->fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
         *(request->fields.getFieldValue(fields::TRANSFER_ENCODING).begin()) ==
@@ -121,6 +143,10 @@ void RequestParser::run(const std::string& buf) {
     parseRequestLine();
     parseFields();
     parseBody();
+    if (_validatePos == COMPLETED) {
+        logInfo(OK, "OK");
+        _request.httpStatus = OK;
+    }
 }
 
 void RequestParser::parseRequestLine() {
@@ -230,34 +256,41 @@ void RequestParser::validateVersion() {
 }
 
 void RequestParser::parseFields() {
-    if (_validatePos != HEADERS) {
+    if (_validatePos != HEADERS ||
+            _buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
-    if (_buf.find(symbols::CRLF) == std::string::npos) {
-        return;
-    }
-    if (!_request.fields.get().empty()) {
+    if (_request.fields.get().empty()) {
         _request.fields.initFieldsMap();
     }
-    while (true) {
+    while (_buf.find(symbols::CRLF) != std::string::npos) {
         if (_buf.find(symbols::CRLF) == 0) {
             _validatePos = BODY;
             _buf = _buf.substr(sizeof(*symbols::CRLF));
-            return;
-        }
-        if (_buf.find(symbols::CRLF) == std::string::npos) {
-            return;
+            break;
         }
         std::string line = toolbox::trim(&_buf, symbols::CRLF);
-        if (hasCtlChar(line)) {
-            throw ParseException("Error: field value has ctlchar");
+        validateFieldLine(line, _request.httpStatus);
+        HTTPFields::FieldPair pair = splitFieldLine(&line);
+        if (!_request.fields.parseHeaderLine(pair, _request.httpStatus)) {
+            throw ParseException("");
         }
-        std::pair<std::string, std::vector<std::string> > pair =
-            splitFieldLine(&line);
-        if (pair.first.empty() || pair.second.empty() ||
-                !_request.fields.addField(pair)) {
-            throw ParseException("Error: field value dup or nothing");  // error
-        }
+    }
+    if (!_request.fields.validateRequestHeaders(_request.httpStatus)) {
+        throw ParseException("");
+    }
+}
+
+void RequestParser::validateFieldLine(std::string& line, HttpStatus& hs) {
+    if (hasCtlChar(line)) {
+        hs = BAD_REQUEST;
+        logInfo(BAD_REQUEST, "line has CtlChar");
+        throw ParseException("");
+    }
+    if (line.size() > fields::MAX_FIELDLINE_SIZE) {
+        hs = BAD_REQUEST;
+        logInfo(BAD_REQUEST, "line is too long");
+        throw ParseException("");
     }
 }
 
@@ -323,4 +356,5 @@ void RequestParser::parseChunkedEncoding() {
         _buf = _buf.substr(chunkSize + 2);
     }
 }
+
 }  // namespace http

@@ -6,12 +6,17 @@
 #include <map>
 
 #include "http_fields.hpp"
+#include "../http_status.hpp"
 
+namespace http {
 class HTTPRequest {
  public:
     struct Body {
-        Body() : isChunked(false), lastChunk(false),
-                    contentLength(0), recvedLength(0) {}
+        Body() :
+            isChunked(false),
+            lastChunk(false),
+            contentLength(0),
+            recvedLength(0) {}
         bool isChunked;
         bool lastChunk;
         std::string content;
@@ -23,12 +28,13 @@ class HTTPRequest {
         std::string path;
         std::string fullQuery;
         std::map<std::string, std::string> queryMap;
-        std::string fragment;  // client dependent
+        std::string fragment;
     };
 
-    HTTPRequest() {}
+    HTTPRequest() : httpStatus(http::OK) {}
     ~HTTPRequest() {}
 
+    HttpStatus httpStatus;
     std::string method;
     URI uri;
     std::string version;
@@ -39,3 +45,5 @@ class HTTPRequest {
     HTTPRequest(const HTTPRequest& other);
     HTTPRequest& operator=(const HTTPRequest& other);
 };
+
+}  // namespace http

@@ -45,6 +45,8 @@ AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
 SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE
 };
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
+const std::size_t MAX_FIELDLINE_SIZE = 8192;
+const std::size_t MAX_BODY_SIZE = 1048576;
 }  // namespace fields
 
 namespace symbols {
@@ -57,6 +59,9 @@ const char* HASH = "#";
 const char* SLASH = "/";
 const char* QUESTION = "?";
 const char* PERCENT = "%";
+const char* COLON = ":";
+const char* COMMA = ",";
+const char* COMMASP = ", ";
 }  // namespace symbols
 
 }  // namespace http
