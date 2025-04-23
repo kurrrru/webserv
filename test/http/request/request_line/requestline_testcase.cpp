@@ -131,7 +131,7 @@ void makeMethodTests(TestVector& t) {
 void makePathTests(TestVector& t) {
     RequestLineTest r;
 
-    r._name = "基本的なルートパス";
+    r._name = "基本的なパス";
     r._request = "GET / HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 200;
     r._isSuccessTest = true;
@@ -170,14 +170,13 @@ void makePathTests(TestVector& t) {
     for (int i = 0; i < 8192; ++i) {
         longPath += "a";
     }
-    r._name = "非常に長いURI";  // 8kb8192made
+    r._name = "非常に長いURI";  // 8kb8192
     r._request = "GET " + longPath + " HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 414;  // URI Too Long
     r._isSuccessTest = false;
     t.push_back(r);
 }
 
-// ディレクトリトラバーサル攻撃に対するテストケース
 void makeDirectoryTraversalTests(TestVector& t) {
     RequestLineTest r;
 
@@ -367,6 +366,17 @@ void makeQueryParameterTests(TestVector& t) {
     t.push_back(r);
     r._exceptRequest.queryVec.clear();
 
+    r._name = "クエリパラメータ?連続";
+    r._request = "GET /search???q=test HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/search";
+    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.queryVec.push_back(QueryPair("??q", "test"));
+    t.push_back(r);
+    r._exceptRequest.queryVec.clear();
+
     r._name = "複数クエリパラメータ";
     r._request = "GET /search?q=test&page=1&limit=10 HTTP/1.1\r\n"
                     "Host: sample\r\n\r\n";
@@ -502,6 +512,15 @@ void makePercentEncodingTests(TestVector& t) {
     r._isSuccessTest = true;
     r._exceptRequest.method = "GET";
     r._exceptRequest.path = "/hello world";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "?パーセントエンコーディング";
+    r._request = "GET /hello%3fworld HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/hello?world";
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
 
@@ -755,7 +774,7 @@ void makePercentEncodingTests(TestVector& t) {
     t.push_back(r);
     r._exceptRequest.queryVec.clear();
 
-    r._name = "混合エンコーディングスキーム";
+    r._name = "混合エンコーディング";
     r._request = "GET /path/with/mixed%20encoding+and+plus?"
                 "q=test%20query+with+spaces HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 200;
@@ -781,18 +800,11 @@ void requestLineTest() {
     makeRequestStructureTests(tests);
     makePercentEncodingTests(tests);
 
-    int pass = 0;
+    std::size_t pass = 0;
     for (std::size_t i = 0; i < tests.size(); ++i) {
         if (runTest(tests[i])) {
             ++pass;
         }
     }
     std::cout << pass << " / " << tests.size() << std::endl;
-}
-
-int main(void) {
-    toolbox::logger::StepMark::setLogFile("field_test.log");
-    toolbox::logger::StepMark::setLevel(toolbox::logger::DEBUG);
-    requestLineTest();
-    return 0;
 }
