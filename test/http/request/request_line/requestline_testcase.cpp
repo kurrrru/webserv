@@ -82,20 +82,20 @@ void makeMethodTests(TestVector& t) {
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
 
-    r._name = "基本的なPOSTリクエスト";
-    r._request = "POST /submit HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = 200;
-    r._isSuccessTest = true;
-    r._exceptRequest.method = "POST";
-    r._exceptRequest.path = "/submit";
-    r._exceptRequest.version = "HTTP/1.1";
-    t.push_back(r);
-
     r._name = "基本的なHEADリクエスト";
     r._request = "HEAD /submit HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 200;
     r._isSuccessTest = true;
     r._exceptRequest.method = "HEAD";
+    r._exceptRequest.path = "/submit";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+
+    r._name = "基本的なPOSTリクエスト";
+    r._request = "POST /submit HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 200;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "POST";
     r._exceptRequest.path = "/submit";
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
@@ -117,6 +117,12 @@ void makeMethodTests(TestVector& t) {
 
     r._name = "大文字小文字混在メソッド";
     r._request = "gEt / HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = 400;  // Bad Request
+    r._isSuccessTest = false;
+    t.push_back(r);
+
+    r._name = "メソッド%エンコーディング";
+    r._request = "%47%45%54 / HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 400;  // Bad Request
     r._isSuccessTest = false;
     t.push_back(r);
@@ -170,7 +176,7 @@ void makePathTests(TestVector& t) {
     for (int i = 0; i < 2000; ++i) {
         longPath += "a";
     }
-    r._name = "非常に長いURI";
+    r._name = "非常に長いURI";  // 8kb8192made
     r._request = "GET " + longPath + " HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = 414;  // URI Too Long
     r._isSuccessTest = false;
