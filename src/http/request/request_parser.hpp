@@ -11,6 +11,7 @@
 
 #include "../../../toolbox/string.hpp"
 #include "../http_namespace.hpp"
+#include "../http_status.hpp"
 #include "http_request.hpp"
 
 namespace http {
