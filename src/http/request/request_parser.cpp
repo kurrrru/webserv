@@ -140,20 +140,20 @@ const char* RequestParser::ParseException::what() const throw() {
 
 void RequestParser::run(const std::string& buf) {
     _buf += buf;
+    if (_buf.find(http::symbols::CRLF) == std::string::npos) {
+        return;
+    }
     parseRequestLine();
     parseFields();
     parseBody();
     if (_validatePos == COMPLETED) {
-        logInfo(OK, "OK");
+        logInfo(OK, "Request parse completed");
         _request.httpStatus = OK;
     }
 }
 
 void RequestParser::parseRequestLine() {
     if (_validatePos != REQUEST_LINE) {
-        return;
-    }
-    if (_buf.find(symbols::CRLF) == std::string::npos) {
         return;
     }
     std::string line = toolbox::trim(&_buf, symbols::CRLF);
