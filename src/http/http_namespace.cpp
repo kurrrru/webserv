@@ -6,6 +6,7 @@ namespace http {
 // method
 namespace method {
 const char* GET = "GET";
+const char* HEAD = "HEAD";
 const char* POST = "POST";
 const char* DELETE = "DELETE";
 }  // namespace method

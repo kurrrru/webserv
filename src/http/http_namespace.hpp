@@ -9,6 +9,7 @@ namespace http {
 // method
 namespace method {
 extern const char* GET;
+extern const char* HEAD;
 extern const char* POST;
 extern const char* DELETE;
 }  // namespace method

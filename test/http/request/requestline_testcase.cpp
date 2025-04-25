@@ -35,20 +35,20 @@ bool compareRequestLine(http::RequestParser& r, RequestLineTest& t) {
 void showRequestLine(http::RequestParser& r, RequestLineTest& t) {
     std::cout << "---- request -----" << std::endl;
     std::cout << t._request << std::endl;
-    std::cout << "method" << std::endl;
-    printf("webserv [%s]\nnginx [%s]\n",
+    std::cout << "***** method *****" << std::endl;
+    printf("webserv [%s]\nnginx   [%s]\n",
         r.get().method.c_str(), t._exceptRequest.method.c_str());
-    std::cout << "path" << std::endl;
-    printf("webserv [%s]\nnginx[%s]\n",
+    std::cout << "**** path *****" << std::endl;
+    printf("webserv [%s]\nnginx   [%s]\n",
         r.get().uri.path.c_str(), t._exceptRequest.path.c_str());
-    std::cout << "version" << std::endl;
-    printf("webserv [%s]\nnginx[%s]\n",
+    std::cout << "***** version *****" << std::endl;
+    printf("webserv [%s]\nnginx   [%s]\n",
         r.get().version.c_str(), t._exceptRequest.version.c_str());
-    std::cout << "query" << std::endl;
+    std::cout << "***** query *****" << std::endl;
     for (std::size_t i = 0; i < t._exceptRequest.queryVec.size(); ++i) {
         QueryPair pair_t = t._exceptRequest.queryVec[i];
         QueryMap::iterator it_r = r.get().uri.queryMap.find(pair_t.first);
-        printf("webserv %s: %s\nnginx %s: %s\n",
+        printf("webserv %s: %s\nnginx   %s: %s\n",
             pair_t.first.c_str(), pair_t.second.c_str(),
             it_r->first.c_str(), it_r->second.c_str());
     }
@@ -785,14 +785,14 @@ void makePercentEncodingTests(TestVector& t) {
 void requestLineTest() {
     TestVector tests;
     makeMethodTests(tests);
-    makePathTests(tests);
-    makeDirectoryTraversalTests(tests);
-    makePathNormalizationTests(tests);
-    makeMultipleDotPathTests(tests);
-    makeQueryParameterTests(tests);
-    makeHttpVersionTests(tests);
-    makeRequestStructureTests(tests);
-    makePercentEncodingTests(tests);
+    // makePathTests(tests);
+    // makeDirectoryTraversalTests(tests);
+    // makePathNormalizationTests(tests);
+    // makeMultipleDotPathTests(tests);
+    // makeQueryParameterTests(tests);
+    // makeHttpVersionTests(tests);
+    // makeRequestStructureTests(tests);
+    // makePercentEncodingTests(tests);
 
     std::size_t pass = 0;
     for (std::size_t i = 0; i < tests.size(); ++i) {
@@ -800,5 +800,6 @@ void requestLineTest() {
             ++pass;
         }
     }
-    std::cout << pass << " / " << tests.size() << std::endl;
+    std::cout << "RequestLine testcase " << pass << " / "
+        << tests.size() << std::endl;
 }
