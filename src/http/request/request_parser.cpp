@@ -13,6 +13,11 @@ namespace http {
 Parser utils
 */
 
+void logInfo(HttpStatus status, const std::string& message) {
+    toolbox::logger::StepMark::info("HTTP " +
+        toolbox::to_string(static_cast<int>(status)) + ": " + message);
+}
+
 bool hasCtlChar(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
         if (std::iscntrl(str[i])) {
@@ -20,11 +25,6 @@ bool hasCtlChar(const std::string& str) {
         }
     }
     return false;
-}
-
-void logInfo(HttpStatus status, const std::string& message) {
-    toolbox::logger::StepMark::info("HTTP " +
-        toolbox::to_string(static_cast<int>(status)) + ": " + message);
 }
 
 bool isUppStr(const std::string& str) {
@@ -168,61 +168,57 @@ void RequestParser::parseRequestLine() {
 }
 
 void RequestParser::parseURI() {
-    urlDecode();
-    std::size_t q_pos = _request.uri.fullUri.find(symbols::QUESTION);
-    std::size_t h_pos = _request.uri.fullUri.find(symbols::HASH);
-    if (q_pos != std::string::npos && q_pos > h_pos) {  // 確認する
+    std::size_t query_pos = _request.uri.fullUri.find(symbols::QUESTION);
+    std::size_t frag_pos = _request.uri.fullUri.find(symbols::HASH);
+    if (query_pos != std::string::npos && query_pos > frag_pos) {
         throw ParseException("Error: uri invalid order");
     }
-    std::size_t path_end = std::min(
-        q_pos != std::string::npos ? q_pos : _request.uri.fullUri.size(),
-        h_pos != std::string::npos ? h_pos : _request.uri.fullUri.size());
-    _request.uri.path = _request.uri.fullUri.substr(0, path_end);
-    if (h_pos != std::string::npos) {
-        _request.uri.fragment = _request.uri.fullUri.substr(h_pos);
-    }
-    if (q_pos != std::string::npos) {
-        std::size_t query_end = h_pos;
-        if (h_pos == std::string::npos) {
-            query_end = _request.uri.fullUri.size();
+
+    if (query_pos != std::string::npos) {
+        _request.uri.path = _request.uri.fullUri.substr(0, query_pos);
+        if (frag_pos != std::string::npos) {
+            _request.uri.fullQuery =
+                _request.uri.fullUri.substr(query_pos, frag_pos - query_pos);
+        } else {
+            _request.uri.fullQuery =
+                _request.uri.fullUri.substr(query_pos);
         }
-        _request.uri.fullQuery =
-            _request.uri.fullUri.substr(q_pos, query_end - q_pos);
+    }
+    urlDecode();
+    if (query_pos != std::string::npos) {
         splitQuery(&_request.uri.queryMap, &_request.uri.fullQuery);
     }
 }
 
 void RequestParser::urlDecode() {
-    std::size_t p_pos = _request.uri.fullUri.find(symbols::PERCENT);
+    std::size_t p_pos = _request.uri.path.find(symbols::PERCENT);
     if (p_pos == std::string::npos) {
         return;
     }
     std::string res;
     std::size_t i = 0;
-    while (i < _request.uri.fullUri.size()) {
-        if (_request.uri.fullUri[i] == *symbols::PERCENT) {
-            std::string hexStr = _request.uri.fullUri.substr(i + 1, 2);
+    while (i < _request.uri.path.size()) {
+        if (_request.uri.path[i] == *symbols::PERCENT) {
+            std::string hexStr = _request.uri.path.substr(i + 1, 2);
             std::size_t hex = strtol(hexStr.c_str(), NULL, 16);
             res += static_cast<char>(hex);
             i += 3;
         } else {
-            res += _request.uri.fullUri[i];
+            res += _request.uri.path[i];
             ++i;
         }
     }
-    _request.uri.fullUri = res;
+    _request.uri.path = res;
 }
 
 void RequestParser::validateMethod() {
     if (_request.method.empty()) {
+        _request.httpStatus = BAD_REQUEST;
         throw ParseException("Error: method doesn't exist");
     }
-    if (hasCtlChar(_request.method) || !isUppStr(_request.method)) {
-        throw ParseException(
-            "Error: method has control or lowercase character");
-    }
     if (_request.method != method::GET && _request.method != method::POST &&
-        _request.method != method::DELETE) {
+        _request.method != method::DELETE && _request.method != method::HEAD) {
+        _request.httpStatus = METHOD_NOT_ALLOWED;
         throw ParseException("Error: method isn't supported");
     }
     return;
