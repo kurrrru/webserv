@@ -39,12 +39,16 @@ bool isUppStr(const std::string& str) {
 bool isTraversalAttack(const std::string& path) {
     std::string normalizePath = path;
     std::size_t pos = 0;
+    while ((pos = normalizePath.find("\\")) != std::string::npos) {
+        normalizePath.replace(pos, 2, "/");
+    }
     while ((pos = normalizePath.find("//", pos)) != std::string::npos) {
         normalizePath.replace(pos, 2, "/");
     }
     std::vector<std::string> splitPath;
     std::string parts;
-    for (std::size_t i = 0; i < normalizePath.size(); ++i) {
+    // i = 1 start, skip path[0] = '/'
+    for (std::size_t i = 1; i < normalizePath.size(); ++i) {
         if (normalizePath[i] == '/' && !parts.empty()) {
             splitPath.push_back(parts);
             parts.clear();
@@ -99,27 +103,6 @@ HTTPFields::FieldPair splitFieldLine(
     return pair;
 }
 
-void splitQuery(std::map<std::string, std::string>* queryMap,
-                std::string* fullQuery) {
-    std::string line = fullQuery->substr(1);  // skip '?'
-    while (true) {
-        std::size_t e_pos = line.find(symbols::EQUAL);
-        std::size_t a_pos = line.find(symbols::AMPERSAND);
-        if (e_pos == std::string::npos) {
-            RequestParser::ParseException(
-                "Error: invalid query oder");
-        }
-        if (a_pos != std::string::npos) {
-            (*queryMap)[line.substr(0, e_pos)] =
-                line.substr(e_pos + 1, a_pos - e_pos - 1);
-        } else {
-            (*queryMap)[line.substr(0, e_pos)] = line.substr(e_pos + 1);
-            break;
-        }
-        line.erase(0, a_pos + 1);
-    }
-}
-
 bool isChunkedEncoding(HTTPRequest* request) {
     return (
         !(request->fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
@@ -140,40 +123,64 @@ const char* RequestParser::ParseException::what() const throw() {
 
 void RequestParser::run(const std::string& buf) {
     _buf += buf;
-    if (_buf.find(http::symbols::CRLF) == std::string::npos) {
+    if (_buf.find(http::symbols::CRLF) == std::string::npos
+        && _validatePos != BODY) {
         return;
     }
-    parseRequestLine();
-    parseFields();
-    parseBody();
+    processRequestLine();
+    processFields();
+    processBody();
+    toolbox::logger::StepMark::info("RequestParser: failed");
     if (_validatePos == COMPLETED) {
         logInfo(OK, "Request parse completed");
-        _request.httpStatus = OK;
     }
 }
 
-void RequestParser::parseRequestLine() {
+void RequestParser::processRequestLine() {
     if (_validatePos != REQUEST_LINE) {
         return;
     }
+    parseRequestLine();
+    validateMethod();
+    processURI();
+    validateVersion();
+    if (_request.httpStatus != OK) {
+        throw ParseException("");
+    }
+    _validatePos = HEADERS;
+}
+
+void RequestParser::parseRequestLine() {
     std::string line = toolbox::trim(&_buf, symbols::CRLF);
     _request.method = toolbox::trim(&line, symbols::SP);
     _request.uri.fullUri = toolbox::trim(&line, symbols::SP);
     _request.version = toolbox::trim(&line, symbols::SP);
+}
+
+void RequestParser::validateMethod() {
+    if (_request.method.empty()) {
+        _request.setHttpStatus(BAD_REQUEST);
+        return;
+    }
+    if (_request.method != method::GET && _request.method != method::POST &&
+        _request.method != method::DELETE && _request.method != method::HEAD) {
+        _request.setHttpStatus(BAD_REQUEST);
+    }
+}
+
+void RequestParser::processURI() {
     parseURI();
-    validateMethod();
-    validateURI();
-    validateVersion();
-    _validatePos = HEADERS;
+    urlDecode();
+    validatePath();
 }
 
 void RequestParser::parseURI() {
     std::size_t query_pos = _request.uri.fullUri.find(symbols::QUESTION);
     std::size_t frag_pos = _request.uri.fullUri.find(symbols::HASH);
     if (query_pos != std::string::npos && query_pos > frag_pos) {
-        throw ParseException("Error: uri invalid order");
+        _request.setHttpStatus(BAD_REQUEST);
+        return;
     }
-
     if (query_pos != std::string::npos) {
         _request.uri.path = _request.uri.fullUri.substr(0, query_pos);
         if (frag_pos != std::string::npos) {
@@ -183,10 +190,35 @@ void RequestParser::parseURI() {
             _request.uri.fullQuery =
                 _request.uri.fullUri.substr(query_pos);
         }
+    } else {
+        if (frag_pos != std::string::npos) {
+            _request.uri.path = _request.uri.fullUri.substr(0);
+        } else {
+            _request.uri.path = _request.uri.fullUri.substr(0, frag_pos);
+        }
     }
-    urlDecode();
     if (query_pos != std::string::npos) {
-        splitQuery(&_request.uri.queryMap, &_request.uri.fullQuery);
+        parseQuery();
+    }
+}
+
+void RequestParser::parseQuery() {
+    std::string line = _request.uri.fullQuery.substr(1);  // skip '?'
+    while (true) {
+        std::size_t e_pos = line.find(symbols::EQUAL);
+        std::size_t a_pos = line.find(symbols::AMPERSAND);
+        if (e_pos == std::string::npos) {
+            return;
+        }
+        if (a_pos != std::string::npos) {
+            _request.uri.queryMap[line.substr(0, e_pos)] =
+                line.substr(e_pos + 1, a_pos - e_pos - 1);
+        } else {
+            _request.uri.queryMap[line.substr(0, e_pos)] =
+                line.substr(e_pos + 1);
+            break;
+        }
+        line.erase(0, a_pos + 1);
     }
 }
 
@@ -211,47 +243,47 @@ void RequestParser::urlDecode() {
     _request.uri.path = res;
 }
 
-void RequestParser::validateMethod() {
-    if (_request.method.empty()) {
-        _request.httpStatus = BAD_REQUEST;
-        throw ParseException("Error: method doesn't exist");
-    }
-    if (_request.method != method::GET && _request.method != method::POST &&
-        _request.method != method::DELETE && _request.method != method::HEAD) {
-        _request.httpStatus = METHOD_NOT_ALLOWED;
-        throw ParseException("Error: method isn't supported");
-    }
-    return;
-}
-
-void RequestParser::validateURI() {
+void RequestParser::validatePath() {
     if (_request.uri.fullUri.empty()) {
-        throw ParseException("Error: uri doesn't exist");
+        _request.setHttpStatus(BAD_REQUEST);
+        toolbox::logger::StepMark::info("RequestParser: uri not found");
+        return;
+    }
+    if (_request.uri.path.size() > http::uri::MAX_PATH_SIZE) {
+        _request.setHttpStatus(URI_TOO_LONG);
+        toolbox::logger::StepMark::info("RequestParser: uri too long");
+        return;
     }
     if (_request.uri.fullUri[0] != *symbols::SLASH ||
         hasCtlChar(_request.uri.fullUri)) {
-        throw ParseException("Error: missing '/' or uri has control character");
+        _request.setHttpStatus(BAD_REQUEST);
+        toolbox::logger::StepMark::info("RequestParser: invalid uri");
+        return;
     }
     if (isTraversalAttack(_request.uri.path)) {
-        throw ParseException("Error: warning! path is TraversalAttack");
+        _request.setHttpStatus(BAD_REQUEST);
+        toolbox::logger::StepMark::info("RequestParser: traversal attack");
     }
-    return;
 }
 
 void RequestParser::validateVersion() {
     if (_request.version.empty()) {
-        _request.version = version::HTTP_VERSION;
+        _request.version = uri::HTTP_VERSION;
     }
     if (hasCtlChar(_request.version)) {
-        throw ParseException("Error: version has control character");
+        _request.setHttpStatus(BAD_REQUEST);
+        toolbox::logger::StepMark::info
+            ("RequestParser: version has control character");
+        return;
     }
-    if (_request.version != version::HTTP_VERSION) {
-        throw ParseException("Error: version isn't supported");
+    if (_request.version != uri::HTTP_VERSION) {
+        _request.setHttpStatus(BAD_REQUEST);
+        toolbox::logger::StepMark::info
+            ("RequestParser: invalid version");
     }
-    return;
 }
 
-void RequestParser::parseFields() {
+void RequestParser::processFields() {
     if (_validatePos != HEADERS ||
             _buf.find(symbols::CRLF) == std::string::npos) {
         return;
@@ -266,7 +298,7 @@ void RequestParser::parseFields() {
             break;
         }
         std::string line = toolbox::trim(&_buf, symbols::CRLF);
-        validateFieldLine(line, _request.httpStatus);
+        validateFieldLine(line);
         HTTPFields::FieldPair pair = splitFieldLine(&line);
         if (!_request.fields.parseHeaderLine(pair, _request.httpStatus)) {
             throw ParseException("");
@@ -277,20 +309,22 @@ void RequestParser::parseFields() {
     }
 }
 
-void RequestParser::validateFieldLine(std::string& line, HttpStatus& hs) {
+void RequestParser::validateFieldLine(std::string& line) {
     if (hasCtlChar(line)) {
-        hs = BAD_REQUEST;
+        _request.setHttpStatus(BAD_REQUEST);
         logInfo(BAD_REQUEST, "line has CtlChar");
-        throw ParseException("");
+        return;
+        // throw ParseException("");
     }
     if (line.size() > fields::MAX_FIELDLINE_SIZE) {
-        hs = BAD_REQUEST;
+        _request.setHttpStatus(BAD_REQUEST);
         logInfo(BAD_REQUEST, "line is too long");
-        throw ParseException("");
+        return;
+        // throw ParseException("");
     }
 }
 
-void RequestParser::parseBody() {
+void RequestParser::processBody() {
     if (_validatePos != BODY) {
         return;
     }
