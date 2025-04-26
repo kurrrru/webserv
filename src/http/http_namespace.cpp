@@ -11,8 +11,9 @@ const char* POST = "POST";
 const char* DELETE = "DELETE";
 }  // namespace method
 
-namespace version {
+namespace uri {
 const char* HTTP_VERSION = "HTTP/1.1";
+const std::size_t MAX_PATH_SIZE = 8192;
 }
 
 namespace fields {

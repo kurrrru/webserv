@@ -43,16 +43,21 @@ class RequestParser {
     RequestParser(const RequestParser& other);
     RequestParser& operator=(const RequestParser& other);
 
-    void parseRequestLine();
-    void parseURI();
-    void parseFields();
-    void parseBody();
-    void parseChunkedEncoding();
-    void validateFieldLine(std::string& line, HttpStatus& hs);
-    void validateMethod();
-    void validateURI();
-    void validateVersion();
-    void urlDecode();
+    void processRequestLine();
+        void parseRequestLine();
+        void validateMethod();
+        void processURI();
+            void parseURI();
+            void urlDecode();
+            void validatePath();
+            void parseQuery();
+        void validateVersion();
+
+    void processFields();
+        void validateFieldLine(std::string& line);
+        void parseChunkedEncoding();
+
+    void processBody();
 
     std::string _buf;
     HTTPRequest _request;

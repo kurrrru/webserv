@@ -33,6 +33,11 @@ class HTTPRequest {
 
     HTTPRequest() : httpStatus(http::OK) {}
     ~HTTPRequest() {}
+    void setHttpStatus(HttpStatus status) {
+        if (httpStatus == http::OK) {
+            httpStatus = status;
+        }
+    }
 
     HttpStatus httpStatus;
     std::string method;
