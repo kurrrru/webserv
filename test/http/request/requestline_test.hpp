@@ -17,24 +17,6 @@ typedef std::pair<std::string, std::string> QueryPair;
 typedef std::vector<QueryPair> QueryVec;
 typedef std::map<std::string, std::string> QueryMap;  // 修正予定
 
-// class RequestLineTest {
-//  public:
-//     struct ExceptRequestLine {
-//         std::string method;
-//         std::string path;
-//         QueryVec queryVec;
-//         std::string version;
-//     };
-
-//     RequestLineTest() : _httpStatus(http::OK) {}
-
-//     std::string _name;
-//     std::string _request;
-//     bool _isSuccessTest;
-//     http::HttpStatus _httpStatus;
-//     ExceptRequestLine _exceptRequest;
-// };
-
 class RequestLineTest : public BaseTest {
  public:
     struct ExceptRequestLine {
