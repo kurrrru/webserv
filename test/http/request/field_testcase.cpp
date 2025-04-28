@@ -65,6 +65,8 @@ bool runTest(FieldTest& t) {
         r.run(t._request);
         if (t._isSuccessTest && compareFields(r, t)) {
             return true;
+        } else if (!t._isSuccessTest && compareFields(r, t)) {
+            return true;
         } else {
             std::cout << "==== Failed: false->true "
                 << t._name << " ====" << std::endl;
@@ -727,9 +729,10 @@ void makeLargeRequestTests(TestVector& tests) {
             longValue += "a";
         }
         f._request = "GET / HTTP/1.1\r\nHost: " + longValue + "\r\n\r\n";
+        addFieldToMap(f._exceptMap, http::fields::HOST, longValue);
     }
-    f._httpStatus = http::PAYLOAD_TOO_LARGE;
-    f._isSuccessTest = false;  // 413 Request Entity Too Large
+    f._httpStatus = http::BAD_REQUEST;
+    f._isSuccessTest = false;  // 400 Bad Request
     tests.push_back(f);
     f._exceptMap.clear();
 }

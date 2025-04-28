@@ -12,8 +12,9 @@ const char* DELETE = "DELETE";
 }  // namespace method
 
 namespace uri {
-const char* HTTP_VERSION = "HTTP/1.1";
-const std::size_t MAX_PATH_SIZE = 8192;
+const char* HTTP_VERSION10 = "HTTP/1.0";
+const char* HTTP_VERSION11 = "HTTP/1.1";
+const std::size_t MAX_URI_SIZE = 8192;
 }
 
 namespace fields {

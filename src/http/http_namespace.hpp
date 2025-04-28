@@ -15,8 +15,9 @@ extern const char* DELETE;
 }  // namespace method
 
 namespace uri {
-extern const char* HTTP_VERSION;
-extern const std::size_t MAX_PATH_SIZE;
+extern const char* HTTP_VERSION11;
+extern const char* HTTP_VERSION10;
+extern const std::size_t MAX_URI_SIZE;
 }
 
 namespace fields {

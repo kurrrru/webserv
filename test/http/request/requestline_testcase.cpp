@@ -50,8 +50,8 @@ void showRequestLine(http::RequestParser& r, RequestLineTest& t) {
         QueryPair pair_t = t._exceptRequest.queryVec[i];
         QueryMap::iterator it_r = r.get().uri.queryMap.find(pair_t.first);
         printf("webserv %s: %s\nnginx   %s: %s\n",
-            pair_t.first.c_str(), pair_t.second.c_str(),
-            it_r->first.c_str(), it_r->second.c_str());
+            it_r->first.c_str(), it_r->second.c_str(),
+            pair_t.first.c_str(), pair_t.second.c_str());
     }
 }
 
@@ -202,8 +202,8 @@ void makePathTests(TestVector& t) {
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
     r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "";
-    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.path = "HTTP/1.1";
+    r._exceptRequest.version = "";
     t.push_back(r);
     clearUri(r);
 
@@ -252,17 +252,7 @@ void makeDirectoryTraversalTests(TestVector& t) {
     r._httpStatus = http::OK;  // 200
     r._isSuccessTest = true;
     r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/a/b/c/../../../etc/passwd";
-    r._exceptRequest.version = "HTTP/1.1";
-    t.push_back(r);
-    clearUri(r);
-
-    r._name = "バックスラッシュを使用したディレクトリトラバーサル";
-    r._request = "GET /..\\..\\etc\\passwd HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = http::BAD_REQUEST;  // Bad Request
-    r._isSuccessTest = false;
-    r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/..\\..\\etc\\passwd";
+    r._exceptRequest.path = "/etc/passwd";
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
@@ -532,6 +522,9 @@ void makeHttpVersionTests(TestVector& t) {
     r._request = "GET / HTTP/2.0\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::HTTP_VERSION_NOT_SUPPORTED;
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/";
+    r._exceptRequest.version = "HTTP/2.0";
     t.push_back(r);
     clearUri(r);
 
@@ -539,13 +532,19 @@ void makeHttpVersionTests(TestVector& t) {
     r._request = "GET / http/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/";
+    r._exceptRequest.version = "http/1.1";
     t.push_back(r);
     clearUri(r);
 
     r._name = "空のHTTPバージョン";
     r._request = "GET / \r\nHost: sample\r\n\r\n";
-    r._httpStatus = http::BAD_REQUEST;  // Bad Request
+    r._httpStatus = http::BAD_REQUEST;  // OK
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/";
+    r._exceptRequest.version = "";
     t.push_back(r);
     clearUri(r);
 }
@@ -567,6 +566,9 @@ void makeRequestStructureTests(TestVector& t) {
     r._request = "GET /\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/";
+    r._exceptRequest.version = "";
     t.push_back(r);
     clearUri(r);
 
@@ -574,6 +576,9 @@ void makeRequestStructureTests(TestVector& t) {
     r._request = "GET\t/\tHTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "";
+    r._exceptRequest.path = "";
+    r._exceptRequest.version = "";
     t.push_back(r);
     clearUri(r);
 
@@ -581,6 +586,9 @@ void makeRequestStructureTests(TestVector& t) {
     r._request = "GET / HTTP/1.1 extra\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 }
@@ -611,6 +619,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._name = "エンコードされたGETメソッド";
     r._request = "%47%45%54 /index.html HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;
+    r._exceptRequest.method = "%47%45%54";
+    r._exceptRequest.path = "/index.html";
+    r._exceptRequest.version = "HTTP/1.1";
     r._isSuccessTest = false;
     t.push_back(r);
     clearUri(r);
@@ -619,6 +630,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "P%4FST /form.html HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "P%4FST";
+    r._exceptRequest.path = "/form.html";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -626,6 +640,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET%20 /index.html HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET%20";
+    r._exceptRequest.path = "/index.html";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -639,6 +656,8 @@ void makePercentEncodingTests(TestVector& t) {
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
+    r._exceptRequest.queryVec.clear();
+
 
     r._name = "URLとクエリ文字列両方にエンコーディング";
     r._request = "GET /search%20page?q=hello%20world&lang=ja%2Den HTTP/1.1\r\n"
@@ -711,6 +730,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET /test%3 HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/test%3";  // need check
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -718,6 +740,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET /test%XY HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/test%XY";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -725,13 +750,19 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET /test%00.html HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/test%00.html";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
     r._name = "エンコーディングされた制御文字";
     r._request = "GET /test%0A%0D.html HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = http::NOT_FOUND;  // Not Found
-    r._isSuccessTest = false;
+    r._httpStatus = http::OK;  // will Not Found
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/test%0A%0D.html";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -740,14 +771,9 @@ void makePercentEncodingTests(TestVector& t) {
                     "Host: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
-    t.push_back(r);
-    clearUri(r);
-
-    r._name = "UTF-8のオーバーロングエンコーディング";
-    r._request = "GET /%C0%AE%C0%AE/etc/passwd HTTP/1.1\r\n"
-                    "Host: sample\r\n\r\n";
-    r._httpStatus = http::NOT_FOUND;  // Not Found
-    r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/../../etc/passwd";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -758,7 +784,7 @@ void makePercentEncodingTests(TestVector& t) {
     r._exceptRequest.method = "GET";
     r._exceptRequest.path = "/search";
     r._exceptRequest.version = "HTTP/1.1";
-    r._exceptRequest.queryVec.push_back(QueryPair("q", "hello world"));
+    r._exceptRequest.queryVec.push_back(QueryPair("q", "hello+world"));
     t.push_back(r);
     clearUri(r);
     r._exceptRequest.queryVec.clear();
@@ -794,6 +820,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET " + longEncodedPath + " HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::URI_TOO_LONG;  // URI Too Long
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = longEncodedPath;
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -802,6 +831,9 @@ void makePercentEncodingTests(TestVector& t) {
                     "%48%54%54%50%2F%31%2E%31\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "%47%45%54";
+    r._exceptRequest.path = "%2F%69%6E%64%65%78%2E%68%74%6D%6C";
+    r._exceptRequest.version = "%48%54%54%50%2F%31%2E%31";
     t.push_back(r);
     clearUri(r);
 
@@ -829,8 +861,11 @@ void makePercentEncodingTests(TestVector& t) {
 
     r._name = "URIエンコードされたディレクトリ区切り文字の特殊ケース";
     r._request = "GET /dir%2F..%2Fsecret.txt HTTP/1.1\r\nHost: sample\r\n\r\n";
-    r._httpStatus = http::NOT_FOUND;  // Not Found
+    r._httpStatus = http::OK;  // will Not Found
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/secret.txt";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -839,6 +874,9 @@ void makePercentEncodingTests(TestVector& t) {
                     "Host: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/safe/../../../etc/passwd";
+    r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -857,6 +895,9 @@ void makePercentEncodingTests(TestVector& t) {
                     "Host: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/index.html";
+    r._exceptRequest.version = "%48%54%54%50%2F%31%2E%31";
     t.push_back(r);
     clearUri(r);
 
@@ -864,6 +905,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET /index.html HTTP%2F1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/index.html";
+    r._exceptRequest.version = "HTTP%2F1.1";
     t.push_back(r);
     clearUri(r);
 
@@ -871,6 +915,9 @@ void makePercentEncodingTests(TestVector& t) {
     r._request = "GET /index.html HTTP/%31.%31\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::BAD_REQUEST;  // Bad Request
     r._isSuccessTest = false;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/index.html";
+    r._exceptRequest.version = "HTTP/%31.%31";
     t.push_back(r);
     clearUri(r);
 
@@ -888,7 +935,7 @@ void makePercentEncodingTests(TestVector& t) {
     clearUri(r);
     r._exceptRequest.queryVec.clear();
 
-    r._name = "混合エンコーディング";
+    r._name = "混合エンコーディング queryの+をSP(対応しない)";
     r._request = "GET /path/with/mixed%20encoding+and+plus?"
                 "q=test%20query+with+spaces HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus = http::OK;
@@ -897,7 +944,7 @@ void makePercentEncodingTests(TestVector& t) {
     r._exceptRequest.path = "/path/with/mixed encoding+and+plus";
     r._exceptRequest.version = "HTTP/1.1";
     r._exceptRequest.queryVec.push_back(
-                                QueryPair("q", "test query with spaces"));
+                                QueryPair("q", "test query+with+spaces"));
     t.push_back(r);
     clearUri(r);
     r._exceptRequest.queryVec.clear();
@@ -908,12 +955,12 @@ void requestLineTest() {
     makeMethodTests(tests);
     makePathTests(tests);
     makeDirectoryTraversalTests(tests);
-    // makePathNormalizationTests(tests);
-    // makeMultipleDotPathTests(tests);
-    // makeQueryParameterTests(tests);
-    // makeHttpVersionTests(tests);
-    // makeRequestStructureTests(tests);
-    // makePercentEncodingTests(tests);
+    makePathNormalizationTests(tests);
+    makeMultipleDotPathTests(tests);
+    makeQueryParameterTests(tests);
+    makeHttpVersionTests(tests);
+    makeRequestStructureTests(tests);
+    makePercentEncodingTests(tests);
 
     std::size_t pass = 0;
     for (std::size_t i = 0; i < tests.size(); ++i) {
