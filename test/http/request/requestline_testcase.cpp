@@ -493,6 +493,17 @@ void makeQueryParameterTests(TestVector& t) {
     t.push_back(r);
     clearUri(r);
     r._exceptRequest.queryVec.clear();
+
+    r._name = "フラグメントの後にクエリが存在する場合";
+    r._request = "GET /page#section1?id=123 HTTP/1.1\r\nHost: sample\r\n\r\n";
+    r._httpStatus = http::OK;
+    r._isSuccessTest = true;
+    r._exceptRequest.method = "GET";
+    r._exceptRequest.path = "/page";
+    r._exceptRequest.version = "HTTP/1.1";
+    t.push_back(r);
+    clearUri(r);
+    r._exceptRequest.queryVec.clear();
 }
 
 void makeHttpVersionTests(TestVector& t) {
