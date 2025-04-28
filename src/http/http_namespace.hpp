@@ -17,6 +17,8 @@ extern const char* DELETE;
 namespace uri {
 extern const char* HTTP_VERSION11;
 extern const char* HTTP_VERSION10;
+extern const std::size_t HTTP_MAJOR_VERSION;
+extern const std::size_t HTTP_MINOR_VERSION_MAX;
 extern const std::size_t MAX_URI_SIZE;
 }
 
