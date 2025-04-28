@@ -8,12 +8,11 @@
 #include <string>
 #include <utility>
 #include <iostream>
+#include <algorithm>
 
 namespace http {
 
-/*
-Parser utils
-*/
+// Parser utils
 
 void logInfo(HttpStatus status, const std::string& message) {
     toolbox::logger::StepMark::info("HTTP " +
@@ -51,23 +50,6 @@ static void trimSpace(std::string &line) {
     line = line.substr(front_pos, rear_pos - front_pos + 1);
 }
 
-HTTPFields::FieldPair splitFieldLine(
-    std::string* line) {
-        HTTPFields::FieldPair pair;
-        std::size_t pos = line->find_first_of(symbols::COLON);
-    if (pos != std::string::npos) {
-        pair.first = toolbox::trim(line, symbols::COLON);
-        while (!line->empty()) {
-            std::string value = toolbox::trim(line, symbols::COMMASP);
-            trimSpace(value);
-            if (!value.empty()) {
-                pair.second.push_back(value);
-            }
-        }
-    }
-    return pair;
-}
-
 bool isChunkedEncoding(HTTPRequest* request) {
     return (
         !(request->fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
@@ -83,9 +65,7 @@ static void skipSpace(std::string* line) {
     *line = line->substr(not_sp_pos);
 }
 
-/*
-Class method
-*/
+// Class method
 
 RequestParser::ParseException::ParseException(const char* message)
 : _message(message) {}
@@ -154,9 +134,9 @@ void RequestParser::validateMethod() {
 void RequestParser::processURI() {
     parseURI();
     validatePath();
-    pathDecode();  // %エンコーディング
+    pathDecode();
     parseQuery();
-    normalizationPath();  // 正規化バックスラッシュをスラッシュに変更
+    normalizationPath();
     verifySafePath();
 }
 
@@ -195,21 +175,15 @@ void RequestParser::verifySafePath() {
         }
     }
     _request.uri.path.clear();
-    for (int64_t i = pathDeque.size() - 1; i >= 0; --i) {
+    for (int i = pathDeque.size() - 1; i >= 0; --i) {
         _request.uri.path += pathDeque[i];
     }
 }
 
-
-//fragmentが先行する場合それ以降は全てfragmentとして扱われる
 void RequestParser::parseURI() {
     std::size_t query_pos = _request.uri.fullUri.find(symbols::QUESTION);
     std::size_t frag_pos = _request.uri.fullUri.find(symbols::HASH);
-    if (query_pos != std::string::npos && query_pos > frag_pos) {
-        _request.setHttpStatus(BAD_REQUEST);
-        return;
-    }
-    if (query_pos != std::string::npos) {
+    if (query_pos != std::string::npos && query_pos < frag_pos) {
         _request.uri.path = _request.uri.fullUri.substr(0, query_pos);
         if (frag_pos != std::string::npos) {
             _request.uri.fullQuery =
@@ -219,13 +193,8 @@ void RequestParser::parseURI() {
                 _request.uri.fullUri.substr(query_pos);
         }
     } else {
-        if (frag_pos != std::string::npos) {
-            _request.uri.path = _request.uri.fullUri.substr(0, frag_pos);
-            _request.uri.fullQuery = _request.uri.fullUri.substr
-                (frag_pos, _request.uri.fullUri.size() - frag_pos);
-        } else {
-            _request.uri.path = _request.uri.fullUri.substr(0, frag_pos);
-        }
+        _request.uri.path = _request.uri.fullUri.substr
+            (0, frag_pos);
     }
 }
 
@@ -269,26 +238,20 @@ void RequestParser::percentDecode(std::string& line) {
     std::size_t i = 0;
     while (i < line.size()) {
         if (line[i] == *symbols::PERCENT) {
-            char* endptr = NULL;
             std::string hexStr = line.substr(i + 1, 2);
-            std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
-            if (*endptr == '\0' && hexStr.size() == 2) {
-                if (hex == '\0') {
-                    _request.setHttpStatus(BAD_REQUEST);
-                    toolbox::logger::StepMark::info
-                        ("RequestParser: path has null character");
-                    return;
-                }
-                res += static_cast<char>(hex);
-                i += hexStr.size() + 1;
+            std::string decodedStr;
+            if (decodeHex(hexStr, decodedStr)) {
+                res += decodedStr;
+                i += 3;  // % + hex num len
             } else {
-                i += line.find(*endptr, i);
-                if (line[0] == '/') {  // if decode line is path
+                if (line[0] == '/' || i + 2 < line.size()) {  // is path
                     _request.setHttpStatus(BAD_REQUEST);
                     toolbox::logger::StepMark::info
                         ("RequestParser: path has invalid hexdecimal");
                     return;
                 }
+                res += line[i];
+                ++i;
             }
         } else {
             res += line[i];
@@ -299,6 +262,27 @@ void RequestParser::percentDecode(std::string& line) {
         line = res;
     }
     return;
+}
+
+bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
+    if (hexStr.size() != 2) {
+        return false;
+    }
+    for (std::size_t i = 0; i < 2; ++i) {
+        if (!isxdigit(hexStr[i])) {
+            return false;
+        }
+    }
+    char* endptr = NULL;
+    std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
+    if (*endptr != '\0') {
+        return false;
+    }
+    decodedStr = static_cast<char>(hex);
+    if (hex == '\0') {
+        return false;
+    }
+    return true;
 }
 
 void RequestParser::validatePath() {
@@ -410,6 +394,22 @@ void RequestParser::validateFieldLine(std::string& line) {
         logInfo(BAD_REQUEST, "line is too long");
         return;
     }
+}
+
+HTTPFields::FieldPair RequestParser::splitFieldLine(std::string* line) {
+    HTTPFields::FieldPair pair;
+    std::size_t pos = line->find_first_of(symbols::COLON);
+    if (pos != std::string::npos) {
+        pair.first = toolbox::trim(line, symbols::COLON);
+        while (!line->empty()) {
+            std::string value = toolbox::trim(line, symbols::COMMASP);
+            trimSpace(value);
+            if (!value.empty()) {
+                pair.second.push_back(value);
+            }
+        }
+    }
+    return pair;
 }
 
 void RequestParser::processBody() {

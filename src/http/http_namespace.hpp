@@ -6,7 +6,7 @@
 #include <utility>
 
 namespace http {
-// method
+
 namespace method {
 extern const char* GET;
 extern const char* HEAD;

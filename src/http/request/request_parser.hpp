@@ -13,6 +13,7 @@
 #include "../http_namespace.hpp"
 #include "../http_status.hpp"
 #include "http_request.hpp"
+#include "http_fields.hpp"
 
 namespace http {
 class RequestParser {
@@ -34,7 +35,7 @@ class RequestParser {
         ERROR       = 4
     };
 
-    RequestParser() : _validatePos(REQUEST_LINE), _time(0) {}
+    RequestParser() : _validatePos(REQUEST_LINE) {}
     ~RequestParser() {}
     void run(const std::string& buf);
     HTTPRequest& get() { return _request; }
@@ -44,29 +45,28 @@ class RequestParser {
     RequestParser& operator=(const RequestParser& other);
 
     void processRequestLine();
-        void parseRequestLine();
-        void validateMethod();
-        void processURI();
-            void parseURI();
-            void pathDecode();
-            void percentDecode(std::string& line);
-            void parseQuery();
-            void validatePath();
-            void normalizationPath();
-            void verifySafePath();
-        void validateVersion();
-            bool isValidFormat();
-
+    void parseRequestLine();
+    void validateMethod();
+    void processURI();
+    void parseURI();
+    void pathDecode();
+    void percentDecode(std::string& line);
+    bool decodeHex(std::string& hexStr, std::string& decodedChar);
+    void parseQuery();
+    void validatePath();
+    void normalizationPath();
+    void verifySafePath();
+    void validateVersion();
+    bool isValidFormat();
     void processFields();
-        void validateFieldLine(std::string& line);
-        void parseChunkedEncoding();
-
+    void validateFieldLine(std::string& line);
+    HTTPFields::FieldPair splitFieldLine(std::string* line);
+    void parseChunkedEncoding();
     void processBody();
 
     std::string _buf;
     HTTPRequest _request;
     ParseState _validatePos;
-    std::time_t _time;
 };
 
 bool hasCtlChar(const std::string& str);
