@@ -321,8 +321,8 @@ void RequestParser::validateVersion() {
             ("RequestParser: version invalid format");
         return;
     }
-    if (_request.version != uri::HTTP_VERSION10 &&
-        _request.version != uri::HTTP_VERSION11) {
+    if (_request.version != uri::HTTP_VERSION_1_0 &&
+        _request.version != uri::HTTP_VERSION_1_1) {
         _request.setHttpStatus(BAD_REQUEST);
         toolbox::logger::StepMark::info
             ("RequestParser: invalid version");
