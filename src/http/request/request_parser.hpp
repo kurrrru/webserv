@@ -19,11 +19,11 @@ class RequestParser {
  public:
     class ParseException : public std::exception {
      public:
-     explicit ParseException(const char* message);
-     const char* what() const throw();
+        explicit ParseException(const char* message);
+        const char* what() const throw();
 
      private:
-     const char* _message;
+        const char* _message;
     };
 
     enum ParseState {
@@ -48,10 +48,14 @@ class RequestParser {
         void validateMethod();
         void processURI();
             void parseURI();
-            void urlDecode();
-            void validatePath();
+            void pathDecode();
+            void percentDecode(std::string& line);
             void parseQuery();
+            void validatePath();
+            void normalizationPath();
+            void verifySafePath();
         void validateVersion();
+            bool isValidFormat();
 
     void processFields();
         void validateFieldLine(std::string& line);
