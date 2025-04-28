@@ -7,8 +7,6 @@
 #include <deque>
 #include <string>
 #include <utility>
-#include <iostream>
-#include <algorithm>
 
 namespace http {
 
