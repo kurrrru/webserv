@@ -275,10 +275,10 @@ bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
     }
     char* endptr = NULL;
     std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
+    decodedStr = static_cast<char>(hex);
     if (*endptr != '\0') {
         return false;
     }
-    decodedStr = static_cast<char>(hex);
     if (hex == '\0') {
         return false;
     }
@@ -346,7 +346,8 @@ bool RequestParser::isValidFormat() {
         strtol(_request.version.substr(5, dotPos).c_str(), &endptr, 10);
     std::size_t minorVersion =
         strtol(_request.version.substr(dotPos + 1).c_str(), &endptr, 10);
-    if (majorVersion < 1 || minorVersion > 999) {
+    if (majorVersion < uri::HTTP_MAJOR_VERSION ||
+            minorVersion > uri::HTTP_MINOR_VERSION_MAX) {
         _request.setHttpStatus(BAD_REQUEST);
         return false;
     }
