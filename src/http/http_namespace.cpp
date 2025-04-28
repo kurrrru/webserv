@@ -12,8 +12,8 @@ const char* DELETE = "DELETE";
 }  // namespace method
 
 namespace uri {
-const char* HTTP_VERSION10 = "HTTP/1.0";
-const char* HTTP_VERSION11 = "HTTP/1.1";
+const char* HTTP_VERSION_1_0 = "HTTP/1.0";
+const char* HTTP_VERSION_1_1 = "HTTP/1.1";
 const std::size_t HTTP_MAJOR_VERSION = 1;
 const std::size_t HTTP_MINOR_VERSION_MAX = 999;
 const std::size_t MAX_URI_SIZE = 8192;
