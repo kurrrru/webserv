@@ -92,9 +92,9 @@ void RequestParser::processRequestLine() {
         return;
     }
     parseRequestLine();
+    validateVersion();
     validateMethod();
     processURI();
-    validateVersion();
 
     if (_request.httpStatus != OK) {
         throw ParseException("");
@@ -123,9 +123,20 @@ void RequestParser::validateMethod() {
         _request.setHttpStatus(BAD_REQUEST);
         return;
     }
-    if (_request.method != method::GET && _request.method != method::POST &&
-        _request.method != method::DELETE && _request.method != method::HEAD) {
-        _request.setHttpStatus(BAD_REQUEST);
+    if (_request.version == uri::HTTP_VERSION_1_0) {
+        if (_request.method != method::GET &&
+            _request.method != method::HEAD &&
+            _request.method != method::POST) {
+            _request.setHttpStatus(BAD_REQUEST);
+            return;
+        }
+    } else {
+        if (_request.method != method::GET &&
+            _request.method != method::HEAD &&
+            _request.method != method::POST &&
+            _request.method != method::DELETE) {
+            _request.setHttpStatus(BAD_REQUEST);
+        }
     }
 }
 
