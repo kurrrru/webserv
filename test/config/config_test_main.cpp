@@ -76,12 +76,13 @@ int main() {
             std::cout << "listen port: " << http->servers[i]->listen.port << std::endl;
             std::cout << "server_name: ";
             for (size_t j = 0; j < http->servers[i]->server_names.size(); ++j) {
-                const std::vector<std::string>& names = http->servers[i]->server_names[j].names;
-                for (size_t k = 0; k < names.size(); ++k) {
-                    std::cout << names[k];
-                    if (k < names.size() - 1) {
-                        std::cout << " ";
-                    }
+                const config::ServerName& server_name = http->servers[i]->server_names[j];
+                if (server_name.type == config::ServerName::WILDCARD_START) {
+                    std::cout << "*" << server_name.name;
+                } else if (server_name.type == config::ServerName::WILDCARD_END) {
+                    std::cout << server_name.name << "*";
+                } else {
+                    std::cout << server_name.name;
                 }
                 if (j < http->servers[i]->server_names.size() - 1) {
                     std::cout << ", ";

@@ -48,6 +48,7 @@ const char* ON = "on";
 const char* OFF = "off";
 const size_t MIN_ERROR_PAGE_CODE = 300;
 const size_t MAX_ERROR_PAGE_CODE = 599;
+const char* ASTERISK = "*";
 }  // namespace directive
 
 namespace method {

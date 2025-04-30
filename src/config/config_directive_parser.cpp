@@ -366,14 +366,16 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
         names.push_back(tokens[*pos]);
         (*pos)++;
     }
-    for (const std::string& name : names) {
+    for (std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it) {
+        const std::string& name = *it;
         ServerName server_name;
-        if (name.size() > 0 && name[0] == '*') {
+        if (name[0] == config::directive::ASTERISK[0]) {
+            if (name.size() < 3 || name[1] != config::token::PERIOD[0]) {
+                toolbox::logger::StepMark::error(std::string(config::directive::SERVER_NAME) + "\"" + name + "\" is invalid");
+                return false;
+            }
             server_name.type = ServerName::WILDCARD_START;
-            server_name.name = name.std::string::substr(1);
-        } else if (name.size() > 0 && name[name.size() - 1] == '*') {
-            server_name.type = ServerName::WILDCARD_END;
-            server_name.name = name.std::string::substr(0, name.size() - 1);
+            server_name.name = name;
         } else {
             server_name.type = ServerName::EXACT;
             server_name.name = name;

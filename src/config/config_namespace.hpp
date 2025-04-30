@@ -48,6 +48,7 @@ extern const char* ON;
 extern const char* OFF;
 extern const size_t MIN_ERROR_PAGE_CODE;
 extern const size_t MAX_ERROR_PAGE_CODE;
+extern const char* ASTERISK;
 }  // namespace directive
 
 namespace method {
@@ -66,7 +67,7 @@ extern const int DEFAULT_PORT;
 extern const std::vector<std::string> DEFAULT_INDICES;
 extern const char* DEFAULT_IP;
 extern const char* DEFAULT_ROOT;
-extern const std::vector<std::string> DEFAULT_SERVER_NAME;
+extern const char* DEFAULT_SERVER_NAME;
 extern const char* DEFAULT_UPLOAD_STORE;
 extern const char* DEFAULT_LOCATION_PATH;
 extern const size_t CONF_BUFFER;
