@@ -14,18 +14,12 @@ ConfigInherit::~ConfigInherit() {
 }
 
 void ConfigInherit::applyInheritance() {
-    // HttpConfigからServerConfigへの継承
     for (std::vector<toolbox::SharedPtr<ServerConfig> >::iterator server_it = _http_config->servers.begin();
         server_it != _http_config->servers.end(); ++server_it) {
-        // 親HttpConfigから子ServerConfigへの継承
         config::ConfigInherit::inheritHttpToServer(_http_config, server_it->get());
-
-        // ServerConfigからLocationConfigへの継承
         for (std::vector<toolbox::SharedPtr<LocationConfig> >::iterator loc_it = (*server_it)->locations.begin();
             loc_it != (*server_it)->locations.end(); ++loc_it) {
-            // 親ServerConfigから子LocationConfigへの継承
             config::ConfigInherit::inheritServerToLocation(server_it->get(), loc_it->get());
-            // さらにネストしたLocationがあれば再帰的に適用
             applyLocationInheritance(*loc_it->get());
         }
     }
@@ -34,9 +28,7 @@ void ConfigInherit::applyInheritance() {
 void ConfigInherit::applyLocationInheritance(LocationConfig& location) {
     for (std::vector<toolbox::SharedPtr<LocationConfig> >::iterator child_it = location.locations.begin();
         child_it != location.locations.end(); ++child_it) {
-        // 親Location→子Locationへの継承
         config::ConfigInherit::inheritLocationToLocation(&location, child_it->get());
-        // さらにネストしたLocationがあれば再帰的に適用
         if (!(*child_it)->locations.empty()) {
             applyLocationInheritance(*child_it->get());
         }
@@ -88,7 +80,6 @@ void ConfigInherit::inheritHttpToServer(HttpConfig* http, ServerConfig* server) 
         http->upload_store != DEFAULT_UPLOAD_STORE) {
         server->upload_store = http->upload_store;
     }
-    // 親への参照を設定
     server->setParent(http);
 }
 
@@ -137,7 +128,6 @@ void ConfigInherit::inheritServerToLocation(ServerConfig* server, LocationConfig
         server->upload_store != DEFAULT_UPLOAD_STORE) {
         location->upload_store = server->upload_store;
     }
-    // 親への参照を設定
     location->setParent(server);
 }
 
@@ -186,7 +176,6 @@ void ConfigInherit::inheritLocationToLocation(LocationConfig* parent, LocationCo
         parent->upload_store != DEFAULT_UPLOAD_STORE) {
         child->upload_store = parent->upload_store;
     }
-    // 親への参照を設定
     child->setParent(parent);
 }
 

@@ -8,6 +8,7 @@
 
 #include "config.hpp"
 #include "config_namespace.hpp"
+#include "config_directive_handler.hpp"
 
 namespace config {
 

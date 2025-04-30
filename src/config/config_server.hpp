@@ -28,7 +28,7 @@ class ServerConfig : public ConfigBase {
     std::vector<ServerName> server_names;
     Return return_value;
     std::vector<toolbox::SharedPtr<LocationConfig> > locations;
-    
+
  private:
     HttpConfig* _parent;
     ServerConfig& operator=(const ServerConfig&);

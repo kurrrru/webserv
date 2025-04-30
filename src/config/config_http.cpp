@@ -11,12 +11,10 @@ HttpConfig::HttpConfig() {
 }
 
 HttpConfig::HttpConfig(const HttpConfig& other) : ConfigBase(other) {
-    // スマートポインタ対応のディープコピー
     for (std::vector<toolbox::SharedPtr<ServerConfig> >::const_iterator it = other.servers.begin();
          it != other.servers.end(); ++it) {
         toolbox::SharedPtr<ServerConfig> server_copy(new ServerConfig(**it));
         servers.push_back(server_copy);
-        // 親への参照を設定
         servers.back()->setParent(this);
     }
 }

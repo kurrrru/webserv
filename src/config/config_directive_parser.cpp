@@ -62,12 +62,10 @@ bool parseSize(const std::string& str, size_t* result) {
     if (!stringToSizeT(num_str, &value)) {
         return false;
     }
-    // 最大値チェック
     if (value > max) {
         toolbox::logger::StepMark::error("Size value too large with scale applied: " + str);
         return false;
     }
-    // スケールを適用
     value *= scale;
     *result = value;
     return true;
@@ -185,7 +183,6 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
         (*pos)++;
         return false;
     }
-    // ステータスコードを読み取る
     std::vector<size_t> codes;
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string token = tokens[(*pos)];
@@ -202,19 +199,15 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
             break;
         }
     }
-    // ステータスコードが指定されていない場合はエラー
     if (codes.empty()) {
         toolbox::logger::StepMark::error("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\"");
         return false;
     }
-    // ステータスコードの後にパスがなければエラー
     if (*pos >= tokens.size() || tokens[*pos] == config::directive::SEMICOLON) {
         toolbox::logger::StepMark::error("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\"");
         return false;
     }
-    // パスを読み取る
     std::string path = tokens[(*pos)++];
-    // パスの後にセミコロン以外のトークンがある場合はエラー
     if (tokens[*pos] != config::directive::SEMICOLON) {
         toolbox::logger::StepMark::error("invalid value in \"" + tokens[*pos] + "\"");
         return false;
@@ -249,6 +242,7 @@ bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens
     return expectSemicolon(tokens, pos, config::directive::INDEX);
 }
 
+// Pending
 bool DirectiveParser::parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, Listen* listen) {
     if (!listen || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::LISTEN));
@@ -259,32 +253,28 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
         (*pos)++;
         return false;
     }
-    // ポート番号を読み取る
     std::string port_str = tokens[(*pos)++];
-    // 数値であることを確認
     for (size_t i = 0; i < port_str.size(); ++i) {
         if (!std::isdigit(port_str[i])) {
             toolbox::logger::StepMark::error("Port must be a number: " + port_str);
             return false;
         }
     }
-    // 値を変換して検証
     int port_value = std::atoi(port_str.c_str());
     if (port_value <= 0 || port_value > 65535) {
         toolbox::logger::StepMark::error("Invalid port number: " + port_str + ". Must be between 1 and 65535");
         return false;
     }
-    // セミコロンチェック
     if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
         toolbox::logger::StepMark::error("Expected semicolon after listen directive");
         return false;
     }
-    (*pos)++; // セミコロンをスキップ
-    // ポート番号を設定
+    (*pos)++;
     listen->port = port_value;
     return true;
 }
 
+// Pending
 bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* return_value) {
     if (!return_value || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::RETURN));
@@ -296,7 +286,6 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
         return false;
     }
     std::string first_token = tokens[(*pos)++];
-    // 最初のトークンがステータスコード（数値）かURLか確認
     bool first_is_code = true;
     for (size_t i = 0; i < first_token.size(); ++i) {
         if (!std::isdigit(first_token[i])) {
@@ -305,40 +294,33 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
         }
     }
     if (first_is_code) {
-        // ステータスコードとして解析
         int code = std::atoi(first_token.c_str());
-        // 有効なリダイレクトコードか確認（主に3XX）
         if ((code < 300 || code > 308) && code != 201) {
             toolbox::logger::StepMark::warning("Return code " + first_token + " is not a standard redirect status code");
-            // 警告だけ出して処理は続行
         }
         return_value->status_code = code;
-        // 次のトークンはURLのはず
         if (*pos >= tokens.size() || tokens[*pos] == config::directive::SEMICOLON) {
             toolbox::logger::StepMark::error("URL expected after status code in return directive");
             return false;
         }
         return_value->text_or_url = tokens[(*pos)++];
     } else {
-        // デフォルトのリダイレクトコード（302）を使用
         return_value->status_code = 302;
         return_value->text_or_url = first_token;
     }
-    // URLの簡易検証
     if (return_value->text_or_url.empty()) {
         toolbox::logger::StepMark::error("Return URL cannot be empty");
         return false;
     }
-    // セミコロンチェック
     if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
         toolbox::logger::StepMark::error("Expected semicolon after return directive");
         return false;
     }
-    (*pos)++; // セミコロンをスキップ
-    toolbox::logger::StepMark::debug("Return directive set with code " + toolbox::to_string(return_value->status_code) + " and URL: " + return_value->text_or_url);
+    (*pos)++;
     return true;
 }
 
+// Pending
 bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* root) {
     if (!root || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::SERVER_NAME));
@@ -349,28 +331,22 @@ bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens,
         (*pos)++;
         return false;
     }
-    // ルートパスを読み取る
     std::string path = tokens[(*pos)++];
-    // パスの検証
     if (path.empty()) {
         toolbox::logger::StepMark::error("Root path cannot be empty");
         return false;
     }
-    // 不正な文字チェック
     if (path.find('\0') != std::string::npos) {
         toolbox::logger::StepMark::error("Root path contains null character");
         return false;
     }
-    // セミコロンチェック
     if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
         toolbox::logger::StepMark::error("Expected semicolon after root directive");
         return false;
     }
-    (*pos)++; // セミコロンをスキップ
-    // パスを設定
+    (*pos)++;
     *root = path;
     toolbox::logger::StepMark::debug("Root path set to " + path);
-    
     return true;
 }
 
@@ -391,7 +367,6 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
         names.push_back(name);
         (*pos)++;
     }
-
     ServerName server_name;
     server_name.names = names;
     server_name.type = ServerName::EXACT;

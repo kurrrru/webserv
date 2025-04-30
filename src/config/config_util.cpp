@@ -37,6 +37,7 @@ bool stringToSizeT(const std::string& str, size_t* result) {
         toolbox::logger::StepMark::error("Empty numeric value");
         return false;
     }
+    // off_t is max
     size_t value = 0;
     size_t cutoff = std::numeric_limits<off_t>::max() / 10;
     size_t cutlim = std::numeric_limits<off_t>::max() % 10;

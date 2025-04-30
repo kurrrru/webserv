@@ -68,7 +68,6 @@ void DirectiveParser::initDirectiveInfo() {
 }
 
 bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
-    // 各ディレクティブに対応するハンドラー関数を呼び出す
     if (directive == config::directive::ROOT) {
         return handleRootDirective(tokens, pos, http, server, location);
     } else if (directive == config::directive::INDEX) {
@@ -94,21 +93,18 @@ bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, siz
     } else if (directive == config::directive::SERVER_NAME) {
         return handleServerNameDirective(tokens, pos, http, server, location);
     } else {
-        toolbox::logger::StepMark::error("Unknown directive '" + directive + "'");
+        toolbox::logger::StepMark::error("Unknown directive \"" + directive + "\"");
         return false;
     }
     toolbox::logger::StepMark::error("Internal Error: Directive '" + directive + "' was allowed but no handler was executed.");
     return false;
 }
 
-// ディレクティブが現在のコンテキストで許可されているかチェック
 bool DirectiveParser::isDirectiveAllowedInContext(const std::string& directive, DirectiveContext context) const {
-    // ディレクティブ情報を取得
     std::map<std::string, DirectiveInfo>::const_iterator it = _directive_info.find(directive);
     if (it == _directive_info.end()) {
         return false;
     }
-    // DirectiveInfo構造体のコンテキストと引数のコンテキストを2進数のビット演算比較
     return (it->second.context & context) != 0;
 }
 
@@ -202,7 +198,7 @@ bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>
 
 bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
-        toolbox::logger::StepMark::error("return directive is not allowed in http context");
+        toolbox::logger::StepMark::error("\"" + std::string(config::directive::RETURN) + "\" directive is not allowed here");
     } else if (server) {
         return parseReturnDirective(tokens, pos, &server->return_value);
     } else if (location) {
@@ -224,22 +220,22 @@ bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::st
 
 bool DirectiveParser::handleListenDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
-        toolbox::logger::StepMark::error("listen directive is not allowed in http context");
+        toolbox::logger::StepMark::error("\"" + std::string(config::directive::LISTEN) + "\" directive is not allowed here");
     } else if (server) {
         return parseListenDirective(tokens, pos, &server->listen);
     } else if (location) {
-        toolbox::logger::StepMark::error("listen directive is not allowed in location context");
+        toolbox::logger::StepMark::error("\"" + std::string(config::directive::LISTEN) + "\" directive is not allowed here");
     }
     return false;
 }
 
 bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
-        toolbox::logger::StepMark::error("server_name directive is not allowed in http context");
+        toolbox::logger::StepMark::error("\"" + std::string(config::directive::SERVER_NAME) + "\" directive is not allowed here");
     } else if (server) {
         return parseServerNameDirective(tokens, pos, &server->server_names);
     } else if (location) {
-        toolbox::logger::StepMark::error("server_name directive is not allowed in location context");
+        toolbox::logger::StepMark::error("\"" + std::string(config::directive::SERVER_NAME) + "\" directive is not allowed here");
     }
     return false;
 }
