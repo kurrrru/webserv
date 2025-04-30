@@ -66,7 +66,7 @@ const int DEFAULT_PORT = 80;
 const std::vector<std::string> DEFAULT_INDICES(1, "index.html");
 const char* DEFAULT_IP = "0.0.0.0";
 const char* DEFAULT_ROOT = "html";
-const std::vector<std::string> DEFAULT_SERVER_NAME(1, "");
+const char* DEFAULT_SERVER_NAME = "";
 const char* DEFAULT_UPLOAD_STORE = "upload";
 const char* DEFAULT_LOCATION_PATH = "/";
 const size_t CONF_BUFFER = 4096;

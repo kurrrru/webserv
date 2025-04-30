@@ -95,10 +95,10 @@ struct ServerName {
         WILDCARD_START,
         WILDCARD_END
     };
-    std::vector<std::string> names;
+    std::string name;
     ServerNameType type;
     ServerName()
-        : names(DEFAULT_SERVER_NAME),
+        : name(DEFAULT_SERVER_NAME),
         type(EXACT) {}
 };
 

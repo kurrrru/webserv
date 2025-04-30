@@ -363,14 +363,23 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
     server_names->clear();
     std::vector<std::string> names;
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
-        std::string name = tokens[*pos];
-        names.push_back(name);
+        names.push_back(tokens[*pos]);
         (*pos)++;
     }
-    ServerName server_name;
-    server_name.names = names;
-    server_name.type = ServerName::EXACT;
-    server_names->push_back(server_name);
+    for (const std::string& name : names) {
+        ServerName server_name;
+        if (name.size() > 0 && name[0] == '*') {
+            server_name.type = ServerName::WILDCARD_START;
+            server_name.name = name.std::string::substr(1);
+        } else if (name.size() > 0 && name[name.size() - 1] == '*') {
+            server_name.type = ServerName::WILDCARD_END;
+            server_name.name = name.std::string::substr(0, name.size() - 1);
+        } else {
+            server_name.type = ServerName::EXACT;
+            server_name.name = name;
+        }
+        server_names->push_back(server_name);
+    }
     return expectSemicolon(tokens, pos, config::directive::SERVER_NAME);
 }
 
