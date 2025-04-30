@@ -7,13 +7,14 @@
 #include <deque>
 #include <string>
 #include <utility>
+#include <numeric>
 
 namespace http {
 
 // Parser utils
 
 void logInfo(HttpStatus status, const std::string& message) {
-    toolbox::logger::StepMark::info("HTTP " +
+    toolbox::logger::StepMark::info("RequestParser " +
         toolbox::to_string(static_cast<int>(status)) + ": " + message);
 }
 
@@ -24,15 +25,6 @@ bool hasCtlChar(const std::string& str) {
         }
     }
     return false;
-}
-
-bool isUppStr(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (!std::isupper(str[i])) {
-            return false;
-        }
-    }
-    return true;
 }
 
 static void trimSpace(std::string &line) {
@@ -48,7 +40,7 @@ static void trimSpace(std::string &line) {
     line = line.substr(front_pos, rear_pos - front_pos + 1);
 }
 
-bool isChunkedEncoding(HTTPRequest* request) {
+static bool isChunkedEncoding(HTTPRequest* request) {
     return (
         !(request->fields.getFieldValue(fields::TRANSFER_ENCODING).empty()) &&
         *(request->fields.getFieldValue(fields::TRANSFER_ENCODING).begin()) ==
@@ -61,6 +53,15 @@ static void skipSpace(std::string* line) {
         return;
     }
     *line = line->substr(not_sp_pos);
+}
+
+static std::size_t addLength(std::size_t sum, const std::string& s) {
+    return sum + s.size();
+}
+
+static std::size_t calcTotalLength(const std::deque<std::string>& deq) {
+    return std::accumulate(deq.begin(), deq.end(),
+        static_cast<std::size_t>(0), addLength);
 }
 
 // Class method
@@ -81,9 +82,8 @@ void RequestParser::run(const std::string& buf) {
     processRequestLine();
     processFields();
     processBody();
-    toolbox::logger::StepMark::info("RequestParser: failed");
     if (_validatePos == COMPLETED) {
-        logInfo(OK, "Request parse completed");
+        logInfo(OK, "completed");
     }
 }
 
@@ -95,7 +95,6 @@ void RequestParser::processRequestLine() {
     validateVersion();
     validateMethod();
     processURI();
-
     if (_request.httpStatus != OK) {
         throw ParseException("");
     }
@@ -128,7 +127,6 @@ void RequestParser::validateMethod() {
             _request.method != method::HEAD &&
             _request.method != method::POST) {
             _request.setHttpStatus(BAD_REQUEST);
-            return;
         }
     } else {
         if (_request.method != method::GET &&
@@ -184,26 +182,28 @@ void RequestParser::verifySafePath() {
         }
     }
     _request.uri.path.clear();
+    std::size_t totalLength = calcTotalLength(pathDeque);
+    _request.uri.path.reserve(totalLength);
     for (int i = pathDeque.size() - 1; i >= 0; --i) {
         _request.uri.path += pathDeque[i];
     }
 }
 
 void RequestParser::parseURI() {
-    std::size_t query_pos = _request.uri.fullUri.find(symbols::QUESTION);
-    std::size_t frag_pos = _request.uri.fullUri.find(symbols::HASH);
-    if (query_pos != std::string::npos && query_pos < frag_pos) {
-        _request.uri.path = _request.uri.fullUri.substr(0, query_pos);
-        if (frag_pos != std::string::npos) {
+    std::size_t queryPos = _request.uri.fullUri.find(symbols::QUESTION);
+    std::size_t fragPos = _request.uri.fullUri.find(symbols::HASH);
+    if (queryPos != std::string::npos && queryPos < fragPos) {
+        _request.uri.path = _request.uri.fullUri.substr(0, queryPos);
+        if (fragPos != std::string::npos) {
             _request.uri.fullQuery =
-                _request.uri.fullUri.substr(query_pos, frag_pos - query_pos);
+                _request.uri.fullUri.substr(queryPos, fragPos - queryPos);
         } else {
             _request.uri.fullQuery =
-                _request.uri.fullUri.substr(query_pos);
+                _request.uri.fullUri.substr(queryPos);
         }
     } else {
         _request.uri.path = _request.uri.fullUri.substr
-            (0, frag_pos);
+            (0, fragPos);
     }
 }
 
@@ -213,20 +213,20 @@ void RequestParser::parseQuery() {
     }
     std::string line = _request.uri.fullQuery.substr(1);  // skip '?'
     while (true) {
-        std::size_t e_pos = line.find(symbols::EQUAL);
-        std::size_t a_pos = line.find(symbols::AMPERSAND);
-        if (e_pos == std::string::npos) {
+        std::size_t ePos = line.find(symbols::EQUAL);
+        std::size_t aPos = line.find(symbols::AMPERSAND);
+        if (ePos == std::string::npos) {
             return;
         }
-        if (a_pos != std::string::npos) {
-            _request.uri.queryMap[line.substr(0, e_pos)] =
-                line.substr(e_pos + 1, a_pos - e_pos - 1);
+        if (aPos != std::string::npos) {
+            _request.uri.queryMap[line.substr(0, ePos)] =
+                line.substr(ePos + 1, aPos - ePos - 1);
         } else {
-            _request.uri.queryMap[line.substr(0, e_pos)] =
-                line.substr(e_pos + 1);
+            _request.uri.queryMap[line.substr(0, ePos)] =
+                line.substr(ePos + 1);
             break;
         }
-        line.erase(0, a_pos + 1);
+        line.erase(0, aPos + 1);
     }
 }
 
@@ -239,8 +239,7 @@ void RequestParser::pathDecode() {
 }
 
 void RequestParser::percentDecode(std::string& line) {
-    std::size_t p_pos = line.find(symbols::PERCENT);
-    if (p_pos == std::string::npos) {
+    if (line.find(symbols::PERCENT) == std::string::npos) {
         return;
     }
     std::string res;
@@ -255,8 +254,7 @@ void RequestParser::percentDecode(std::string& line) {
             } else {
                 if (line[0] == '/' || i + 2 < line.size()) {  // is path
                     _request.setHttpStatus(BAD_REQUEST);
-                    toolbox::logger::StepMark::info
-                        ("RequestParser: path has invalid hexdecimal");
+                    logInfo(BAD_REQUEST, "path has invalid hexdecimal");
                     return;
                 }
                 res += line[i];
@@ -274,21 +272,13 @@ void RequestParser::percentDecode(std::string& line) {
 }
 
 bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
-    if (hexStr.size() != 2) {
+    if (hexStr.size() != 2 || !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
         return false;
-    }
-    for (std::size_t i = 0; i < 2; ++i) {
-        if (!isxdigit(hexStr[i])) {
-            return false;
-        }
     }
     char* endptr = NULL;
     std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
     decodedStr = static_cast<char>(hex);
-    if (*endptr != '\0') {
-        return false;
-    }
-    if (hex == '\0') {
+    if (*endptr != '\0' || hex == '\0') {
         return false;
     }
     return true;
@@ -297,46 +287,36 @@ bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
 void RequestParser::validatePath() {
     if (_request.uri.fullUri.empty()) {
         _request.setHttpStatus(BAD_REQUEST);
-        toolbox::logger::StepMark::info("RequestParser: uri not found");
+        logInfo(BAD_REQUEST, "uri not found");
         return;
     }
     if (_request.uri.path.size() > http::uri::MAX_URI_SIZE) {
         _request.setHttpStatus(URI_TOO_LONG);
-        toolbox::logger::StepMark::info("RequestParser: uri too long");
+        logInfo(BAD_REQUEST, "uri too large");
         return;
     }
     if (_request.uri.fullUri[0] != *symbols::SLASH ||
         hasCtlChar(_request.uri.fullUri)) {
         _request.setHttpStatus(BAD_REQUEST);
-        toolbox::logger::StepMark::info("RequestParser: invalid uri");
+        logInfo(BAD_REQUEST, "invalid uri");
         return;
     }
 }
 
 void RequestParser::validateVersion() {
     if (_request.version.empty()) {
-        toolbox::logger::StepMark::info
-            ("RequestParser: version not found");
         _request.setHttpStatus(BAD_REQUEST);
+        logInfo(BAD_REQUEST, "path has invalid hexdecimal");
         return;
     }
     if (hasCtlChar(_request.version)) {
         _request.setHttpStatus(BAD_REQUEST);
-        toolbox::logger::StepMark::info
-            ("RequestParser: version has control character");
+        logInfo(BAD_REQUEST, "path has invalid hexdecimal");
         return;
     }
     if (!isValidFormat()) {
-        _request.setHttpStatus(BAD_REQUEST);
-        toolbox::logger::StepMark::info
-            ("RequestParser: version invalid format");
+        logInfo(BAD_REQUEST, "invalid version format");
         return;
-    }
-    if (_request.version != uri::HTTP_VERSION_1_0 &&
-        _request.version != uri::HTTP_VERSION_1_1) {
-        _request.setHttpStatus(BAD_REQUEST);
-        toolbox::logger::StepMark::info
-            ("RequestParser: invalid version");
     }
 }
 
@@ -357,7 +337,7 @@ bool RequestParser::isValidFormat() {
         strtol(_request.version.substr(dotPos + 1).c_str(), &endptr, 10);
     if (majorVersion < uri::HTTP_MAJOR_VERSION ||
             minorVersion > uri::HTTP_MINOR_VERSION_MAX) {
-        _request.setHttpStatus(BAD_REQUEST);
+                _request.setHttpStatus(BAD_REQUEST);
         return false;
     }
     if (majorVersion > 1) {
