@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <sstream>
 
+#include "../config/config_parser.hpp"
 #include "../socket/server.hpp"
 #include "../socket/client.hpp"
 #include "../event/epoll.hpp"
@@ -18,15 +19,25 @@
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/shared.hpp"
 
-int main() {
+int main(int argc, char* argv[]) {
     try {
+        toolbox::SharedPtr<config::Config> config;
+        if (argc == 1) {
+            config = config::ConfigParser::parseFile("", true);
+        } else if (argc == 2) {
+            config = config::ConfigParser::parseFile(argv[1], false);
+        }
+        toolbox::SharedPtr<config::HttpConfig> http_config = config->getHttpConfig();
+        toolbox::SharedPtr<config::ServerConfig> server_config1 = http_config->getServers()[0];
+        toolbox::SharedPtr<config::ServerConfig> server_config2 = http_config->getServers()[1];
+
         Epoll epoll;
-        toolbox::SharedPtr<Server> server1(new Server(5000));
-        server1->setName("server1");
+        toolbox::SharedPtr<Server> server1(new Server(server_config1->listen.port));
+        server1->setName(server_config1->server_names[0].names[0]);
         epoll.addServer(server1->getFd(), server1);
 
-        toolbox::SharedPtr<Server> server2(new Server(8001));
-        server2->setName("server2");
+        toolbox::SharedPtr<Server> server2(new Server(server_config2->listen.port));
+        server2->setName(server_config2->server_names[0].names[0]);
         epoll.addServer(server2->getFd(), server2);
 
         int cnt = 0;  // for debug
