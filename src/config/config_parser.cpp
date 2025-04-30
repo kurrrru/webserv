@@ -8,45 +8,52 @@
 #include "config_parser.hpp"
 #include "config.hpp"
 #include "config_namespace.hpp"
+#include "config_inherit.hpp"
 
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/string.hpp"
 
 namespace config {
 
-ConfigParser::ConfigParser() : _directiveParser() {
+ConfigParser::ConfigParser() :
+_input(""),
+_tokens(),
+_config(toolbox::SharedPtr<HttpConfig>(new HttpConfig())) {
 }
 
 ConfigParser::~ConfigParser() {
 }
 
 // ファイルを解析してConfigオブジェクトを生成する
-toolbox::SharedPtr<Config> ConfigParser::parseFile(const std::string& filepath) {
+toolbox::SharedPtr<Config> ConfigParser::parseFile(const std::string& filepath, bool is_default) {
     ConfigParser parser;
-    // ファイルを読み込む
-    if (!parser.readFile(filepath)) {
-        throw ConfigException("Failed to read config file: " + filepath);
+    if (is_default) {
+        // デフォルト設定ファイルを読み込む
+        if (!parser.loadDefaultConfig()) {
+            throw ConfigException("Failed to load default config file");
+        }
+    } else {
+        // 指定されたファイルを読み込む
+        if (!parser.readFile(filepath)) {
+            throw ConfigException("Failed to read config file: " + filepath);
+        }
     }
     ConfigLexer lexer;
     // トークン化を行う
     parser._tokens = lexer.tokenize(parser._input);
     // トークン化結果の処理をヘルパーメソッドに委譲
     // TODO(yootsubo) :トークンが空、または空白/コメントのみの場合の処理
-    // デフォルト設定ファイルを見るために一旦、警告出すだけ
-    // トークンが空の場合はdefalut.confを読み込む
+    toolbox::SharedPtr<Config> config(new Config());
     if (parser._tokens.empty()) {
         toolbox::logger::StepMark::warning("No tokens found in config file.");
-        if (!parser.loadDefaultConfig()) {
-            throw ConfigException("Failed to load default config");
-        }
+        return config;
     }
     // トークン化結果を解析する
     if (!parser.parse()) {
         throw ConfigException("Failed to parse configuration");
     }
-    toolbox::SharedPtr<Config> config(new Config());
     // 解析結果をConfigオブジェクトにセット
-    config->setConfig(parser._config);
+    config->setHttpConfig(parser._config);
     config->setTokenCount(parser._tokens.size());
     return config;
 }
@@ -56,6 +63,7 @@ bool ConfigParser::readFile(const std::string& filepath) {
     // ファイルを開く
     std::ifstream file(filepath.c_str());
     if (!file) {
+        toolbox::logger::StepMark::error("open() \"" + filepath + "\" failed");
         return false;
     }
     std::stringstream buffer;
@@ -91,7 +99,7 @@ bool ConfigParser::parse() {
         return false;
     } else {
         // 空でない場合はhttpブロックから始まる必要がある
-        if (pos >= _tokens.size() || _tokens[pos] != config::context::CONTEXT_HTTP) {
+        if (pos >= _tokens.size() || _tokens[pos] != config::context::HTTP) {
             toolbox::logger::StepMark::error("Configuration must start with 'http' block.");
             return false;
         }
@@ -105,6 +113,9 @@ bool ConfigParser::parse() {
             return false;
         }
     }
+    // パース完了後に継承処理を実行
+    ConfigInherit inherit(_config.get());
+    inherit.applyInheritance();
     return true;
 }
 

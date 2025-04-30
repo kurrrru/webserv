@@ -11,26 +11,6 @@
 
 namespace config {
 
-enum DirectiveContext {
-    CONTEXT_NONE = 0,
-    CONTEXT_HTTP = 1,
-    CONTEXT_SERVER = 2,
-    CONTEXT_LOCATION = 4,
-    CONTEXT_ALL = CONTEXT_HTTP | CONTEXT_SERVER | CONTEXT_LOCATION,
-    CONTEXT_HTTP_SERVER = CONTEXT_HTTP | CONTEXT_SERVER,
-    CONTEXT_HTTP_LOCATION = CONTEXT_HTTP | CONTEXT_LOCATION,
-    CONTEXT_SERVER_LOCATION = CONTEXT_SERVER | CONTEXT_LOCATION,
-};
-
-struct DirectiveInfo {
-    std::string directive;
-    DirectiveContext context;
-
-    DirectiveInfo()
-        : directive(""),
-        context(CONTEXT_NONE) {}
-};
-
 class ServerConfig;
 class LocationConfig;
 class HttpConfig;
@@ -45,7 +25,7 @@ class DirectiveParser {
     bool parseErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ErrorPage>* error_pages);
     bool parseUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* upload_store);
     bool parseCgiPassDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* cgi_pass);
-    bool parseCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* cgi_extensions);
+    bool parseCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* cgi_extension);
     bool parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* return_value);
     bool parseClientMaxBodySize(const std::vector<std::string>& tokens, size_t* pos, size_t* client_max_body_size);
     bool parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, Listen* listen);

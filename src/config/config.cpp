@@ -3,23 +3,24 @@
 #include <string>
 
 #include "config.hpp"
+#include "config_http.hpp"
+
+#include "../../toolbox/shared.hpp"
 
 namespace config {
 
-Config::Config() : _token_count(0) {}
+Config::Config() :
+_token_count(0) {
+}
 
 Config::~Config() {}
 
-const config::HttpConfig& Config::getConfig() const {
-    return _config;
+const toolbox::SharedPtr<config::HttpConfig>& Config::getHttpConfig() const {
+    return _http_config;
 }
 
-config::HttpConfig& Config::getMutableConfig() {
-    return _config;
-}
-
-void Config::setConfig(const config::HttpConfig& config) {
-    _config = config;
+void Config::setHttpConfig(const toolbox::SharedPtr<config::HttpConfig>& http_config) {
+    _http_config = http_config;
 }
 
 size_t Config::getTokenCount() const {

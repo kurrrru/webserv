@@ -1,5 +1,9 @@
 // Copyright 2025 Ideal Broccoli
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "config_directive_handler.hpp"
 #include "config_namespace.hpp"
 
@@ -11,108 +15,90 @@ DirectiveParser::DirectiveParser() {
     initDirectiveInfo();
 }
 
-// ディレクティブの初期化
 void DirectiveParser::initDirectiveInfo() {
     DirectiveInfo info;
 
-    info.directive = config::directive::DIRECTIVE_ROOT;
+    info.directive = config::directive::ROOT;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_ROOT] = info;
+    _directive_info[config::directive::ROOT] = info;
 
-    info.directive = config::directive::DIRECTIVE_INDEX;
+    info.directive = config::directive::INDEX;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_INDEX] = info;
+    _directive_info[config::directive::INDEX] = info;
 
-    info.directive = config::directive::DIRECTIVE_AUTOINDEX;
+    info.directive = config::directive::AUTOINDEX;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_AUTOINDEX] = info;
+    _directive_info[config::directive::AUTOINDEX] = info;
 
-    info.directive = config::directive::DIRECTIVE_ALLOWED_METHODS;
+    info.directive = config::directive::ALLOWED_METHODS;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_ALLOWED_METHODS] = info;
+    _directive_info[config::directive::ALLOWED_METHODS] = info;
 
-    info.directive = config::directive::DIRECTIVE_ERROR_PAGE;
+    info.directive = config::directive::ERROR_PAGE;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_ERROR_PAGE] = info;
+    _directive_info[config::directive::ERROR_PAGE] = info;
 
-    info.directive = config::directive::DIRECTIVE_UPLOAD_STORE;
+    info.directive = config::directive::UPLOAD_STORE;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_UPLOAD_STORE] = info;
+    _directive_info[config::directive::UPLOAD_STORE] = info;
 
-    info.directive = config::directive::DIRECTIVE_CGI_PASS;
+    info.directive = config::directive::CGI_PASS;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_CGI_PASS] = info;
+    _directive_info[config::directive::CGI_PASS] = info;
 
-    info.directive = config::directive::DIRECTIVE_CGI_EXTENSION;
+    info.directive = config::directive::CGI_EXTENSION;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_CGI_EXTENSION] = info;
+    _directive_info[config::directive::CGI_EXTENSION] = info;
 
-    info.directive = config::directive::DIRECTIVE_CLIENT_MAX_BODY_SIZE;
+    info.directive = config::directive::CLIENT_MAX_BODY_SIZE;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::DIRECTIVE_CLIENT_MAX_BODY_SIZE] = info;
+    _directive_info[config::directive::CLIENT_MAX_BODY_SIZE] = info;
 
-    info.directive = config::directive::DIRECTIVE_LISTEN;
+    info.directive = config::directive::LISTEN;
     info.context = CONTEXT_SERVER;
-    _directive_info[config::directive::DIRECTIVE_LISTEN] = info;
+    _directive_info[config::directive::LISTEN] = info;
 
-    info.directive = config::directive::DIRECTIVE_SERVER_NAME;
+    info.directive = config::directive::SERVER_NAME;
     info.context = CONTEXT_SERVER;
-    _directive_info[config::directive::DIRECTIVE_SERVER_NAME] = info;
+    _directive_info[config::directive::SERVER_NAME] = info;
 
-    info.directive = config::directive::DIRECTIVE_RETURN;
+    info.directive = config::directive::RETURN;
     info.context = CONTEXT_SERVER_LOCATION;
-    _directive_info[config::directive::DIRECTIVE_RETURN] = info;
+    _directive_info[config::directive::RETURN] = info;
 }
 
-bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    // TODO(yootsubo) :チェックが必要かもかも知らないところで使われるとアウト
+bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     // 各ディレクティブに対応するハンドラー関数を呼び出す
-    if (directive == config::directive::DIRECTIVE_ROOT) {
-        return handleRootDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_INDEX) {
-        return handleIndexDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_AUTOINDEX) {
-        return handleAutoindexDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_ALLOWED_METHODS) {
-        return handleAllowedMethodsDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_ERROR_PAGE) {
-        return handleErrorPageDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_UPLOAD_STORE) {
-        return handleUploadStoreDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_CGI_PASS) {
-        return handleCgiPassDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_CGI_EXTENSION) {
-        return handleCgiExtensionDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_RETURN) {
-        return handleReturnDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_CLIENT_MAX_BODY_SIZE) {
-        return handleClientMaxBodySizeDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_LISTEN) {
-        return handleListenDirective(tokens, pos, server, location, http);
-    } else if (directive == config::directive::DIRECTIVE_SERVER_NAME) {
-        return handleServerNameDirective(tokens, pos, server, location, http);
-    // 未知のディレクティブ
+    if (directive == config::directive::ROOT) {
+        return handleRootDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::INDEX) {
+        return handleIndexDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::AUTOINDEX) {
+        return handleAutoindexDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::ALLOWED_METHODS) {
+        return handleAllowedMethodsDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::ERROR_PAGE) {
+        return handleErrorPageDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::UPLOAD_STORE) {
+        return handleUploadStoreDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::CGI_PASS) {
+        return handleCgiPassDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::CGI_EXTENSION) {
+        return handleCgiExtensionDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::RETURN) {
+        return handleReturnDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::CLIENT_MAX_BODY_SIZE) {
+        return handleClientMaxBodySizeDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::LISTEN) {
+        return handleListenDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::SERVER_NAME) {
+        return handleServerNameDirective(tokens, pos, http, server, location);
     } else {
         toolbox::logger::StepMark::error("Unknown directive '" + directive + "'");
         return false;
     }
-    // ここに来るのは内部エラー
     toolbox::logger::StepMark::error("Internal Error: Directive '" + directive + "' was allowed but no handler was executed.");
     return false;
-}
-
-// ディレクティブのコンテキストを取得
-DirectiveContext DirectiveParser::getCurrentContext(config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* config) const {
-    if (location) {
-        return CONTEXT_LOCATION;
-    }
-    if (server) {
-        return CONTEXT_SERVER;
-    }
-    if (config) {
-        return CONTEXT_HTTP;
-    }
-    return CONTEXT_NONE;
 }
 
 // ディレクティブが現在のコンテキストで許可されているかチェック
@@ -126,107 +112,106 @@ bool DirectiveParser::isDirectiveAllowedInContext(const std::string& directive, 
     return (it->second.context & context) != 0;
 }
 
-bool DirectiveParser::handleAllowedMethodsDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseAllowedMethodsDirective(tokens, pos, &location->allowed_methods); 
+bool DirectiveParser::handleAllowedMethodsDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseAllowedMethodsDirective(tokens, pos, &http->allowed_methods);
     } else if (server) {
-        return parseAllowedMethodsDirective(tokens, pos, &server->allowed_methods); 
-    } else if (http) {
-        return parseAllowedMethodsDirective(tokens, pos, &http->allowed_methods); 
+        return parseAllowedMethodsDirective(tokens, pos, &server->allowed_methods);
+    } else if (location) {
+        return parseAllowedMethodsDirective(tokens, pos, &location->allowed_methods);
     }
     return false;
 }
 
-bool DirectiveParser::handleAutoindexDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseAutoindexDirective(tokens, pos, &location->autoindex); 
+bool DirectiveParser::handleAutoindexDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseAutoindexDirective(tokens, pos, &http->autoindex);
     } else if (server) {
-        return parseAutoindexDirective(tokens, pos, &server->autoindex); 
-    } else if (http) {
-        return parseAutoindexDirective(tokens, pos, &http->autoindex); 
+        return parseAutoindexDirective(tokens, pos, &server->autoindex);
+    } else if (location) {
+        return parseAutoindexDirective(tokens, pos, &location->autoindex);
     }
     return false;
 }
 
-bool DirectiveParser::handleRootDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseRootDirective(tokens, pos, &location->root); 
+bool DirectiveParser::handleRootDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseRootDirective(tokens, pos, &http->root);
+    } else if (location) {
+        return parseRootDirective(tokens, pos, &location->root);
     } else if (server) {
-        return parseRootDirective(tokens, pos, &server->root); 
-    } else if (http) {
-        return parseRootDirective(tokens, pos, &http->root); 
+        return parseRootDirective(tokens, pos, &server->root);
     }
     return false;
 }
 
-bool DirectiveParser::handleIndexDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseIndexDirective(tokens, pos, &location->index); 
+bool DirectiveParser::handleIndexDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseIndexDirective(tokens, pos, &http->indices);
     } else if (server) {
-        return parseIndexDirective(tokens, pos, &server->index); 
-    } else if (http) {
-        return parseIndexDirective(tokens, pos, &http->index); 
+        return parseIndexDirective(tokens, pos, &server->indices);
+    } else if (location) {
+        return parseIndexDirective(tokens, pos, &location->indices);
     }
     return false;
 }
 
-bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseErrorPageDirective(tokens, pos, &location->error_pages); 
+bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseErrorPageDirective(tokens, pos, &http->error_pages);
     } else if (server) {
-        return parseErrorPageDirective(tokens, pos, &server->error_pages); 
-    } else if (http) {
-        return parseErrorPageDirective(tokens, pos, &http->error_pages); 
+        return parseErrorPageDirective(tokens, pos, &server->error_pages);
+    } else if (location) {
+        return parseErrorPageDirective(tokens, pos, &location->error_pages);
     }
     return false;
 }
 
-bool DirectiveParser::handleUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseUploadStoreDirective(tokens, pos, &location->upload_store); 
+bool DirectiveParser::handleUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseUploadStoreDirective(tokens, pos, &http->upload_store);
     } else if (server) {
-        return parseUploadStoreDirective(tokens, pos, &server->upload_store); 
-    } else if (http) {
-        return parseUploadStoreDirective(tokens, pos, &http->upload_store); 
+        return parseUploadStoreDirective(tokens, pos, &server->upload_store);
+    } else if (location) {
+        return parseUploadStoreDirective(tokens, pos, &location->upload_store);
     }
     return false;
 }
 
-bool DirectiveParser::handleCgiPassDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseCgiPassDirective(tokens, pos, &location->cgi_pass); 
+bool DirectiveParser::handleCgiPassDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseCgiPassDirective(tokens, pos, &http->cgi_pass);
     } else if (server) {
-        return parseCgiPassDirective(tokens, pos, &server->cgi_pass); 
-    } else if (http) {
-        return parseCgiPassDirective(tokens, pos, &http->cgi_pass); 
+        return parseCgiPassDirective(tokens, pos, &server->cgi_pass);
+    } else if (location) {
+        return parseCgiPassDirective(tokens, pos, &location->cgi_pass);
     }
     return false;
 }
 
-bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseCgiExtensionDirective(tokens, pos, &location->cgi_extension); 
+bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        return parseCgiExtensionDirective(tokens, pos, &http->cgi_extensions);
     } else if (server) {
-        return parseCgiExtensionDirective(tokens, pos, &server->cgi_extension); 
-    } else if (http) {
-        return parseCgiExtensionDirective(tokens, pos, &http->cgi_extension); 
+        return parseCgiExtensionDirective(tokens, pos, &server->cgi_extensions);
+    } else if (location) {
+        return parseCgiExtensionDirective(tokens, pos, &location->cgi_extensions);
     }
     return false;
 }
 
-bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
-    if (location) {
-        return parseReturnDirective(tokens, pos, &location->return_code, &location->return_url); 
+bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    if (http) {
+        toolbox::logger::StepMark::error("return directive is not allowed in http context");
     } else if (server) {
-        return parseReturnDirective(tokens, pos, &server->return_code, &server->return_url); 
-    } else if (http) {
-        return parseReturnDirective(tokens, pos, &http->return_code, &http->return_url); 
+        return parseReturnDirective(tokens, pos, &server->return_value);
+    } else if (location) {
+        return parseReturnDirective(tokens, pos, &location->return_value);
     }
     return false;
 }
 
-// 専用ディレクティブのハンドラー関数
-bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
+bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
         return parseClientMaxBodySize(tokens, pos, &http->client_max_body_size);
     } else if (server) {
@@ -237,18 +222,18 @@ bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::st
     return false;
 }
 
-bool DirectiveParser::handleListenDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
+bool DirectiveParser::handleListenDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
         toolbox::logger::StepMark::error("listen directive is not allowed in http context");
     } else if (server) {
-        return parseListenDirective(tokens, pos, &server->port);
+        return parseListenDirective(tokens, pos, &server->listen);
     } else if (location) {
         toolbox::logger::StepMark::error("listen directive is not allowed in location context");
     }
     return false;
 }
 
-bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server, config::LocationConfig* location, config::HttpConfig* http) {
+bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
         toolbox::logger::StepMark::error("server_name directive is not allowed in http context");
     } else if (server) {

@@ -8,6 +8,12 @@
 #include <set>
 
 #include "config_namespace.hpp"
+#include "config_http.hpp"
+#include "config_server.hpp"
+#include "config_location.hpp"
+
+
+#include "../../toolbox/shared.hpp"
 
 namespace config {
 
@@ -16,21 +22,16 @@ class Config {
     Config();
     ~Config();
 
-    // 設定の初期化用コンストラクタ (パーサーから使用)
-    explicit Config(const config::HttpConfig& config) : _config(config) {}
-
-    const config::HttpConfig& getConfig() const;
-    config::HttpConfig& getMutableConfig();
-    void setConfig(const config::HttpConfig& config);
+    const toolbox::SharedPtr<config::HttpConfig>& getHttpConfig() const;
+    void setHttpConfig(const toolbox::SharedPtr<config::HttpConfig>& config);
     size_t getTokenCount() const;
     void setTokenCount(const size_t token_count);
 
  private:
-    config::HttpConfig _config;
+    toolbox::SharedPtr<config::HttpConfig> _http_config;
+    Config& operator=(const Config& other);
     size_t _token_count;
     Config(const Config& other);
-    Config& operator=(const Config& other);
-
 };
 
 class ConfigException : public std::exception {

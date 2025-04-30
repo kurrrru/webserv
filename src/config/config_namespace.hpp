@@ -4,162 +4,113 @@
 
 #include <string>
 #include <vector>
-#include <set>
 
 namespace config {
 
 namespace token {
 // Token types
-const char OPEN_BRACE[] = "{";
-const char CLOSE_BRACE[] = "}";
-const char SEMICOLON[] = ";";
-
-// Token delimiters
-const char WHITESPACE_CHARS[] = " \t\n\r";
-const char COMMENT_CHAR = '#';
-const char DOUBLE_QUOTE = '"';
-const char SINGLE_QUOTE = '\'';
+extern const char* OPEN_BRACE;
+extern const char* CLOSE_BRACE;
+extern const char* SEMICOLON;
+extern const char* LF;
+extern const char* CR;
+extern const char* TAB;
+extern const char* BACKSLASH;
+extern const char* COMMENT_CHAR;
+extern const char* DOUBLE_QUOTE;
+extern const char* SINGLE_QUOTE;
+extern const char* PERIOD;
+extern const char* SLASH;
+extern const char* WHITESPACE_CHARS;
 }  // namespace token
 
 namespace context {
-const char CONTEXT_HTTP[] = "http";
-const char CONTEXT_SERVER[] = "server";
-const char CONTEXT_LOCATION[] = "location";
+extern const char* HTTP;
+extern const char* SERVER;
+extern const char* LOCATION;
 }  // namespace context
 
 namespace directive {
-const char DIRECTIVE_CLIENT_MAX_BODY_SIZE[] = "client_max_body_size";
-const char DIRECTIVE_LISTEN[] = "listen";
-const char DIRECTIVE_SERVER_NAME[] = "server_name";
-const char DIRECTIVE_ROOT[] = "root";
-const char DIRECTIVE_INDEX[] = "index";
-const char DIRECTIVE_ALLOWED_METHODS[] = "allowed_methods";
-const char DIRECTIVE_UPLOAD_STORE[] = "upload_store";
-const char DIRECTIVE_CGI_PASS[] = "cgi_pass";
-const char DIRECTIVE_ERROR_PAGE[] = "error_page";
-const char DIRECTIVE_AUTOINDEX[] = "autoindex";
-const char DIRECTIVE_CGI_EXTENSION[] = "cgi_extension";
-const char DIRECTIVE_RETURN[] = "return";
+extern const char* CLIENT_MAX_BODY_SIZE;
+extern const char* LISTEN;
+extern const char* SERVER_NAME;
+extern const char* ROOT;
+extern const char* INDEX;
+extern const char* ALLOWED_METHODS;
+extern const char* UPLOAD_STORE;
+extern const char* CGI_PASS;
+extern const char* ERROR_PAGE;
+extern const char* AUTOINDEX;
+extern const char* CGI_EXTENSION;
+extern const char* RETURN;
+extern const char* SEMICOLON;
+extern const char* ON;
+extern const char* OFF;
+extern const size_t MIN_ERROR_PAGE_CODE;
+extern const size_t MAX_ERROR_PAGE_CODE;
 }  // namespace directive
 
 namespace method {
-const char METHOD_GET[] = "GET";
-const char METHOD_POST[] = "POST";
-const char METHOD_DELETE[] = "DELETE";
-const char METHOD_HEAD[] = "HEAD";
+extern const char* GET;
+extern const char* POST;
+extern const char* DELETE;
+extern const size_t ALLOWED_METHODS_COUNT;
+extern const char* ALLOWED_METHODS[];
 }  // namespace method
 
-const int DEFAULT_PORT = 80;
-const size_t DEFAULT_CLIENT_MAX_BODY_SIZE = 1024 * 1024;
-const char DEFAULT_FILE[] = "conf/default.conf";
+extern const bool DEFAULT_AUTOINDEX;
+extern const size_t DEFAULT_CLIENT_MAX_BODY_SIZE;
+extern const char* DEFAULT_CGI_PATH;
+extern const char* DEFAULT_FILE;
+extern const int DEFAULT_PORT;
+extern const std::vector<std::string> DEFAULT_INDICES;
+extern const char* DEFAULT_IP;
+extern const char* DEFAULT_ROOT;
+extern const std::vector<std::string> DEFAULT_SERVER_NAME;
+extern const char* DEFAULT_UPLOAD_STORE;
+extern const char* DEFAULT_LOCATION_PATH;
+extern const size_t CONF_BUFFER;
 
 struct ErrorPage {
-    std::vector<int> codes;
+    std::vector<size_t> codes;
     std::string path;
-
     ErrorPage()
         : codes(),
         path() {}
 };
 
-struct LocationConfig {
-    std::vector<std::string> allowed_methods;
-    bool autoindex;
-    std::string cgi_extension;
-    std::string cgi_pass;
-    size_t client_max_body_size;
-    std::vector<ErrorPage> error_pages;
-    std::vector<std::string> index;
-    std::string path;
-    int return_code;
-    std::string return_url;
-    std::string root;
-    std::string upload_store;
-    std::set<std::string> parsedDirectives;
-
-    LocationConfig()
-        : allowed_methods(),
-        autoindex(false),
-        cgi_extension(""),
-        cgi_pass(""),
-        client_max_body_size(DEFAULT_CLIENT_MAX_BODY_SIZE),
-        error_pages(),
-        index(),
-        path(""),
-        return_code(-1),
-        return_url(""),
-        root(""),
-        upload_store(""),
-        parsedDirectives()
-        {}
+struct Listen {
+    size_t port;
+    std::string ip;
+    bool default_server;
+    Listen()
+        : port(DEFAULT_PORT),
+        ip(DEFAULT_IP),
+        default_server(false) {}
 };
 
-struct ServerConfig {
-    std::vector<std::string> allowed_methods;
-    bool autoindex;
-    std::string cgi_extension;
-    std::string cgi_pass;
-    size_t client_max_body_size;
-    std::vector<ErrorPage> error_pages;
-    std::vector<std::string> index;
-    int port;
-    int return_code;
-    std::string return_url;
-    std::string root;
-    std::vector<std::string> server_names;
-    std::string upload_store;
-    std::vector<LocationConfig> locations;
-    std::set<std::string> parsedDirectives;
-
-    ServerConfig()
-        : allowed_methods(),
-        autoindex(false),
-        cgi_extension(""),
-        cgi_pass(""),
-        client_max_body_size(DEFAULT_CLIENT_MAX_BODY_SIZE),
-        error_pages(),
-        index(),
-        port(DEFAULT_PORT),
-        return_code(-1),
-        return_url(""),
-        root(""),
-        server_names(),
-        upload_store(""),
-        locations(),
-        parsedDirectives()
-        {}
+struct ServerName {
+    enum ServerNameType {
+        EXACT,
+        WILDCARD_START,
+        WILDCARD_END
+    };
+    std::vector<std::string> names;
+    ServerNameType type;
+    ServerName()
+        : names(DEFAULT_SERVER_NAME),
+        type(EXACT) {}
 };
 
-struct HttpConfig {
-    std::vector<std::string> allowed_methods;
-    bool autoindex;
-    std::string cgi_extension;
-    std::string cgi_pass;
-    size_t client_max_body_size;
-    std::vector<ErrorPage> error_pages;
-    std::vector<std::string> index;
-    int return_code;
-    std::string return_url;
-    std::string root;
-    std::string upload_store;
-    std::vector<ServerConfig> servers;
-    std::set<std::string> parsedDirectives;
-
-    HttpConfig()
-        : allowed_methods(),
-        autoindex(false),
-        cgi_extension(""),
-        cgi_pass(""),
-        client_max_body_size(DEFAULT_CLIENT_MAX_BODY_SIZE),
-        error_pages(),
-        index(),
-        return_code(-1),
-        return_url(""),
-        root(""),
-        upload_store(""),
-        servers(),
-        parsedDirectives()
-        {}
+struct Return {
+    size_t status_code;
+    std::string text_or_url;
+    bool has_return_setting;
+    Return()
+        : status_code(),
+        text_or_url(),
+        has_return_setting(false) {}
 };
+
 
 }  // namespace config
