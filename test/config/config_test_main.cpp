@@ -12,7 +12,6 @@
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/stepmark.hpp"
 
-// 設定値表示用のヘルパー関数
 void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     std::cout << prefix << "allowed_methods: ";
     for (size_t i = 0; i < conf.allowed_methods.size(); ++i) {
@@ -58,10 +57,8 @@ int main() {
     try {
         std::string config_file = "../../conf/default.conf";
         std::cout << "===== parse start =====" << std::endl << std::endl;
-        // config 変数をより広いスコープで宣言
         toolbox::SharedPtr<config::Config> config;
         try {
-            // ConfigParserを使用して設定ファイルをパース
             config = config::ConfigParser::parseFile(config_file, false);
             std::cout << "parse success" << std::endl << std::endl;
         } catch (const std::exception& e) {
@@ -79,15 +76,13 @@ int main() {
             std::cout << "listen port: " << http->servers[i]->listen.port << std::endl;
             std::cout << "server_name: ";
             for (size_t j = 0; j < http->servers[i]->server_names.size(); ++j) {
-                // 各ServerName内の複数の名前を表示
                 const std::vector<std::string>& names = http->servers[i]->server_names[j].names;
                 for (size_t k = 0; k < names.size(); ++k) {
                     std::cout << names[k];
                     if (k < names.size() - 1) {
-                        std::cout << " ";  // 同じServerName内の名前はスペースで区切る
+                        std::cout << " ";
                     }
                 }
-                // 異なるServerNameオブジェクト間はカンマで区切る
                 if (j < http->servers[i]->server_names.size() - 1) {
                     std::cout << ", ";
                 }
@@ -99,7 +94,6 @@ int main() {
                 std::cout << "location #" << (j + 1) << ":" << std::endl;
                 std::cout << "path: " << http->servers[i]->locations[j]->path << std::endl;
                 printSettings("", *http->servers[i]->locations[j]);
-                // 入れ子ロケーション設定の検証
                 for (size_t k = 0; k < http->servers[i]->locations[j]->locations.size(); ++k) {
                     std::cout << "===== NESTEDLOCATION =====" << std::endl;
                     std::cout << "nestedlocation #" << (k + 1) << ": " << std::endl;
