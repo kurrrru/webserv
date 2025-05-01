@@ -48,7 +48,6 @@ bool ConfigParser::validateAndParseLocationBlockStart(const std::vector<std::str
         return false;
     }
     location_config->path = tokens[*pos];
-    toolbox::logger::StepMark::debug("Location path: " + location_config->path);
     (*pos)++;
     if (*pos >= tokens.size() || tokens[*pos] != config::token::OPEN_BRACE) {
         toolbox::logger::StepMark::error("Expected '{' after location path.");

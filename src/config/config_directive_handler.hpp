@@ -48,7 +48,7 @@ class DirectiveParser {
     bool parseCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* cgi_extensions);
     bool parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* return_value);
     bool parseClientMaxBodySize(const std::vector<std::string>& tokens, size_t* pos, size_t* client_max_body_size);
-    bool parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, Listen* listen);
+    bool parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<Listen>* listen);
     bool parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<config::ServerName>* server_names);
     bool isDirectiveAllowedInContext(const std::string& directive, DirectiveContext context) const;
 

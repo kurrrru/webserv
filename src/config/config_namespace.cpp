@@ -12,6 +12,7 @@ namespace token {
 const char* OPEN_BRACE = "{";
 const char* CLOSE_BRACE = "}";
 const char* SEMICOLON = ";";
+const char* COLON = ":";
 const char* LF = "\n";
 const char* CR = "\r";
 const char* TAB = "\t";
@@ -49,6 +50,9 @@ const char* OFF = "off";
 const size_t MIN_ERROR_PAGE_CODE = 300;
 const size_t MAX_ERROR_PAGE_CODE = 599;
 const char* ASTERISK = "*";
+const size_t MIN_PORT = 1;
+const size_t MAX_PORT = 65535;
+const char* LISTEN_DEFAULT_SERVER = "default_server";
 }  // namespace directive
 
 namespace method {

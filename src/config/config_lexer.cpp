@@ -127,7 +127,6 @@ bool ConfigLexer::readToken(const std::string& input, size_t* pos, std::string* 
             return false;
         }
     }
-    toolbox::logger::StepMark::debug("Token read: " + *token);
     return true;
 }
 

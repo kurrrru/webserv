@@ -24,7 +24,7 @@ class ServerConfig : public ConfigBase {
     void addLocation(const LocationConfig& location);
     const std::vector<toolbox::SharedPtr<LocationConfig> >& getLocations() const;
 
-    Listen listen;
+    std::vector<Listen> listens;
     std::vector<ServerName> server_names;
     Return return_value;
     std::vector<toolbox::SharedPtr<LocationConfig> > locations;

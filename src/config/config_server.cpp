@@ -13,7 +13,7 @@ namespace config {
 
 ServerConfig::ServerConfig() :
 ConfigBase(),
-listen(),
+listens(),
 server_names(),
 return_value(),
 locations(),
@@ -22,7 +22,7 @@ _parent(NULL) {
 
 ServerConfig::ServerConfig(const ServerConfig& other) :
 ConfigBase(other),
-listen(other.listen),
+listens(other.listens),
 server_names(other.server_names),
 return_value(other.return_value),
 _parent(NULL) {

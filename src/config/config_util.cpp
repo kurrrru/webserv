@@ -44,7 +44,7 @@ bool stringToSizeT(const std::string& str, size_t* result) {
     for (size_t i = 0; i < str.size(); i++) {
         char c = str[i];
         if (!std::isdigit(c)) {
-            toolbox::logger::StepMark::error("Invalid character in numeric value: " + str);
+            toolbox::logger::StepMark::debug("Invalid character in numeric value: " + str);
             return false;
         }
         if (value > cutoff || (value == cutoff && static_cast<size_t>(c - '0') > cutlim)) {

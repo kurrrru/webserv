@@ -12,6 +12,7 @@ namespace token {
 extern const char* OPEN_BRACE;
 extern const char* CLOSE_BRACE;
 extern const char* SEMICOLON;
+extern const char* COLON;
 extern const char* LF;
 extern const char* CR;
 extern const char* TAB;
@@ -49,6 +50,9 @@ extern const char* OFF;
 extern const size_t MIN_ERROR_PAGE_CODE;
 extern const size_t MAX_ERROR_PAGE_CODE;
 extern const char* ASTERISK;
+extern const size_t MIN_PORT;
+extern const size_t MAX_PORT;
+extern const char* LISTEN_DEFAULT_SERVER;
 }  // namespace directive
 
 namespace method {

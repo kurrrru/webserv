@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <limits>
 #include <string>
+#include <cstring>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #include "config_directive_handler.hpp"
 #include "config_namespace.hpp"
@@ -68,6 +73,25 @@ bool parseSize(const std::string& str, size_t* result) {
     }
     value *= scale;
     *result = value;
+    return true;
+}
+
+bool validateHost(const std::string& host, const std::string& full_value) {
+    struct addrinfo hints;
+    struct addrinfo* result = NULL;
+    std::memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    int status = getaddrinfo(host.c_str(), NULL, &hints, &result);
+    if (status != 0) {
+        toolbox::logger::StepMark::error("host not found in \"" + full_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive: ");
+        return false;
+    }
+    if (result == NULL) {
+        toolbox::logger::StepMark::error("host not found in \"" + full_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive: ");
+        return false;
+    }
+    freeaddrinfo(result);
     return true;
 }
 
@@ -242,8 +266,7 @@ bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens
     return expectSemicolon(tokens, pos, config::directive::INDEX);
 }
 
-// Pending
-bool DirectiveParser::parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, Listen* listen) {
+bool DirectiveParser::parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<Listen>* listen) {
     if (!listen || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::LISTEN));
         return false;
@@ -253,25 +276,56 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
         (*pos)++;
         return false;
     }
-    std::string port_str = tokens[(*pos)++];
-    for (size_t i = 0; i < port_str.size(); ++i) {
-        if (!std::isdigit(port_str[i])) {
-            toolbox::logger::StepMark::error("Port must be a number: " + port_str);
+    std::string listen_value = tokens[(*pos)++];
+    Listen tmp_listen;
+    size_t port;
+    size_t colon_pos = listen_value.find(config::token::COLON);
+    if (colon_pos != std::string::npos) {
+        std::string port_str = listen_value.substr(colon_pos + 1);
+        if (!config::stringToSizeT(port_str, &port))
+            return false;
+        if (port < config::directive::MIN_PORT || port > config::directive::MAX_PORT) {
+            toolbox::logger::StepMark::error("invalid port in \"" + port_str + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
             return false;
         }
+        tmp_listen.port = port;
+        std::string host_str = listen_value.substr(0, colon_pos);
+        if (host_str.empty()) {
+            toolbox::logger::StepMark::error("no host in \"" + listen_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
+            return false;
+        } else if (host_str == config::directive::ASTERISK) {
+            tmp_listen.ip = config::DEFAULT_IP;
+        } else {
+            if (!validateHost(host_str, listen_value)) {
+                return false;
+            }
+            tmp_listen.ip = host_str;
+        }
+
+    } else {
+        if (config::stringToSizeT(listen_value, &port)) {
+            tmp_listen.port = port;
+            tmp_listen.ip = config::DEFAULT_IP;
+        } else {
+            if (!validateHost(listen_value, listen_value)) {
+                return false;
+            }
+            tmp_listen.ip = listen_value;
+        }
     }
-    int port_value = std::atoi(port_str.c_str());
-    if (port_value <= 0 || port_value > 65535) {
-        toolbox::logger::StepMark::error("Invalid port number: " + port_str + ". Must be between 1 and 65535");
-        return false;
+    if (tokens[(*pos)] != config::directive::SEMICOLON) {
+        if (tokens[(*pos)] == config::directive::LISTEN_DEFAULT_SERVER) {
+            tmp_listen.default_server = true;
+        } else {
+            toolbox::logger::StepMark::error("invalid parameter \"" + tokens[(*pos)] + "\"" );
+            return false;
+        }
+    } else {
+        tmp_listen.default_server = false;
     }
-    if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
-        toolbox::logger::StepMark::error("Expected semicolon after listen directive");
-        return false;
-    }
-    (*pos)++;
-    listen->port = port_value;
-    return true;
+    listen->push_back(tmp_listen);
+
+    return expectSemicolon(tokens, pos, config::directive::LISTEN);
 }
 
 // Pending

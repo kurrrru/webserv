@@ -222,7 +222,7 @@ bool DirectiveParser::handleListenDirective(const std::vector<std::string>& toke
     if (http) {
         toolbox::logger::StepMark::error("\"" + std::string(config::directive::LISTEN) + "\" directive is not allowed here");
     } else if (server) {
-        return parseListenDirective(tokens, pos, &server->listen);
+        return parseListenDirective(tokens, pos, &server->listens);
     } else if (location) {
         toolbox::logger::StepMark::error("\"" + std::string(config::directive::LISTEN) + "\" directive is not allowed here");
     }

@@ -72,8 +72,18 @@ int main() {
         for (size_t i = 0; i < http->servers.size(); ++i) {
             std::cout << "===== SERVER =====" << std::endl;
             std::cout << "server #" << (i + 1) << std::endl;
-            std::cout << "listen ip: " << http->servers[i]->listen.ip << std::endl;
-            std::cout << "listen port: " << http->servers[i]->listen.port << std::endl;
+            std::cout << "listen: ";
+            for (size_t listen_idx = 0; listen_idx < http->servers[i]->listens.size(); ++listen_idx) {
+                const config::Listen& listen_config = http->servers[i]->listens[listen_idx];
+                std::cout << listen_config.ip << ":" << listen_config.port;
+                if (listen_config.default_server) {
+                    std::cout << " (default)";
+                }
+                if (listen_idx < http->servers[i]->listens.size() - 1) {
+                    std::cout << ", ";
+                }
+            }
+            std::cout << std::endl;
             std::cout << "server_name: ";
             for (size_t j = 0; j < http->servers[i]->server_names.size(); ++j) {
                 const config::ServerName& server_name = http->servers[i]->server_names[j];
