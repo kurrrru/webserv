@@ -51,6 +51,7 @@ class DirectiveParser {
     bool parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<Listen>* listen);
     bool parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<config::ServerName>* server_names);
     bool isDirectiveAllowedInContext(const std::string& directive, DirectiveContext context) const;
+    bool handleDuplicateDirective(const std::string& directive_name, const std::vector<std::string>& tokens, size_t* pos);
 
  private:
     std::map<std::string, DirectiveInfo> _directive_info;
@@ -67,6 +68,9 @@ class DirectiveParser {
     bool handleClientMaxBodySizeDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location);
     bool handleListenDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location);
     bool handleServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location);
+    bool isAllowedDuplicate(const std::string& directive_name);
+    bool isIgnoredDuplicate(const std::string& directive_name);
+    void skipUntilSemicolon(const std::vector<std::string>& tokens, size_t* pos);
 };
 
 }  // namespace config

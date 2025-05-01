@@ -58,6 +58,7 @@ bool ConfigParser::validateAndParseLocationBlockStart(const std::vector<std::str
 }
 
 bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* location_config) {
+    std::map<std::string, bool> processed_directives;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
         std::string directive_name = tokens[*pos];
         if (directive_name == config::context::LOCATION) {
@@ -68,12 +69,18 @@ bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& token
         }
         (*pos)++;
         if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_LOCATION)) {
+            if (processed_directives.find(directive_name) != processed_directives.end()) {
+                if (!_directiveParser.handleDuplicateDirective(directive_name, tokens, pos)) {
+                    return false;
+                }
+            }
+            processed_directives[directive_name] = true;
             if (!_directiveParser.parseDirective(tokens, pos, directive_name, NULL, NULL, location_config)) {
                 toolbox::logger::StepMark::error("Error parsing '" + directive_name + "' directive in location context.");
                 return false;
             }
         } else {
-            toolbox::logger::StepMark::error("Unknown or disallowed directive '" + directive_name + "' in location context.");
+            toolbox::logger::StepMark::error("Unknown directive \"" + directive_name + "\"");
             return false;
         }
     }

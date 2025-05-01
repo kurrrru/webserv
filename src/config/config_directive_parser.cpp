@@ -348,7 +348,6 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
         toolbox::logger::StepMark::error("Invalid return code: \"" + first_token + "\"");
         return false;
     }
-    toolbox::logger::StepMark::debug("return code: " + toolbox::to_string(code));
     return_value->status_code = code;
     return_value->has_return_value = true;
     if (tokens[*pos] == config::directive::SEMICOLON) {
