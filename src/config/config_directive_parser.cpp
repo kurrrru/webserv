@@ -105,7 +105,6 @@ bool DirectiveParser::parseAllowedMethodsDirective(const std::vector<std::string
         (*pos)++;
         return false;
     }
-    methods->clear();
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string method = tokens[*pos];
         bool is_valid_method = false;
@@ -157,7 +156,6 @@ bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>&
         (*pos)++;
         return false;
     }
-    cgi_extensions->clear();
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string extension = tokens[(*pos)++];
         cgi_extensions->push_back(extension);
@@ -350,9 +348,9 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
         toolbox::logger::StepMark::error("Invalid return code: \"" + first_token + "\"");
         return false;
     }
+    toolbox::logger::StepMark::debug("return code: " + toolbox::to_string(code));
     return_value->status_code = code;
     return_value->has_return_value = true;
-    (*pos)++;
     if (tokens[*pos] == config::directive::SEMICOLON) {
         return_value->is_text_or_url_setting = false;
     } else {
@@ -388,7 +386,6 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
         (*pos)++;
         return false;
     }
-    server_names->clear();
     std::vector<std::string> names;
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         names.push_back(tokens[*pos]);
