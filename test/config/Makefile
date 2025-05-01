@@ -20,11 +20,13 @@ $(NAME):$(OBJS)
 clean:
 	rm -f $(OBJS) $(NAME)
 
-re:
-	make clean
-	make all
+re: fclean all
 
-fclean:
-	make clean
+fclean: clean
 	rm -f $(NAME)
 	rm -f config_test.log
+
+run: fclean all
+	./$(NAME)
+
+.PHONY: all clean fclean re run
