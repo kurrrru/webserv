@@ -320,34 +320,19 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
     return true;
 }
 
-// Pending
 bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* root) {
     if (!root || *pos >= tokens.size()) {
-        toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::SERVER_NAME));
+        toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::ROOT));
         return false;
     }
     if (tokens[*pos] == config::directive::SEMICOLON) {
-        toolbox::logger::StepMark::error(std::string(config::directive::SERVER_NAME) + " directive requires a value");
+        toolbox::logger::StepMark::error(std::string(config::directive::ROOT) + " directive requires a value");
         (*pos)++;
         return false;
     }
     std::string path = tokens[(*pos)++];
-    if (path.empty()) {
-        toolbox::logger::StepMark::error("Root path cannot be empty");
-        return false;
-    }
-    if (path.find('\0') != std::string::npos) {
-        toolbox::logger::StepMark::error("Root path contains null character");
-        return false;
-    }
-    if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
-        toolbox::logger::StepMark::error("Expected semicolon after root directive");
-        return false;
-    }
-    (*pos)++;
     *root = path;
-    toolbox::logger::StepMark::debug("Root path set to " + path);
-    return true;
+    return expectSemicolon(tokens, pos, config::directive::ROOT);
 }
 
 bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ServerName>* server_names) {
