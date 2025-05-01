@@ -62,7 +62,7 @@ bool parseSize(const std::string& str, size_t* result) {
             }
             max = std::numeric_limits<off_t>::max();
     }
-    std::string num_str = str.std::string::substr(0, len);
+    std::string num_str = str.substr(0, len);
     size_t value;
     if (!stringToSizeT(num_str, &value)) {
         return false;
@@ -192,6 +192,7 @@ bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tok
     }
     std::string size_str = tokens[(*pos)++];
     if (!parseSize(size_str, client_max_body_size)) {
+        toolbox::logger::StepMark::error("\"" + std::string(config::directive::CLIENT_MAX_BODY_SIZE) + "\" directive invalid value");
         return false;
     }
     return expectSemicolon(tokens, pos, config::directive::CLIENT_MAX_BODY_SIZE);
@@ -329,7 +330,6 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
     return expectSemicolon(tokens, pos, config::directive::LISTEN);
 }
 
-// Pending
 bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* return_value) {
     if (!return_value || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::RETURN));
@@ -341,38 +341,26 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
         return false;
     }
     std::string first_token = tokens[(*pos)++];
-    bool first_is_code = true;
-    for (size_t i = 0; i < first_token.size(); ++i) {
-        if (!std::isdigit(first_token[i])) {
-            first_is_code = false;
-            break;
-        }
-    }
-    if (first_is_code) {
-        int code = std::atoi(first_token.c_str());
-        if ((code < 300 || code > 308) && code != 201) {
-            toolbox::logger::StepMark::warning("Return code " + first_token + " is not a standard redirect status code");
-        }
-        return_value->status_code = code;
-        if (*pos >= tokens.size() || tokens[*pos] == config::directive::SEMICOLON) {
-            toolbox::logger::StepMark::error("URL expected after status code in return directive");
-            return false;
-        }
-        return_value->text_or_url = tokens[(*pos)++];
-    } else {
-        return_value->status_code = 302;
-        return_value->text_or_url = first_token;
-    }
-    if (return_value->text_or_url.empty()) {
-        toolbox::logger::StepMark::error("Return URL cannot be empty");
+    size_t code;
+    if (!stringToSizeT(first_token, &code)) {
+        toolbox::logger::StepMark::error("Invalid return code: \"" + first_token + "\"");
         return false;
     }
-    if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
-        toolbox::logger::StepMark::error("Expected semicolon after return directive");
+    if (code > config::directive::MAX_RETURN_CODE) {
+        toolbox::logger::StepMark::error("Invalid return code: \"" + first_token + "\"");
         return false;
     }
+    return_value->status_code = code;
+    return_value->has_return_value = true;
     (*pos)++;
-    return true;
+    if (tokens[*pos] == config::directive::SEMICOLON) {
+        return_value->is_text_or_url_setting = false;
+    } else {
+        std::string second_token = tokens[(*pos)++];
+        return_value->text_or_url = second_token;
+        return_value->is_text_or_url_setting = true;
+    }
+    return expectSemicolon(tokens, pos, config::directive::RETURN);
 }
 
 bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* root) {

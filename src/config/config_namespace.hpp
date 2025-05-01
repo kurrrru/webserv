@@ -53,6 +53,7 @@ extern const char* ASTERISK;
 extern const size_t MIN_PORT;
 extern const size_t MAX_PORT;
 extern const char* LISTEN_DEFAULT_SERVER;
+extern const size_t MAX_RETURN_CODE;
 }  // namespace directive
 
 namespace method {
@@ -110,11 +111,13 @@ struct ServerName {
 struct Return {
     size_t status_code;
     std::string text_or_url;
-    bool has_return_setting;
+    bool is_text_or_url_setting;
+    bool has_return_value;
     Return()
         : status_code(),
         text_or_url(),
-        has_return_setting(false) {}
+        is_text_or_url_setting(false),
+        has_return_value(false) {}
 };
 
 

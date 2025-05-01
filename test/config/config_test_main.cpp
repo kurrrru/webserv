@@ -99,11 +99,23 @@ int main() {
                 }
             }
             std::cout << std::endl;
+            if (http->servers[i]->return_value.has_return_value) {
+                std::cout << "return code: " << http->servers[i]->return_value.status_code << std::endl;
+                if (http->servers[i]->return_value.is_text_or_url_setting) {
+                    std::cout << "return text_or_url: " << http->servers[i]->return_value.text_or_url << std::endl;
+                }
+            }
             printSettings("", *http->servers[i]);
             for (size_t j = 0; j < http->servers[i]->locations.size(); ++j) {
                 std::cout << "===== LOCATION =====" << std::endl;
                 std::cout << "location #" << (j + 1) << ":" << std::endl;
                 std::cout << "path: " << http->servers[i]->locations[j]->path << std::endl;
+                if (http->servers[i]->return_value.has_return_value) {
+                    std::cout << "return code: " << http->servers[i]->return_value.status_code << std::endl;
+                    if (http->servers[i]->return_value.is_text_or_url_setting) {
+                        std::cout << "return text_or_url: " << http->servers[i]->return_value.text_or_url << std::endl;
+                    }
+                }
                 printSettings("", *http->servers[i]->locations[j]);
                 for (size_t k = 0; k < http->servers[i]->locations[j]->locations.size(); ++k) {
                     std::cout << "===== NESTEDLOCATION =====" << std::endl;

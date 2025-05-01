@@ -53,6 +53,7 @@ const char* ASTERISK = "*";
 const size_t MIN_PORT = 1;
 const size_t MAX_PORT = 65535;
 const char* LISTEN_DEFAULT_SERVER = "default_server";
+const size_t MAX_RETURN_CODE = 999;
 }  // namespace directive
 
 namespace method {
