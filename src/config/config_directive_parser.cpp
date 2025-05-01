@@ -316,6 +316,7 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
     if (tokens[(*pos)] != config::directive::SEMICOLON) {
         if (tokens[(*pos)] == config::directive::LISTEN_DEFAULT_SERVER) {
             tmp_listen.default_server = true;
+            (*pos)++;
         } else {
             toolbox::logger::StepMark::error("invalid parameter \"" + tokens[(*pos)] + "\"" );
             return false;
