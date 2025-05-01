@@ -21,7 +21,7 @@ class LocationConfig : public ConfigBase {
  public:
     LocationConfig();
     LocationConfig(const LocationConfig&);
-    ~LocationConfig();
+    virtual ~LocationConfig();
 
     void setParent(ServerConfig* config_server);
     void setParent(LocationConfig* config_location);

@@ -12,7 +12,7 @@ HttpConfig::HttpConfig() {
 
 HttpConfig::HttpConfig(const HttpConfig& other) : ConfigBase(other) {
     for (std::vector<toolbox::SharedPtr<ServerConfig> >::const_iterator it = other.servers.begin();
-         it != other.servers.end(); ++it) {
+        it != other.servers.end(); ++it) {
         toolbox::SharedPtr<ServerConfig> server_copy(new ServerConfig(**it));
         servers.push_back(server_copy);
         servers.back()->setParent(this);
