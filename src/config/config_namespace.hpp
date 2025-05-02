@@ -70,6 +70,7 @@ extern const char* DEFAULT_CGI_PATH;
 extern const char* DEFAULT_FILE;
 extern const int DEFAULT_PORT;
 extern const std::vector<std::string> DEFAULT_INDICES;
+extern const char* DEFAULT_INDEX;
 extern const char* DEFAULT_IP;
 extern const char* DEFAULT_ROOT;
 extern const char* DEFAULT_SERVER_NAME;

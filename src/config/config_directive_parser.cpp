@@ -252,7 +252,6 @@ bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens
         (*pos)++;
         return false;
     }
-    index_files->clear();
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string file = tokens[*pos];
         if (file.empty()) {
@@ -340,6 +339,7 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
     }
     std::string first_token = tokens[(*pos)++];
     size_t code;
+    toolbox::logger::StepMark::debug("first_token: " + first_token);
     if (!stringToSizeT(first_token, &code)) {
         toolbox::logger::StepMark::error("Invalid return code: \"" + first_token + "\"");
         return false;

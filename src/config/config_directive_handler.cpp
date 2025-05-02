@@ -240,11 +240,13 @@ bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& 
     return false;
 }
 
-bool DirectiveParser::handleDuplicateDirective(const std::string& directive_name, const std::vector<std::string>& tokens, size_t* pos) {
+bool DirectiveParser::handleDuplicateDirective(const std::string& directive_name, const std::vector<std::string>& tokens, size_t* pos, bool* should_skip) {
+    *should_skip = false;
     if (isAllowedDuplicate(directive_name)) {
         return true;
     } else if (isIgnoredDuplicate(directive_name)) {
         skipUntilSemicolon(tokens, pos);
+        *should_skip = true;
         return true;
     } else {
         toolbox::logger::StepMark::error("\"" + directive_name + "\" directive is duplicate");
@@ -257,6 +259,7 @@ bool DirectiveParser::isAllowedDuplicate(const std::string& directive_name) {
         config::directive::ALLOWED_METHODS,
         config::directive::CGI_EXTENSION,
         config::directive::ERROR_PAGE,
+        config::directive::INDEX,
         config::directive::SERVER_NAME,
     };
     static const size_t allowed_count = sizeof(allowed_duplicates) / sizeof(allowed_duplicates[0]);

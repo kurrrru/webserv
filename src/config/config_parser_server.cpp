@@ -37,8 +37,12 @@ bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens,
             server_config->locations.push_back(location_config);
         } else if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_SERVER)) {
             if (processed_directives.find(directive_name) != processed_directives.end()) {
-                if (!_directiveParser.handleDuplicateDirective(directive_name, tokens, pos)) {
+                bool should_skip = false;
+                if (!_directiveParser.handleDuplicateDirective(directive_name, tokens, pos, &should_skip)) {
                     return false;
+                }
+                if (should_skip) {
+                    continue;
                 }
             }
             processed_directives[directive_name] = true;

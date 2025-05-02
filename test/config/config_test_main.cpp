@@ -111,9 +111,9 @@ int main() {
                 std::cout << "location #" << (j + 1) << ":" << std::endl;
                 std::cout << "path: " << http->servers[i]->locations[j]->path << std::endl;
                 if (http->servers[i]->return_value.has_return_value) {
-                    std::cout << "return code: " << http->servers[i]->return_value.status_code << std::endl;
+                    std::cout << "return code: " << http->servers[i]->locations[j]->return_value.status_code << std::endl;
                     if (http->servers[i]->return_value.is_text_or_url_setting) {
-                        std::cout << "return text_or_url: " << http->servers[i]->return_value.text_or_url << std::endl;
+                        std::cout << "return text_or_url: " << http->servers[i]->locations[j]->return_value.text_or_url << std::endl;
                     }
                 }
                 printSettings("", *http->servers[i]->locations[j]);

@@ -70,6 +70,7 @@ const char* DEFAULT_CGI_PATH = "cgi";
 const char* DEFAULT_FILE = "conf/default.conf";
 const int DEFAULT_PORT = 80;
 const std::vector<std::string> DEFAULT_INDICES(1, "index.html");
+const char* DEFAULT_INDEX = "index.html";
 const char* DEFAULT_IP = "0.0.0.0";
 const char* DEFAULT_ROOT = "html";
 const char* DEFAULT_SERVER_NAME = "";

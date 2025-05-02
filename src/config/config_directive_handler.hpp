@@ -51,7 +51,7 @@ class DirectiveParser {
     bool parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<Listen>* listen);
     bool parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<config::ServerName>* server_names);
     bool isDirectiveAllowedInContext(const std::string& directive, DirectiveContext context) const;
-    bool handleDuplicateDirective(const std::string& directive_name, const std::vector<std::string>& tokens, size_t* pos);
+    bool handleDuplicateDirective(const std::string& directive_name, const std::vector<std::string>& tokens, size_t* pos, bool* should_skip);
 
  private:
     std::map<std::string, DirectiveInfo> _directive_info;
