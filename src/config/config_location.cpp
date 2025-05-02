@@ -23,14 +23,11 @@ ConfigBase(other),
 path(other.path),
 return_value(other.return_value),
 locations(),
-_parent_server(NULL),
-_parent_location(NULL) {
+_parent_server(other._parent_server),
+_parent_location(other._parent_location) {
 }
 
 LocationConfig::~LocationConfig() {
-    _parent_location = NULL;
-    _parent_server = NULL;
-    locations.clear();
 }
 
 void LocationConfig::setParent(ServerConfig* config_server) {
@@ -51,17 +48,6 @@ LocationConfig* LocationConfig::getLocationParent() const {
 
 void LocationConfig::addLocation(const LocationConfig& location) {
     toolbox::SharedPtr<LocationConfig> new_location(new LocationConfig(location));
-    new_location->allowed_methods = location.allowed_methods;
-    new_location->autoindex = location.autoindex;
-    new_location->cgi_extensions = location.cgi_extensions;
-    new_location->cgi_pass = location.cgi_pass;
-    new_location->client_max_body_size = location.client_max_body_size;
-    new_location->error_pages = location.error_pages;
-    new_location->root = location.root;
-    new_location->indices = location.indices;
-    new_location->upload_store = location.upload_store;
-    new_location->path = location.path;
-    new_location->return_value = location.return_value;
     new_location->setParent(this);
     locations.push_back(new_location);
 }
