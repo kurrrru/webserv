@@ -60,8 +60,10 @@ void ConfigInherit::inheritHttpToServer(HttpConfig* http, ServerConfig* server) 
     if (server->error_pages.empty() && !http->error_pages.empty()) {
         server->error_pages = http->error_pages;
     }
-    if (server->indices == DEFAULT_INDICES &&
-        http->indices != DEFAULT_INDICES) {
+    if (http->indices.empty()) {
+        http->indices = DEFAULT_INDICES;
+    }
+    if (server->indices.empty() && !http->indices.empty()) {
         server->indices = http->indices;
     }
     if (server->root == DEFAULT_ROOT && http->root != DEFAULT_ROOT) {
@@ -99,8 +101,7 @@ void ConfigInherit::inheritServerToLocation(ServerConfig* server, LocationConfig
     if (location->error_pages.empty() && !server->error_pages.empty()) {
         location->error_pages = server->error_pages;
     }
-    if (location->indices == DEFAULT_INDICES &&
-        server->indices != DEFAULT_INDICES) {
+    if (location->indices.empty() && !server->indices.empty()) {
         location->indices = server->indices;
     }
     if (location->root == DEFAULT_ROOT && server->root != DEFAULT_ROOT) {
@@ -138,8 +139,7 @@ void ConfigInherit::inheritLocationToLocation(LocationConfig* parent, LocationCo
     if (child->error_pages.empty() && !parent->error_pages.empty()) {
         child->error_pages = parent->error_pages;
     }
-    if (child->indices == DEFAULT_INDICES &&
-        parent->indices != DEFAULT_INDICES) {
+    if (child->indices.empty() && !parent->indices.empty()) {
         child->indices = parent->indices;
     }
     if (child->root == DEFAULT_ROOT && parent->root != DEFAULT_ROOT) {
