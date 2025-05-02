@@ -79,6 +79,7 @@ bool ConfigParser::loadDefaultConfig() {
 }
 
 bool ConfigParser::parse() {
+    toolbox::logger::StepMark::info("Parsing configuration");
     size_t pos = 0;
     if (_tokens.empty()) {
         return false;
@@ -97,6 +98,7 @@ bool ConfigParser::parse() {
     }
     ConfigInherit inherit(_config.get());
     inherit.applyInheritance();
+    toolbox::logger::StepMark::info("Configuration parsing completed successfully.");
     return true;
 }
 
