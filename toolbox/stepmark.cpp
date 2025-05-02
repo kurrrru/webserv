@@ -44,11 +44,11 @@ logger::StepMark& logger::StepMark::getInstance() {
 
 void logger::StepMark::log(StepmarkLevel level, const std::string& message) {
     const char* levelStr[] = {
-        [DEBUG] = "DEBUG",
-        [INFO] = "INFO",
-        [WARNING] = "WARNING",
-        [ERROR] = "ERROR",
-        [CRITICAL] = "CRITICAL"
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR",
+        "CRITICAL"
     };
 
     logger::StepMark& instance = getInstance();
