@@ -21,17 +21,6 @@ bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, size_t
     if (!validateBlockEnd(tokens, pos)) {
         return false;
     }
-    if (!validateServerBlocks()) {
-        return false;
-    }
-    return true;
-}
-
-bool ConfigParser::validateServerBlocks() {
-    if (_config->servers.empty()) {
-        toolbox::logger::StepMark::error("No servers defined in HTTP context.");
-        return false;
-    }
     return true;
 }
 
@@ -58,9 +47,6 @@ bool ConfigParser::parseHttpDirectives(const std::vector<std::string>& tokens, s
                 }
             }
             processed_directives[directive_name] = true;
-            if (config == NULL) {
-                return true;
-            }
             if (!_directiveParser.parseDirective(tokens, pos, directive_name, config, NULL, NULL)) {
                 toolbox::logger::StepMark::error("Error parsing '" + directive_name + "' directive in HTTP context.");
                 return false;
