@@ -24,7 +24,7 @@ clean:
 
 fclean: clean
 	$(RM) $(NAME)
-	$(RM) field_test.log
+	$(RM) request_test.log
 
 re: fclean all
 

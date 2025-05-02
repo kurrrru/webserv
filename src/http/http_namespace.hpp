@@ -6,15 +6,20 @@
 #include <utility>
 
 namespace http {
-// method
+
 namespace method {
 extern const char* GET;
+extern const char* HEAD;
 extern const char* POST;
 extern const char* DELETE;
 }  // namespace method
 
-namespace version {
-extern const char* HTTP_VERSION;
+namespace uri {
+extern const char* HTTP_VERSION_1_1;
+extern const char* HTTP_VERSION_1_0;
+extern const std::size_t HTTP_MAJOR_VERSION;
+extern const std::size_t HTTP_MINOR_VERSION_MAX;
+extern const std::size_t MAX_URI_SIZE;
 }
 
 namespace fields {

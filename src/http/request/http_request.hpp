@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include <string>
 #include <map>
+#include <vector>
+#include <string>
 
 #include "http_fields.hpp"
 #include "../http_status.hpp"
@@ -25,6 +26,7 @@ class HTTPRequest {
     };
     struct URI {
         std::string fullUri;
+        std::vector<std::string> splitPath;
         std::string path;
         std::string fullQuery;
         std::map<std::string, std::string> queryMap;
@@ -33,6 +35,11 @@ class HTTPRequest {
 
     HTTPRequest() : httpStatus(http::OK) {}
     ~HTTPRequest() {}
+    void setHttpStatus(HttpStatus status) {
+        if (httpStatus == http::OK) {
+            httpStatus = status;
+        }
+    }
 
     HttpStatus httpStatus;
     std::string method;

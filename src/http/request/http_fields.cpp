@@ -120,7 +120,7 @@ void HTTPFields::normalFieldLine(FieldMap::iterator& target,
     for (std::size_t i = 0; i < pair.second.size(); ++i) {
         target->second.push_back(pair.second[i]);
     }
-return;
+    return;
 }
 
 bool HTTPFields::validateRequestHeaders(HttpStatus& hs) {

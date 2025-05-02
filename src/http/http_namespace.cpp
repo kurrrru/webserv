@@ -6,12 +6,17 @@ namespace http {
 // method
 namespace method {
 const char* GET = "GET";
+const char* HEAD = "HEAD";
 const char* POST = "POST";
 const char* DELETE = "DELETE";
 }  // namespace method
 
-namespace version {
-const char* HTTP_VERSION = "HTTP/1.1";
+namespace uri {
+const char* HTTP_VERSION_1_0 = "HTTP/1.0";
+const char* HTTP_VERSION_1_1 = "HTTP/1.1";
+const std::size_t HTTP_MAJOR_VERSION = 1;
+const std::size_t HTTP_MINOR_VERSION_MAX = 999;
+const std::size_t MAX_URI_SIZE = 8192;
 }
 
 namespace fields {
