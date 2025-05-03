@@ -56,6 +56,7 @@ const std::size_t MAX_BODY_SIZE = 1048576;
 
 namespace symbols {
 const char* CR = "\r";
+const char* LF = "\n";
 const char* CRLF = "\r\n";
 const char* SP = " ";
 const char* EQUAL = "=";
