@@ -7,8 +7,9 @@
 #include <cstdio>
 
 #include "../../../toolbox/stepmark.hpp"
-#include "../../../src/http/request/request_parser.hpp"
+// #include "../../../src/http/request/request_parser.hpp"
 #include "requestline_test.hpp"
+#include "../../../src/http/request/new_request_parser.hpp"
 
 typedef std::vector<RequestLineTest> TestVector;
 

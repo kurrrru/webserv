@@ -7,6 +7,7 @@
 
 #include "../../../src/http/http_status.hpp"
 #include "field_test.hpp"
+#include "../../../src/http/request/new_request_parser.hpp"
 
 typedef std::vector<FieldTest> TestVector;
 

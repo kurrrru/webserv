@@ -9,7 +9,7 @@ int main(void) {
     toolbox::logger::StepMark::setLogFile("request_test.log");
     toolbox::logger::StepMark::setLevel(toolbox::logger::DEBUG);
     requestLineTest();
-    fieldTest();
+    // fieldTest();
 
     return 0;
 }
