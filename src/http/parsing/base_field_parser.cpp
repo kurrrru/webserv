@@ -20,7 +20,7 @@ bool BaseFieldParser::parseFieldLine(const HTTPFields::FieldPair& pair,
     } else if (isUnique(pair.first)) {
         return uniqueFieldLine(target, pair, hs);
     } else {
-        normalFieldLine(target, fieldMap, pair);
+        normalFieldLine(target, pair);
     }
     return true;
 }
@@ -68,13 +68,7 @@ bool BaseFieldParser::uniqueFieldLine(HTTPFields::FieldMap::iterator& target,
 }
 
 bool BaseFieldParser::normalFieldLine(HTTPFields::FieldMap::iterator& target,
-                                      HTTPFields::FieldMap& fieldMap,
                                       const HTTPFields::FieldPair& pair) {
-    if (target == fieldMap.end()) {
-        toolbox::logger::StepMark::info
-            ("FieldParser: " + pair.first + " not found");
-        return true;
-    }
     for (std::size_t i = 0; i < pair.second.size(); ++i) {
         target->second.push_back(pair.second[i]);
     }
