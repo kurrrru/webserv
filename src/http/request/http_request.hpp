@@ -17,7 +17,8 @@ class HTTPRequest {
             isChunked(false),
             lastChunk(false),
             contentLength(0),
-            recvedLength(0) {}
+            recvedLength(0)
+        {}
         bool isChunked;
         bool lastChunk;
         std::string content;
@@ -33,13 +34,8 @@ class HTTPRequest {
         std::string fragment;
     };
 
-    HTTPRequest() : httpStatus(http::OK) {}
+    HTTPRequest() {}
     ~HTTPRequest() {}
-    void setHttpStatus(HttpStatus status) {
-        if (httpStatus == http::OK) {
-            httpStatus = status;
-        }
-    }
 
     HttpStatus httpStatus;
     std::string method;

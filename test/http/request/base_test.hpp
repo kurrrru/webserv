@@ -4,14 +4,13 @@
 
 #include <string>
 
-#include "../../../src/http/request/request_parser.hpp"
 #include "../../../src/http/request/http_fields.hpp"
 #include "../../../src/http/http_namespace.hpp"
 #include "../../../src/http/http_status.hpp"
 
 class BaseTest {
  public:
-    BaseTest() : _httpStatus(http::OK) {}
+    BaseTest() {}
     virtual ~BaseTest() {}
     BaseTest(const BaseTest& other) :
         _name(other._name),

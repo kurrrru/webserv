@@ -5,7 +5,14 @@
 namespace http {
 
 class BaseParser {
-    public:
+ public:
+    class ParseException : public std::exception {
+     public:
+        explicit ParseException(const char* message);
+        const char* what() const throw();
+     private:
+        const char* _message;
+    };
     enum ParseState {
         REQUEST_LINE = 0,
         HEADERS = 1,
@@ -18,12 +25,12 @@ class BaseParser {
     virtual ~BaseParser() {}
     virtual void run(const std::string& buf) = 0;
 
-    protected:
+ protected:
     std::string _buf;
     ParseState _validatePos;
 
-    virtual void parseFieldLine() = 0;
-    virtual void parseBody() = 0;
+    virtual void processFieldLine() = 0;
+    virtual void processBody() = 0;
 
     std::size_t findNewLinePos(std::string& buffer);
     std::size_t getLineEndLen(std::string& line, std::size_t lineEndPos);
