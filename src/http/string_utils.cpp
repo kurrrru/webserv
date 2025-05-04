@@ -69,5 +69,5 @@ bool isEqualCaseInsensitive(const std::string& str1, const std::string& str2) {
     return !less(str1, str2) && !less(str2, str1);
 }
 
-}
-}
+}  // namespace utils
+}  // namespace http

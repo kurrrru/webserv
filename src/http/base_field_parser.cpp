@@ -1,3 +1,5 @@
+#include <string>
+
 #include "base_field_parser.hpp"
 #include "request/http_fields.hpp"
 #include "string_utils.hpp"
@@ -7,8 +9,7 @@ bool BaseFieldParser::parseFieldLine(const HTTPFields::FieldPair& pair,
     HTTPFields::FieldMap& fieldMap, HttpStatus& hs) {
     if (pair.first.empty() || utils::hasWhiteSpace(pair.first) ||
             utils::hasCtlChar(pair.first)) {
-        toolbox::logger::StepMark::info("FieldParser: invalid key");
-        hs.set(HttpStatus::BAD_REQUEST);
+        handleInvalidFieldError(pair.first, hs);
         return false;
     }
     HTTPFields::FieldMap::iterator target = fieldMap.find(pair.first);
@@ -19,7 +20,7 @@ bool BaseFieldParser::parseFieldLine(const HTTPFields::FieldPair& pair,
     if (target->first == fields::HOST) {
         return hostFieldLine(target, pair, hs);
     } else if (isUnique(pair.first)) {
-        return uniqueFieldLine(target, pair);
+        return uniqueFieldLine(target, pair, hs);
     } else {
         normalFieldLine(target, fieldMap, pair);
     }
@@ -58,9 +59,10 @@ bool BaseFieldParser::hostFieldLine(HTTPFields::FieldMap::iterator& target,
 }
 
 bool BaseFieldParser::uniqueFieldLine(HTTPFields::FieldMap::iterator& target,
-                                      const HTTPFields::FieldPair& pair) {
+                                    const HTTPFields::FieldPair& pair,
+                                    HttpStatus& hs) {
     if (!target->second.empty()) {
-        toolbox::logger::StepMark::info("FieldParser: " + pair.first + " is already set");
+        handleDuplicateFieldError(pair.first, hs);
         return false;
     }
     target->second = pair.second;
@@ -71,7 +73,8 @@ bool BaseFieldParser::normalFieldLine(HTTPFields::FieldMap::iterator& target,
                                       HTTPFields::FieldMap& fieldMap,
                                       const HTTPFields::FieldPair& pair) {
     if (target == fieldMap.end()) {
-        toolbox::logger::StepMark::info("FieldParser: " + pair.first + " not found");
+        toolbox::logger::StepMark::info
+            ("FieldParser: " + pair.first + " not found");
         return true;
     }
     for (std::size_t i = 0; i < pair.second.size(); ++i) {
@@ -80,7 +83,6 @@ bool BaseFieldParser::normalFieldLine(HTTPFields::FieldMap::iterator& target,
     return true;
 }
 
-// if return false set BADREQ or INTERNALSERVER
 bool BaseFieldParser::validateHost(const HTTPFields::FieldValue& values) {
     if (values.empty()) {
         toolbox::logger::StepMark::info("FieldParser: host value not found");

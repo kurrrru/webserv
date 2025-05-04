@@ -1,5 +1,7 @@
 #pragma once
 
+#include<string>
+
 #include "http_status.hpp"
 #include "request/http_fields.hpp"
 
@@ -12,7 +14,7 @@ class FieldValidator {
 
     static bool validateFieldLine(std::string& line);
     static bool validateRequestHeaders(HTTPFields& fields, HttpStatus& hs);
-    // bool validateResponseHeaders(HTTPFields& fields, HttpStatus& hs);
+    // static bool validateResponseHeaders(HTTPFields& fields, HttpStatus& hs);
 
  private:
     static bool validateHostExists(HTTPFields& fields, HttpStatus& hs);
@@ -23,4 +25,4 @@ class FieldValidator {
         (HTTPFields::FieldMap::iterator transferEncoding, HttpStatus& hs);
 };
 
-}
+}  // namespace http

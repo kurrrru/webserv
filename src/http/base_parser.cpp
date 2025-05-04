@@ -6,7 +6,7 @@
 namespace http {
 
 BaseParser::ParseException::ParseException(const char* message)
-    : _message(message) {}
+: _message(message) {}
 
 const char* BaseParser::ParseException::what() const throw() {
     return _message;
@@ -32,4 +32,4 @@ std::size_t BaseParser::getLineEndLen
     return 1;
 }
 
-}
+}  // namespace http

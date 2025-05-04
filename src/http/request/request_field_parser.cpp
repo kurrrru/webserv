@@ -1,3 +1,5 @@
+#include <string>
+
 #include "request_field_parser.hpp"
 #include "../http_status.hpp"
 
@@ -8,14 +10,15 @@ bool RequestFieldParser::isUnique(const std::string& key) {
 }
 
 void RequestFieldParser::handleInvalidFieldError(const std::string& key,
-                                                 HttpStatus& hs) {
+                                                HttpStatus& hs) {
     toolbox::logger::StepMark::info("RequestFieldParser: invalid " + key);
     hs.set(HttpStatus::BAD_REQUEST);
 }
 
 void RequestFieldParser::handleDuplicateFieldError(const std::string& key,
-                                                   HttpStatus& hs) {
+                                                HttpStatus& hs) {
     toolbox::logger::StepMark::info("RequestFieldParser: duplicate " + key);
     hs.set(HttpStatus::BAD_REQUEST);
 }
-}
+
+}  // namespace http

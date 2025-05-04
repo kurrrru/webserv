@@ -1,3 +1,4 @@
+#include <string>
 #include <cstdlib>
 
 #include "field_validator.hpp"
@@ -34,8 +35,10 @@ bool FieldValidator::validateHostExists(HTTPFields& fields, HttpStatus& hs) {
     return true;
 }
 
-bool FieldValidator::validateContentHeaders(HTTPFields& fields, HttpStatus& hs) {
-    HTTPFields::FieldMap::iterator content_length = fields.get().find(fields::CONTENT_LENGTH);
+bool FieldValidator::validateContentHeaders(HTTPFields& fields,
+                                            HttpStatus& hs) {
+    HTTPFields::FieldMap::iterator content_length =
+        fields.get().find(fields::CONTENT_LENGTH);
     HTTPFields::FieldMap::iterator transfer_encoding =
         fields.get().find(fields::TRANSFER_ENCODING);
     if (!content_length->second.empty()) {
@@ -71,18 +74,20 @@ bool FieldValidator::validateContentLength(
     }
     std::size_t size = std::strtol(contentLength->second[0].c_str(), NULL, 10);
     if (size > fields::MAX_BODY_SIZE) {
-        toolbox::logger::StepMark::info("FieldValidator: content-length too large");
+        toolbox::logger::StepMark::info
+            ("FieldValidator: content-length too large");
         hs.set(HttpStatus::PAYLOAD_TOO_LARGE);
         return false;
     }
     return true;
 }
 
-bool FieldValidator::validateTransferEncoding(HTTPFields::FieldMap::iterator transferEncoding,
-                              HttpStatus& hs) {
+bool FieldValidator::validateTransferEncoding(
+    HTTPFields::FieldMap::iterator transferEncoding, HttpStatus& hs) {
     for (std::size_t i = 0; i < transferEncoding->second.size(); ++i) {
         if ("chunked" != transferEncoding->second[i]) {
-            toolbox::logger::StepMark::info("FieldValidator: transfer-encoding not implemented");
+            toolbox::logger::StepMark::info
+                ("FieldValidator: transfer-encoding not implemented");
             hs.set(HttpStatus::NOT_IMPLEMENTED);
             return false;
         }
@@ -90,4 +95,4 @@ bool FieldValidator::validateTransferEncoding(HTTPFields::FieldMap::iterator tra
     return true;
 }
 
-}
+}  // namespace http

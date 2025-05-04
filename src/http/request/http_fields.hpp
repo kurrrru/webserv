@@ -24,9 +24,10 @@ class HTTPFields {
 
     HTTPFields() {}
     ~HTTPFields() {}
+
     void initFieldsMap();
     FieldValue& getFieldValue(const std::string& key);
-    FieldMap& get() { return _fieldsMap; };
+    FieldMap& get() { return _fieldsMap; }
 
  private:
     HTTPFields(const HTTPFields& other);
