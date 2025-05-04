@@ -1,8 +1,6 @@
 #include <string>
 
 #include "base_field_parser.hpp"
-#include "request/http_fields.hpp"
-#include "string_utils.hpp"
 
 namespace http {
 bool BaseFieldParser::parseFieldLine(const HTTPFields::FieldPair& pair,

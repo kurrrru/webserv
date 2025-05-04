@@ -1,7 +1,7 @@
-#include "http_fields.hpp"
-
 #include <string>
 #include <utility>
+
+#include "http_fields.hpp"
 
 namespace http {
 void HTTPFields::initFieldsMap() {

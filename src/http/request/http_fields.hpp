@@ -1,8 +1,5 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
-#include <iostream>
 #include <map>
 #include <string>
 #include <utility>

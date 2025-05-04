@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #include "http_namespace.hpp"
 
 namespace http {

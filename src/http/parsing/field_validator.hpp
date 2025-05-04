@@ -2,11 +2,12 @@
 
 #include<string>
 
-#include "http_status.hpp"
-#include "request/http_fields.hpp"
+#include "../request/http_fields.hpp"
+#include "../http_status.hpp"
+#include "../http_namespace.hpp"
+#include "../string_utils.hpp"
 
 namespace http {
-
 class FieldValidator {
  public:
     FieldValidator() {}
@@ -17,6 +18,9 @@ class FieldValidator {
     // static bool validateResponseHeaders(HTTPFields& fields, HttpStatus& hs);
 
  private:
+    FieldValidator(const FieldValidator& other);
+    FieldValidator& operator=(const FieldValidator& other);
+
     static bool validateHostExists(HTTPFields& fields, HttpStatus& hs);
     static bool validateContentHeaders(HTTPFields& fields, HttpStatus& hs);
     static bool validateContentLength
