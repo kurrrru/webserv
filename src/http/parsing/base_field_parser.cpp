@@ -67,12 +67,10 @@ bool BaseFieldParser::uniqueFieldLine(HTTPFields::FieldMap::iterator& target,
     return true;
 }
 
-bool BaseFieldParser::normalFieldLine(HTTPFields::FieldMap::iterator& target,
+void BaseFieldParser::normalFieldLine(HTTPFields::FieldMap::iterator& target,
                                       const HTTPFields::FieldPair& pair) {
-    for (std::size_t i = 0; i < pair.second.size(); ++i) {
-        target->second.push_back(pair.second[i]);
-    }
-    return true;
+    target->second.insert(target->second.begin(),
+        pair.second.begin(), pair.second.end());
 }
 
 bool BaseFieldParser::validateHost(const HTTPFields::FieldValue& values) {

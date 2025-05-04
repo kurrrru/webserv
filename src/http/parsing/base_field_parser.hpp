@@ -27,7 +27,7 @@ class BaseFieldParser {
     virtual bool uniqueFieldLine(HTTPFields::FieldMap::iterator& target,
                     const HTTPFields::FieldPair& pair,
                     HttpStatus& hs);
-    bool normalFieldLine(HTTPFields::FieldMap::iterator& target,
+    void normalFieldLine(HTTPFields::FieldMap::iterator& target,
                         const HTTPFields::FieldPair& pair);
     virtual bool isUnique(const std::string& key) = 0;
     bool validateHost(const HTTPFields::FieldValue& values);
