@@ -57,7 +57,7 @@ class HttpStatus {
     ~HttpStatus() {}
 
     void set(EHttpStatus status) { _status = status; }
-    int get() { return _status; }
+    EHttpStatus get() { return _status; }
 
  private:
     EHttpStatus _status;
