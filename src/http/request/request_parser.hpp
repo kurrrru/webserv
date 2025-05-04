@@ -1,75 +1,47 @@
-// // Copyright 2025 Ideal Broccoli
+#pragma once
 
-// #pragma once
+#include <string>
 
-// #include <ctime>
-// #include <map>
-// #include <string>
-// #include <utility>
-// #include <vector>
-// #include <cstdlib>
+#include "../base_parser.hpp"
+#include "../http_status.hpp"
+#include "../field_validator.hpp"
+#include "../base_field_parser.hpp"
+#include "http_request.hpp"
+#include "request_field_parser.hpp"
 
-// #include "../../../toolbox/string.hpp"
-// #include "../http_namespace.hpp"
-// #include "../http_status.hpp"
-// #include "http_request.hpp"
-// #include "http_fields.hpp"
+namespace http {
 
-// namespace http {
-// class RequestParser {
-//  public:
-//     class ParseException : public std::exception {
-//      public:
-//         explicit ParseException(const char* message);
-//         const char* what() const throw();
+class RequestParser : public BaseParser {
+ public:
+    RequestParser() { _validatePos = REQUEST_LINE; }
+    ~RequestParser() {}
+    void run(const std::string& buf);
+    HTTPRequest& get() { return _request; }
 
-//      private:
-//         const char* _message;
-//     };
+ private:
+    HTTPRequest _request;
+    RequestFieldParser _fieldParser;
 
-//     enum ParseState {
-//         REQUEST_LINE  = 0,
-//         HEADERS     = 1,
-//         BODY        = 2,
-//         COMPLETED   = 3,
-//         ERROR       = 4
-//     };
+    void processRequestLine();
+    void parseRequestLine();
+    void validateVersion();
+    bool isValidFormat();
+    void validateMethod();
+    void processURI();
+    void parseURI();
+    void validatePath();
+    void pathDecode();
+    void percentDecode(std::string& line);
+    bool decodeHex(std::string& hexStr, std::string& decodedStr);
+    void parseQuery();
+    void normalizationPath();
+    void verifySafePath();
 
-//     RequestParser() : _validatePos(REQUEST_LINE) {}
-//     ~RequestParser() {}
-//     void run(const std::string& buf);
-//     HTTPRequest& get() { return _request; }
+    void processFieldLine();
+    void processBody();
+    bool isChunkedEncoding();
+    void parseChunkedEncoding();
 
-//  private:
-//     RequestParser(const RequestParser& other);
-//     RequestParser& operator=(const RequestParser& other);
+};
 
-//     void processRequestLine();
-//     void parseRequestLine();
-//     void validateMethod();
-//     void processURI();
-//     void parseURI();
-//     void pathDecode();
-//     void percentDecode(std::string& line);
-//     bool decodeHex(std::string& hexStr, std::string& decodedChar);
-//     void parseQuery();
-//     void validatePath();
-//     void normalizationPath();
-//     void verifySafePath();
-//     void validateVersion();
-//     bool isValidFormat();
-//     void processFields();
-//     void validateFieldLine(std::string& line);
-//     HTTPFields::FieldPair splitFieldLine(std::string* line);
-//     void parseChunkedEncoding();
-//     void processBody();
-
-//     std::string _buf;
-//     HTTPRequest _request;
-//     ParseState _validatePos;
-// };
-
-// bool hasCtlChar(const std::string& str);
-// void logInfo(HttpStatus status, const std::string& message);
-
-// }  // namespace http
+}

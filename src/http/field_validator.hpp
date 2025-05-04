@@ -7,19 +7,19 @@ namespace http {
 
 class FieldValidator {
  public:
-    FieldValidator();
-    ~FieldValidator();
+    FieldValidator() {}
+    ~FieldValidator() {}
 
-    bool validateFieldLine(std::string& line);
-    bool validateRequestHeaders(HTTPFields& fields, HttpStatus& hs);
-    bool validateResponseHeaders(HTTPFields& fields, HttpStatus& hs);
+    static bool validateFieldLine(std::string& line);
+    static bool validateRequestHeaders(HTTPFields& fields, HttpStatus& hs);
+    // bool validateResponseHeaders(HTTPFields& fields, HttpStatus& hs);
 
  private:
-    bool validateHostExists(HTTPFields& fields, HttpStatus& hs);
-    bool validateContentHeaders(HTTPFields& fields, HttpStatus& hs);
-    bool validateContentLength
+    static bool validateHostExists(HTTPFields& fields, HttpStatus& hs);
+    static bool validateContentHeaders(HTTPFields& fields, HttpStatus& hs);
+    static bool validateContentLength
         (HTTPFields::FieldMap::iterator contentLength, HttpStatus& hs);
-    bool validateTransferEncoding
+    static bool validateTransferEncoding
         (HTTPFields::FieldMap::iterator transferEncoding, HttpStatus& hs);
 };
 
