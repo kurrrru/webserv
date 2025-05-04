@@ -2,27 +2,31 @@
 
 #include <string>
 
-#include "../base_parser.hpp"
+#include "../parsing/base_parser.hpp"
+#include "../parsing/field_validator.hpp"
+#include "../parsing/base_field_parser.hpp"
 #include "../http_status.hpp"
-#include "../field_validator.hpp"
-#include "../base_field_parser.hpp"
-#include "http_request.hpp"
+#include "../string_utils.hpp"
 #include "request_field_parser.hpp"
+#include "http_request.hpp"
+
 
 namespace http {
+namespace parser {
+const std::size_t HEX_DIGIT_LENGTH = 2;
+}
 
 class RequestParser : public BaseParser {
  public:
-    RequestParser() { _validatePos = REQUEST_LINE; }
+    RequestParser() { setValidatePos(V_REQUEST_LINE); }
     ~RequestParser() {}
-    void run(const std::string& buf);
     HTTPRequest& get() { return _request; }
 
  private:
-    HTTPRequest _request;
-    RequestFieldParser _fieldParser;
+    RequestParser(const RequestParser& other);
+    RequestParser& operator=(const RequestParser& other);
 
-    void processRequestLine();
+    ParseStatus processRequestLine();
     void parseRequestLine();
     void validateVersion();
     bool isValidFormat();
@@ -36,11 +40,13 @@ class RequestParser : public BaseParser {
     void parseQuery();
     void normalizationPath();
     void verifySafePath();
-
-    void processFieldLine();
-    void processBody();
+    ParseStatus processFieldLine();
+    ParseStatus processBody();
     bool isChunkedEncoding();
     void parseChunkedEncoding();
+
+    HTTPRequest _request;
+    RequestFieldParser _fieldParser;
 };
 
 }  // namespace http

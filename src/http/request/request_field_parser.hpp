@@ -2,7 +2,8 @@
 
 #include <string>
 
-#include "../base_field_parser.hpp"
+#include "../parsing/base_field_parser.hpp"
+#include "../http_status.hpp"
 
 namespace http {
 class RequestFieldParser : public BaseFieldParser {

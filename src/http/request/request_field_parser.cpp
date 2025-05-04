@@ -1,10 +1,8 @@
 #include <string>
 
 #include "request_field_parser.hpp"
-#include "../http_status.hpp"
 
 namespace http {
-
 bool RequestFieldParser::isUnique(const std::string& key) {
     return key == fields::CONTENT_LENGTH || key == fields::TRANSFER_ENCODING;
 }

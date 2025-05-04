@@ -5,11 +5,8 @@
 #include <cstdlib>
 
 #include "request_parser.hpp"
-#include "../string_utils.hpp"
-
 
 namespace http {
-
 static std::size_t addLength(std::size_t sum, const std::string& s) {
     return sum + s.size();
 }
@@ -19,32 +16,20 @@ static std::size_t calcTotalLength(const std::deque<std::string>& deq) {
         static_cast<std::size_t>(0), addLength);
 }
 
-void RequestParser::run(const std::string& buf) {
-    _buf += buf;
-    if (_buf.find(http::symbols::CRLF) == std::string::npos &&
-        _validatePos != BODY) {
-        return;
-    }
-    processRequestLine();
-    processFieldLine();
-    processBody();
-}
-
-void RequestParser::processFieldLine() {
-    if (_validatePos != HEADERS ||
-        _buf.find(symbols::CRLF) == std::string::npos) {
-        return;
+BaseParser::ParseStatus RequestParser::processFieldLine() {
+    if (getBuf()->find(symbols::CRLF) == std::string::npos) {
+        return P_NEED_MORE_DATA;
     }
     if (_request.fields.get().empty()) {
         _request.fields.initFieldsMap();
     }
-    while (_buf.find(symbols::CRLF) != std::string::npos) {
-        if (_buf.find(symbols::CRLF) == 0) {
-            _validatePos = BODY;
-            _buf = _buf.substr(sizeof(*symbols::CRLF));
+    while (getBuf()->find(symbols::CRLF) != std::string::npos) {
+        if (getBuf()->find(symbols::CRLF) == 0) {
+            setValidatePos(V_BODY);
+            setBuf(getBuf()->substr(sizeof(*symbols::CRLF)));
             break;
         }
-        std::string line = toolbox::trim(&_buf, symbols::CRLF);
+        std::string line = toolbox::trim(getBuf(), symbols::CRLF);
         if (!FieldValidator::validateFieldLine(line)) {
             _request.httpStatus.set(HttpStatus::BAD_REQUEST);
             continue;
@@ -59,12 +44,11 @@ void RequestParser::processFieldLine() {
                                                 _request.httpStatus)) {
         throw ParseException("");
     }
+    setValidatePos(V_BODY);
+    return P_IN_PROGRESS;
 }
 
-void RequestParser::processRequestLine() {
-    if (_validatePos != REQUEST_LINE) {
-        return;
-    }
+BaseParser::ParseStatus RequestParser::processRequestLine() {
     parseRequestLine();
     validateVersion();
     validateMethod();
@@ -72,11 +56,12 @@ void RequestParser::processRequestLine() {
     if (_request.httpStatus.get() != HttpStatus::OK) {
         throw ParseException("");
     }
-    _validatePos = HEADERS;
+    setValidatePos(V_FIELD);
+    return P_IN_PROGRESS;
 }
 
 void RequestParser::parseRequestLine() {
-    std::string line = toolbox::trim(&_buf, symbols::CRLF);
+    std::string line = toolbox::trim(getBuf(), symbols::CRLF);
     if (line.find(symbols::SP) == std::string::npos) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
         return;
@@ -224,13 +209,14 @@ void RequestParser::percentDecode(std::string& line) {
     std::size_t i = 0;
     while (i < line.size()) {
         if (line[i] == *symbols::PERCENT) {
-            std::string hexStr = line.substr(i + 1, 2);
+            std::string hexStr = line.substr(i + 1, parser::HEX_DIGIT_LENGTH);
             std::string decodedStr;
             if (decodeHex(hexStr, decodedStr)) {
                 res += decodedStr;
                 i += 3;  // % + hex num len
             } else {
-                if (line[0] == '/' || i + 2 < line.size()) {  // is path
+                if (line[0] == '/' ||
+                    i + parser::HEX_DIGIT_LENGTH < line.size()) {  // is path
                     _request.httpStatus.set(HttpStatus::BAD_REQUEST);
                     toolbox::logger::StepMark::info
                         ("RequestParser: path has invalid hexdecimal");
@@ -251,7 +237,8 @@ void RequestParser::percentDecode(std::string& line) {
 }
 
 bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
-    if (hexStr.size() != 2 || !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
+    if (hexStr.size() != parser::HEX_DIGIT_LENGTH ||
+        !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
         return false;
     }
     char* endptr = NULL;
@@ -290,7 +277,7 @@ void RequestParser::normalizationPath() {
     std::size_t slashPos = 0;
     while ((slashPos = normalizePath.find("//", slashPos)) !=
            std::string::npos) {
-        normalizePath.replace(slashPos, 2, "/");
+        normalizePath.replace(slashPos, parser::HEX_DIGIT_LENGTH, "/");
     }
     std::string parts;
     for (std::size_t i = 0; i < normalizePath.size(); ++i) {
@@ -327,13 +314,10 @@ void RequestParser::verifySafePath() {
     }
 }
 
-void RequestParser::processBody() {
-    if (_validatePos != BODY) {
-        return;
-    }
+BaseParser::ParseStatus RequestParser::processBody() {
     if (_request.body.isChunked || isChunkedEncoding()) {
         parseChunkedEncoding();
-        return;
+        return P_COMPLETED;
     }
     if (!_request.body.contentLength) {
         std::vector<std::string>& contentLen =
@@ -346,15 +330,16 @@ void RequestParser::processBody() {
         }
     }
     if (_request.body.contentLength > _request.body.recvedLength) {
-        _request.body.content.append(_buf.substr(
+        _request.body.content.append(getBuf()->substr(
             0, _request.body.contentLength - _request.body.recvedLength));
-        _request.body.recvedLength += _buf.size();
+        _request.body.recvedLength += getBuf()->size();
     }
     if (_request.body.contentLength <= _request.body.recvedLength ||
-        _buf.empty()) {
-        _validatePos = COMPLETED;
+        getBuf()->empty()) {
+            setValidatePos(V_COMPLETED);
     }
-    _buf.clear();
+    getBuf()->clear();
+    return P_IN_PROGRESS;
 }
 
 bool RequestParser::isChunkedEncoding() {
@@ -368,31 +353,35 @@ void RequestParser::parseChunkedEncoding() {
         _request.body.isChunked = true;
         _request.body.lastChunk = false;
     }
-    while (!_buf.empty() && !_request.body.lastChunk) {
-        std::size_t pos = _buf.find(symbols::CRLF);
+    while (!getBuf()->empty() && !_request.body.lastChunk) {
+        std::size_t pos = getBuf()->find(symbols::CRLF);
         if (pos == std::string::npos) {
             return;
         }
-        std::string hexStr = _buf.substr(0, pos + 1);
+        std::string hexStr = getBuf()->substr(0, pos + 1);
         std::size_t chunkSize;
         char* endPtr;
         chunkSize = strtol(hexStr.c_str(), &endPtr, 16);
         if (*endPtr != *http::symbols::CR) {
-            throw ParseException("Error: chunked encoding failed read hexStr");
+            throw ParseException("");
         }
         if (chunkSize == 0) {
             _request.body.lastChunk = true;
-            _validatePos = COMPLETED;
+            setValidatePos(V_COMPLETED);
             return;
         }
-        _buf = _buf.substr(pos + 2);
-        if (_buf.size() < chunkSize + 2) {  // buf + CRLF
+        setBuf(getBuf()->substr(pos + parser::HEX_DIGIT_LENGTH));
+        if (getBuf()->size() < chunkSize + parser::HEX_DIGIT_LENGTH) {
             return;
         }
-        std::string chunkData = _buf.substr(0, chunkSize);
+        std::string chunkData = getBuf()->substr(0, chunkSize);
+        if (_request.body.recvedLength + chunkSize > fields::MAX_BODY_SIZE) {
+            _request.httpStatus.set(HttpStatus::PAYLOAD_TOO_LARGE);
+            throw ParseException("");
+        }
         _request.body.content.append(chunkData);
         _request.body.recvedLength += chunkSize;
-        _buf = _buf.substr(chunkSize + 2);
+        setBuf(getBuf()->substr(chunkSize + parser::HEX_DIGIT_LENGTH));
     }
 }
 

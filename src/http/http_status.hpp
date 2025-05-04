@@ -1,11 +1,10 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 namespace http {
 class HttpStatus {
  public:
     enum EHttpStatus {
+        UNSET = 0,
         OK = 200,
         CREATED = 201,
         ACCEPTED = 202,
@@ -56,6 +55,7 @@ class HttpStatus {
 
     HttpStatus() : _status(OK) {}
     ~HttpStatus() {}
+
     void set(EHttpStatus status) { _status = status; }
     int get() { return _status; }
 

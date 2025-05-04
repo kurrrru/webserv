@@ -1,5 +1,8 @@
 #include <string>
 
+#include "http_namespace.hpp"
+#include "case_insensitive_less.hpp"
+
 namespace http {
 namespace utils {
 bool hasWhiteSpace(const std::string& str);

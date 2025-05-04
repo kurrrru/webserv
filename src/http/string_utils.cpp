@@ -1,12 +1,9 @@
 #include <string>
 
 #include "string_utils.hpp"
-#include "http_namespace.hpp"
-#include "case_insensitive_less.hpp"
 
 namespace http {
 namespace utils {
-
 bool hasWhiteSpace(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
         if (std::isspace(str[i])) {
@@ -18,7 +15,7 @@ bool hasWhiteSpace(const std::string& str) {
 
 bool hasCtlChar(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
-        if (std::iscntrl(str[i])) {
+        if (std::iscntrl(static_cast<unsigned char>(str[i]))) {
             return true;
         }
     }
@@ -27,7 +24,7 @@ bool hasCtlChar(const std::string& str) {
 
 bool isDigitStr(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
-        if (!std::isdigit(str[i])) {
+        if (!std::isdigit(static_cast<unsigned char>(str[i]))) {
             return false;
         }
     }
@@ -36,7 +33,7 @@ bool isDigitStr(const std::string& str) {
 
 bool isAlnumStr(const std::string& str) {
     for (std::size_t i = 0; i < str.size(); ++i) {
-        if (!std::isalnum(str[i])) {
+        if (!std::isalnum(static_cast<unsigned char>(str[i]))) {
             return false;
         }
     }

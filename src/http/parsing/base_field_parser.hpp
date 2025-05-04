@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include "request/http_fields.hpp"
+#include "../request/http_fields.hpp"
+#include "../string_utils.hpp"
 
 namespace http {
-
 class BaseFieldParser {
  public:
     BaseFieldParser() {}
@@ -18,7 +18,9 @@ class BaseFieldParser {
                             // HttpStatus& hs);
 
  protected:
-    virtual bool isUnique(const std::string& key) = 0;
+    BaseFieldParser(const BaseFieldParser& other);
+    BaseFieldParser& operator=(const BaseFieldParser& other);
+
     bool hostFieldLine(HTTPFields::FieldMap::iterator& target,
                     const HTTPFields::FieldPair& pair,
                     HttpStatus& hs);
@@ -28,6 +30,7 @@ class BaseFieldParser {
     bool normalFieldLine(HTTPFields::FieldMap::iterator& target,
                         HTTPFields::FieldMap& fieldMap,
                         const HTTPFields::FieldPair& pair);
+    virtual bool isUnique(const std::string& key) = 0;
     bool validateHost(const HTTPFields::FieldValue& values);
     virtual void handleInvalidFieldError(const std::string& key,
                                         HttpStatus& hs) = 0;

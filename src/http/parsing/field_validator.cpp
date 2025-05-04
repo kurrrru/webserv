@@ -2,8 +2,6 @@
 #include <cstdlib>
 
 #include "field_validator.hpp"
-#include "http_namespace.hpp"
-#include "string_utils.hpp"
 
 namespace http {
 bool FieldValidator::validateFieldLine(std::string& line) {
