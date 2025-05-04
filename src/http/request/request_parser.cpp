@@ -1,3 +1,5 @@
+#include <string>
+#include <vector>
 #include <deque>
 #include <numeric>
 #include <cstdlib>
@@ -48,12 +50,13 @@ void RequestParser::processFieldLine() {
             continue;
         }
         HTTPFields::FieldPair pair = RequestFieldParser::splitFieldLine(&line);
-        if (!_fieldParser.parseFieldLine(pair, _request.fields.get(), _request.httpStatus)) {
-            _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        if (!_fieldParser.parseFieldLine(pair, _request.fields.get(),
+                                        _request.httpStatus)) {
             throw ParseException("");
         }
     }
-    if (!FieldValidator::validateRequestHeaders(_request.fields, _request.httpStatus)) {
+    if (!FieldValidator::validateRequestHeaders(_request.fields,
+                                                _request.httpStatus)) {
         throw ParseException("");
     }
 }
@@ -229,7 +232,8 @@ void RequestParser::percentDecode(std::string& line) {
             } else {
                 if (line[0] == '/' || i + 2 < line.size()) {  // is path
                     _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-                    toolbox::logger::StepMark::info("RequestParser: path has invalid hexdecimal");
+                    toolbox::logger::StepMark::info
+                        ("RequestParser: path has invalid hexdecimal");
                     return;
                 }
                 res += line[i];
@@ -354,9 +358,9 @@ void RequestParser::processBody() {
 }
 
 bool RequestParser::isChunkedEncoding() {
-    HTTPFields::FieldValue value = _request.fields.getFieldValue(fields::TRANSFER_ENCODING);
+    HTTPFields::FieldValue value =
+        _request.fields.getFieldValue(fields::TRANSFER_ENCODING);
     return !value.empty() && value[0] == "chunked";
-
 }
 
 void RequestParser::parseChunkedEncoding() {
@@ -392,4 +396,4 @@ void RequestParser::parseChunkedEncoding() {
     }
 }
 
-}
+}  // namespace http

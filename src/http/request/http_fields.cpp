@@ -1,5 +1,8 @@
 #include "http_fields.hpp"
 
+#include <string>
+#include <utility>
+
 namespace http {
 void HTTPFields::initFieldsMap() {
     for (std::size_t i = 0; i < fields::FIELD_SIZE; ++i) {

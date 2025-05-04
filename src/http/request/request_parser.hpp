@@ -41,7 +41,6 @@ class RequestParser : public BaseParser {
     void processBody();
     bool isChunkedEncoding();
     void parseChunkedEncoding();
-
 };
 
-}
+}  // namespace http

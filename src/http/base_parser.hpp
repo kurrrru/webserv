@@ -26,14 +26,14 @@ class BaseParser {
     virtual void run(const std::string& buf) = 0;
 
  protected:
-    std::string _buf;
-    ParseState _validatePos;
-
     virtual void processFieldLine() = 0;
     virtual void processBody() = 0;
 
     std::size_t findNewLinePos(std::string& buffer);
     std::size_t getLineEndLen(std::string& line, std::size_t lineEndPos);
+
+    std::string _buf;
+    ParseState _validatePos;
 };
 
-}
+}  // namespace http
