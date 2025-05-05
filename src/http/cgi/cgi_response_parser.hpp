@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdlib>
+
 #include "../parsing/base_field_parser.hpp"
 #include "../parsing/field_validator.hpp"
 #include "../parsing/base_parser.hpp"
@@ -16,6 +18,7 @@ class CgiResponseParser : public BaseParser {
     inline CgiResponse& get() { return _response; }
 
  private:
+    ParseStatus processRequestLine() { return BaseParser::P_ERROR; }
     ParseStatus processFieldLine();
     ParseStatus processBody();
 

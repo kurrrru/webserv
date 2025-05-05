@@ -22,12 +22,13 @@ BaseParser::ParseStatus CgiResponseParser::processFieldLine() {
         if (lineEndPos == 0) {
             setValidatePos(V_BODY);
             setBuf(getBuf()->substr(lineEndLen));
-            return;
+            return P_IN_PROGRESS;
         }
         std::string line = getBuf()->substr(0, lineEndPos);
         setBuf(getBuf()->substr(lineEndPos + lineEndLen));
         if (!FieldValidator::validateFieldLine(line)) {
-            break;
+            _response.httpStatus.set(HttpStatus::BAD_REQUEST);
+            continue;
         }
         HTTPFields::FieldPair pair = BaseFieldParser::splitFieldLine(&line);
         if (pair.second.empty()) {
@@ -44,6 +45,10 @@ BaseParser::ParseStatus CgiResponseParser::processFieldLine() {
         lfPos = getBuf()->find(symbols::LF);
     }
     return P_NEED_MORE_DATA;
+}
+
+BaseParser::ParseStatus CgiResponseParser::processBody() {
+    return BaseParser::P_ERROR;
 }
 
 }  // namespace http
