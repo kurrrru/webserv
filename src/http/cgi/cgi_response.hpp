@@ -8,7 +8,10 @@
 namespace http {
 class CgiResponse {
  public:
-    CgiResponse() { httpStatus.set(HttpStatus::EHttpStatus::UNSET); }
+    inline CgiResponse() {
+        httpStatus.set(HttpStatus::EHttpStatus::UNSET);
+        fields.initFieldsMap();
+    }
     ~CgiResponse() {}
 
     HttpStatus httpStatus;
