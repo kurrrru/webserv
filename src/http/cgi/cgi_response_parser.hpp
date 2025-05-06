@@ -21,6 +21,7 @@ class CgiResponseParser : public BaseParser {
     ParseStatus processRequestLine() { return BaseParser::P_ERROR; }
     ParseStatus processFieldLine();
     ParseStatus processBody();
+    bool parseStatus(HTTPFields::FieldPair& pair);
 
     CgiResponse _response;
     CgiFieldParser _fieldParser;

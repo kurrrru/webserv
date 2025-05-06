@@ -25,6 +25,10 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
     }
     while (getBuf()->find(symbols::CRLF) != std::string::npos) {
         if (getBuf()->find(symbols::CRLF) == 0) {
+            if (!FieldValidator::validateRequestHeaders
+                (_request.fields, _request.httpStatus)) {
+                throw ParseException("");
+            }
             setValidatePos(V_BODY);
             setBuf(getBuf()->substr(sizeof(*symbols::CRLF)));
             break;
@@ -40,11 +44,6 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
             throw ParseException("");
         }
     }
-    if (!FieldValidator::validateRequestHeaders(_request.fields,
-                                                _request.httpStatus)) {
-        throw ParseException("");
-    }
-    setValidatePos(V_BODY);
     return P_IN_PROGRESS;
 }
 

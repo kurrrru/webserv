@@ -58,7 +58,7 @@ class HttpStatus {
 
     void set(EHttpStatus status) { _status = status; }
     void set(int status) { _status = static_cast<EHttpStatus>(status); }
-    EHttpStatus get() { return _status; }
+    EHttpStatus get() const { return _status; }
 
  private:
     EHttpStatus _status;

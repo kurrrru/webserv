@@ -14,27 +14,43 @@ bool FieldValidator::validateFieldLine(std::string& line) {
 
 bool FieldValidator::validateRequestHeaders(HTTPFields& fields,
                                             HttpStatus& hs) {
-    if (!validateHostExists(fields, hs)) {
+    Result result;
+    result = validateHostExists(fields);
+    if (!result) {
+        hs.set(result.status);
         return false;
     }
-    if (!validateContentHeaders(fields, hs)) {
+    result = validateContentHeaders(fields);
+    if (!result) {
+        hs.set(result.status);
         return false;
     }
     return true;
 }
 
-bool FieldValidator::validateHostExists(HTTPFields& fields, HttpStatus& hs) {
+bool FieldValidator::validateCgiHeaders(HTTPFields& fields,
+    HttpStatus& hs) {
+    Result result;
+    result = validateContentHeaders(fields);
+    if (!result) {
+        hs.set(HttpStatus::INTERNAL_SERVER_ERROR);
+        return false;
+    }
+    return true;
+}
+
+
+FieldValidator::Result FieldValidator::validateHostExists(HTTPFields& fields) {
     if (fields.get().find(fields::HOST)->second.empty()) {
         toolbox::logger::StepMark::info(
             "FieldValidator: host does not exist");
-        hs.set(HttpStatus::BAD_REQUEST);
-        return false;
+        return Result(false, HttpStatus::BAD_REQUEST);
     }
-    return true;
+    return Result(true, HttpStatus::OK);
 }
 
-bool FieldValidator::validateContentHeaders(HTTPFields& fields,
-                                            HttpStatus& hs) {
+FieldValidator::Result FieldValidator::validateContentHeaders
+(HTTPFields& fields) {
     HTTPFields::FieldMap::iterator content_length =
         fields.get().find(fields::CONTENT_LENGTH);
     HTTPFields::FieldMap::iterator transfer_encoding =
@@ -44,53 +60,48 @@ bool FieldValidator::validateContentHeaders(HTTPFields& fields,
             toolbox::logger::StepMark::info(
                 "FieldValidator: content-length and transfer-encoding must not "
                 "coexist");
-            hs.set(HttpStatus::BAD_REQUEST);
-            return false;
+            return Result(false, HttpStatus::BAD_REQUEST);
         }
-        return validateContentLength(content_length, hs);
+        return validateContentLength(content_length);
     } else if (!transfer_encoding->second.empty()) {
-        return validateTransferEncoding(transfer_encoding, hs);
+        return validateTransferEncoding(transfer_encoding);
     }
-    return true;
+    return Result(true, HttpStatus::OK);
 }
 
-bool FieldValidator::validateContentLength(
-    HTTPFields::FieldMap::iterator contentLength, HttpStatus& hs) {
+FieldValidator::Result FieldValidator::validateContentLength(
+    HTTPFields::FieldMap::iterator contentLength) {
     if (!utils::isDigitStr(contentLength->second[0])) {
         toolbox::logger::StepMark::info(
             "FieldValidator: content-length is not number");
-        hs.set(HttpStatus::BAD_REQUEST);
-        return false;
+        return Result(false, HttpStatus::BAD_REQUEST);
     }
     for (std::size_t i = 1; i < contentLength->second.size(); ++i) {
         if (contentLength->second[0] != contentLength->second[i]) {
             toolbox::logger::StepMark::info(
                 "FieldValidator: content-length has different multiple number");
-            hs.set(HttpStatus::BAD_REQUEST);
-            return false;
+            return Result(false, HttpStatus::BAD_REQUEST);
         }
     }
     std::size_t size = std::strtol(contentLength->second[0].c_str(), NULL, 10);
     if (size > fields::MAX_BODY_SIZE) {
         toolbox::logger::StepMark::info
             ("FieldValidator: content-length too large");
-        hs.set(HttpStatus::PAYLOAD_TOO_LARGE);
-        return false;
+        return Result(false, HttpStatus::PAYLOAD_TOO_LARGE);
     }
-    return true;
+    return Result(true, HttpStatus::OK);
 }
 
-bool FieldValidator::validateTransferEncoding(
-    HTTPFields::FieldMap::iterator transferEncoding, HttpStatus& hs) {
+FieldValidator::Result FieldValidator::validateTransferEncoding(
+    HTTPFields::FieldMap::iterator transferEncoding) {
     for (std::size_t i = 0; i < transferEncoding->second.size(); ++i) {
         if ("chunked" != transferEncoding->second[i]) {
             toolbox::logger::StepMark::info
                 ("FieldValidator: transfer-encoding not implemented");
-            hs.set(HttpStatus::NOT_IMPLEMENTED);
-            return false;
+            return Result(false, HttpStatus::NOT_IMPLEMENTED);
         }
     }
-    return true;
+    return Result(true, HttpStatus::OK);
 }
 
 }  // namespace http

@@ -23,6 +23,7 @@ class HTTPFields {
     ~HTTPFields() {}
 
     void initFieldsMap();
+    std::size_t countNonEmptyValues();
     FieldValue& getFieldValue(const std::string& key);
     FieldMap& get() { return _fieldsMap; }
 
