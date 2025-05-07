@@ -5,39 +5,23 @@
 namespace http {
 namespace utils {
 bool hasWhiteSpace(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (std::isspace(str[i])) {
-            return true;
-        }
-    }
-    return false;
+    int (*is_space)(int) = std::isspace;
+    return toolbox::any_true(str.begin(), str.end(), is_space);
 }
 
 bool hasCtlChar(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (std::iscntrl(static_cast<unsigned char>(str[i]))) {
-            return true;
-        }
-    }
-    return false;
+    int (*is_cntrl)(int) = std::iscntrl;
+    return toolbox::any_true(str.begin(), str.end(), is_cntrl);
 }
 
 bool isDigitStr(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (!std::isdigit(static_cast<unsigned char>(str[i]))) {
-            return false;
-        }
-    }
-    return true;
+    int (*is_digit)(int) = std::isdigit;
+    return toolbox::all_true(str.begin(), str.end(), is_digit);
 }
 
 bool isAlnumStr(const std::string& str) {
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        if (!std::isalnum(static_cast<unsigned char>(str[i]))) {
-            return false;
-        }
-    }
-    return true;
+    int (*is_alnum)(int) = std::isalnum;
+    return toolbox::all_true(str.begin(), str.end(), is_alnum);
 }
 
 void trimSpace(std::string* str) {
