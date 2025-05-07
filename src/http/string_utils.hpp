@@ -1,5 +1,7 @@
 #include <string>
+#include <cctype>
 
+#include "../../toolbox/string.hpp"
 #include "http_namespace.hpp"
 #include "case_insensitive_less.hpp"
 
