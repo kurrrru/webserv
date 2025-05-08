@@ -21,7 +21,7 @@ void initExtensionMap(ExtentionMap& extensionMap);
 void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
     mkdir("./test_dir/empty_dir", 0755);
-    mkdir("./test_dir/no_permission_dir", 0000);  // 権限なしディレクトリ
+    mkdir("./test_dir/no_permission_dir", 0000);
 
     std::ofstream test_file("./test_dir/test.html");
     test_file << "<html><body><h1>Test HTML</h1></body></html>";
@@ -34,7 +34,7 @@ void setupTestEnvironment() {
     std::ofstream no_perm_file("./test_dir/no_permission.html");
     no_perm_file << "<html><body><h1>No Permission</h1></body></html>";
     no_perm_file.close();
-    chmod("./test_dir/no_permission.html", 0000);  // 読み取り権限を削除
+    chmod("./test_dir/no_permission.html", 0000);
 }
 
 void cleanupTestEnvironment() {
