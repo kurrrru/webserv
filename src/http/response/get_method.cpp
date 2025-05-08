@@ -18,7 +18,7 @@
 #include "../../../toolbox/string.hpp"
 
 typedef std::map<std::string, std::string, http::CaseInsensitiveLess>
-ExtentionMap;
+ExtensionMap;
 
 struct FileInfo {
     std::string name;
@@ -64,7 +64,7 @@ std::string getCurrentWorkingDir() {
 
 // Extension map functions
 
-void initExtensionMap(ExtentionMap& extensionMap) {
+void initExtensionMap(ExtensionMap& extensionMap) {
     extensionMap["html"] = "text/html";
     extensionMap["htm"] = "text/html";
     extensionMap["css"] = "text/css";
@@ -94,13 +94,13 @@ void initExtensionMap(ExtentionMap& extensionMap) {
 }
 
 std::string getContentType(const std::string& filename,
-    const ExtentionMap& extensionMap) {
+    const ExtensionMap& extensionMap) {
     size_t pos = filename.find_last_of(".");
     if (pos == std::string::npos || pos == filename.size()) {
         return "application/octet-stream";
     }
     std::string ext = filename.substr(pos + 1);
-    ExtentionMap::const_iterator it = extensionMap.find(ext);
+    ExtensionMap::const_iterator it = extensionMap.find(ext);
     if (it != extensionMap.end()) {
         return it->second;
     }
@@ -127,12 +127,14 @@ void appendFileInfoRow(FileInfo& info, std::string& responseBody) {
     char timeStr[26];
     ctime_r(&info.time, timeStr);
     timeStr[24] = '\0';  // del newline
-    responseBody += "<tr>\n"
-                   "  <td><a href=\"" + info.path + "\">" +
-                   info.name + "</a></td>\n"
-                   "  <td>" + size + "</td>\n"
-                   "  <td>" + timeStr + "</td>\n"
-                   "</tr>\n";
+    std::stringstream ss;
+    ss << "<tr>\n"
+        << "  <td><a href=\"" << info.path << "\">"
+        << info.name << "</a></td>\n"
+        << "  <td>" << size << "</td>\n"
+        << "  <td>" << timeStr << "</td>\n"
+        << "</tr>\n";
+    responseBody += ss.str();
 }
 
 void processAutoindex(const std::string& path, std::string& responseBody) {
@@ -210,7 +212,7 @@ http::HttpStatus checkFileAccess(const std::string& path, struct stat& st) {
 
 http::HttpStatus handleDirectory(const std::string& path,
     const std::string& indexPath, std::string& responseBody,
-    std::string& contentType, ExtentionMap& extensionMap, bool isAutoindex) {
+    std::string& contentType, ExtensionMap& extensionMap, bool isAutoindex) {
     http::HttpStatus status;
     if (!indexPath.empty()) {
         struct stat indexSt;
@@ -228,7 +230,7 @@ http::HttpStatus handleDirectory(const std::string& path,
 }
 
 http::HttpStatus handleFile(const std::string& path, std::string& responseBody,
-    std::string& contentType, ExtentionMap& extensionMap) {
+    std::string& contentType, ExtensionMap& extensionMap) {
     readFile(path, responseBody);
     contentType = getContentType(path, extensionMap);
     return http::OK;
@@ -236,7 +238,7 @@ http::HttpStatus handleFile(const std::string& path, std::string& responseBody,
 
 http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
     const std::string& indexPath, bool isAutoindex, std::string& contentType,
-    ExtentionMap& extensionMap) {
+    ExtensionMap& extensionMap) {
     struct stat st;
 
     http::HttpStatus status = checkFileAccess(path, st);
