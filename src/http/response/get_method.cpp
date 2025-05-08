@@ -1,23 +1,24 @@
 #include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <map>
-#include <dirent.h>
 #include <ctime>
 #include <cstring>
-#include <errno.h>
-#include <unistd.h>
-#include <limits.h>
 
 #include "../case_insensitive_less.hpp"
 #include "../http_status.hpp"
 #include "../../../toolbox/stepmark.hpp"
 #include "../../../toolbox/string.hpp"
-void readDirectoryEntries(const std::string& dirPath,
-    std::string& responseBody);
+
+typedef std::map<std::string, std::string, http::CaseInsensitiveLess>
+ExtentionMap;
 
 struct FileInfo {
     std::string name;
@@ -27,10 +28,10 @@ struct FileInfo {
     size_t size;
 };
 
-typedef std::map<std::string, std::string, http::CaseInsensitiveLess>
-ExtentionMap;
+void readDirectoryEntries(const std::string& dirPath,
+    std::string& responseBody);
 
-// utils
+// Utility functions
 
 bool isDirectory(const struct stat& st) {
     return S_ISDIR(st.st_mode);
@@ -61,21 +62,7 @@ std::string getCurrentWorkingDir() {
     return ".";
 }
 
-std::string getContentType(const std::string& filename,
-    const ExtentionMap& extensionMap) {
-    size_t pos = filename.find_last_of(".");
-    if (pos == std::string::npos || pos == filename.size()) {
-        return "application/octet-stream";
-    }
-    std::string ext = filename.substr(pos + 1);
-    ExtentionMap::const_iterator it = extensionMap.find(ext);
-    if (it != extensionMap.end()) {
-        return it->second;
-    }
-    return "application/octet-stream";
-}
-
-//  extension map
+// Extension map functions
 
 void initExtensionMap(ExtentionMap& extensionMap) {
     extensionMap["html"] = "text/html";
@@ -106,7 +93,47 @@ void initExtensionMap(ExtentionMap& extensionMap) {
     extensionMap["hpp"] = "text/x-c++";
 }
 
-//  append body
+std::string getContentType(const std::string& filename,
+    const ExtentionMap& extensionMap) {
+    size_t pos = filename.find_last_of(".");
+    if (pos == std::string::npos || pos == filename.size()) {
+        return "application/octet-stream";
+    }
+    std::string ext = filename.substr(pos + 1);
+    ExtentionMap::const_iterator it = extensionMap.find(ext);
+    if (it != extensionMap.end()) {
+        return it->second;
+    }
+    return "application/octet-stream";
+}
+
+// File handling functions
+
+void readFile(const std::string& path, std::string& responseBody) {
+    std::ifstream file(path.c_str(), std::ios::binary);
+    if (!file.is_open()) {
+        toolbox::logger::StepMark::error("GetMethod: cannot readFile");
+        throw std::runtime_error("");
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    responseBody += buffer.str();
+}
+
+// Directory handling functions
+
+void appendFileInfoRow(FileInfo& info, std::string& responseBody) {
+    std::string size = info.isDir ? "-" : toolbox::to_string(info.size);
+    char timeStr[26];
+    ctime_r(&info.time, timeStr);
+    timeStr[24] = '\0';  // del newline
+    responseBody += "<tr>\n"
+                   "  <td><a href=\"" + info.path + "\">" +
+                   info.name + "</a></td>\n"
+                   "  <td>" + size + "</td>\n"
+                   "  <td>" + timeStr + "</td>\n"
+                   "</tr>\n";
+}
 
 void processAutoindex(const std::string& path, std::string& responseBody) {
     responseBody += "<!DOCTYPE html>\n"
@@ -137,32 +164,6 @@ void processAutoindex(const std::string& path, std::string& responseBody) {
                    "</html>\n";
 }
 
-void appendFileInfoRow(FileInfo& info, std::string& responseBody) {
-    std::string size = info.isDir ? "-" : toolbox::to_string(info.size);
-    char timeStr[26];
-    ctime_r(&info.time, timeStr);
-    timeStr[24] = '\0';  // del newline
-    responseBody += "<tr>\n"
-                   "  <td><a href=\"" + info.path + "\">" +
-                   info.name + "</a></td>\n"
-                   "  <td>" + size + "</td>\n"
-                   "  <td>" + timeStr + "</td>\n"
-                   "</tr>\n";
-}
-
-//  file handling
-
-void readFile(const std::string& path, std::string& responseBody) {
-    std::ifstream file(path.c_str(), std::ios::binary);
-    if (!file.is_open()) {
-        toolbox::logger::StepMark::error("GetMethod: cannot readFile");
-        throw std::runtime_error("");
-    }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    responseBody += buffer.str();
-}
-
 void readDirectoryEntries(const std::string& dirPath,
     std::string& responseBody) {
     struct stat st;
@@ -190,11 +191,9 @@ void readDirectoryEntries(const std::string& dirPath,
     closedir(dir);
 }
 
-http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
-    const std::string& indexPath, bool isAutoindex, std::string& contentType,
-    ExtentionMap& extensionMap) {
+// Main processing functions
 
-    struct stat st;
+http::HttpStatus checkFileAccess(const std::string& path, struct stat& st) {
     if (stat(path.c_str(), &st) != 0) {
         if (errno == ENOENT) {
             return http::NOT_FOUND;
@@ -206,28 +205,55 @@ http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
     if (!(st.st_mode & S_IRUSR)) {
         return http::FORBIDDEN;
     }
-    try {
-        if (isDirectory(st)) {
-            if (!indexPath.empty()) {
-                struct stat indexSt;
-                if (stat((path + indexPath).c_str(), &indexSt) != 0) {
-                    return http::NOT_FOUND;
-                }
-                if (!(indexSt.st_mode & S_IRUSR)) {
-                    return http::FORBIDDEN;
-                }
-                readFile(path + indexPath, responseBody);
-                contentType = getContentType(indexPath, extensionMap);
-            }  else if (isAutoindex) {
-                    processAutoindex(path, responseBody);
-                    contentType = "text/html";
-            }
-        } else {
-            readFile(path, responseBody);
-            contentType = getContentType(path, extensionMap);
+    return http::OK;
+}
+
+http::HttpStatus handleDirectory(const std::string& path,
+    const std::string& indexPath, std::string& responseBody,
+    std::string& contentType, ExtentionMap& extensionMap, bool isAutoindex) {
+    http::HttpStatus status;
+    if (!indexPath.empty()) {
+        struct stat indexSt;
+        status = checkFileAccess(path + indexPath, indexSt);
+        if (status != http::OK) {
+            return status;
         }
-    } catch (const std::exception& e) {
-        return http::INTERNAL_SERVER_ERROR;
+        readFile(path + indexPath, responseBody);
+        contentType = getContentType(indexPath, extensionMap);
+    }  else if (isAutoindex) {
+        processAutoindex(path, responseBody);
+        contentType = "text/html";
     }
     return http::OK;
+}
+
+http::HttpStatus handleFile(const std::string& path, std::string& responseBody,
+    std::string& contentType, ExtentionMap& extensionMap) {
+    readFile(path, responseBody);
+    contentType = getContentType(path, extensionMap);
+    return http::OK;
+}
+
+http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
+    const std::string& indexPath, bool isAutoindex, std::string& contentType,
+    ExtentionMap& extensionMap) {
+    struct stat st;
+
+    http::HttpStatus status = checkFileAccess(path, st);
+    if (status != http::OK) {
+        return status;
+    }
+    try {
+        if (isDirectory(st)) {
+            return handleDirectory(path, indexPath, responseBody, contentType,
+                extensionMap, isAutoindex);
+        } else if (isRegularFile(st)) {
+            return handleFile(path, responseBody, contentType, extensionMap);
+        } else {
+            status = http::INTERNAL_SERVER_ERROR;
+        }
+    } catch (const std::exception& e) {
+        status = http::INTERNAL_SERVER_ERROR;
+    }
+    return status;
 }

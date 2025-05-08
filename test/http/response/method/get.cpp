@@ -130,16 +130,14 @@ void runTests() {
     std::cout << "OK: " << status << std::endl;
 }
 
-int get_test() {
+void get_test() {
     try {
         setupTestEnvironment();
         runTests();
         cleanupTestEnvironment();
-        std::cout << "ok" << std::endl;
+        std::cout << "OK" << std::endl;
     } catch (const std::exception& e) {
-        std::cerr << "failed" << e.what() << std::endl;
+        std::cerr << "FAILED" << e.what() << std::endl;
         cleanupTestEnvironment();
-        return 1;
     }
-    return 0;
 }
