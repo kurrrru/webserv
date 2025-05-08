@@ -9,9 +9,15 @@
 #include <ctime>
 #include <cstring>
 #include <errno.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "../case_insensitive_less.hpp"
 #include "../http_status.hpp"
+#include "../../../toolbox/stepmark.hpp"
+#include "../../../toolbox/string.hpp"
+void readDirectoryEntries(const std::string& dirPath,
+    std::string& responseBody);
 
 struct FileInfo {
     std::string name;
@@ -24,6 +30,8 @@ struct FileInfo {
 typedef std::map<std::string, std::string, http::CaseInsensitiveLess>
 ExtentionMap;
 
+// utils
+
 bool isDirectory(const struct stat& st) {
     return S_ISDIR(st.st_mode);
 }
@@ -32,80 +40,75 @@ bool isRegularFile(const struct stat& st) {
     return S_ISREG(st.st_mode);
 }
 
-void appendBody(FileInfo& info, std::string& responseBody) {
-    std::string size = info.isDir ? "-" : std::to_string(info.size);
-    responseBody += "<tr>\n"
-                   "  <td><a href=\"" + info.path + "\">" + info.name + "</a></td>\n"
-                   "  <td>" + size + "</td>\n"
-                   "  <td>" + ctime(&info.time) + "</td>\n"
-                   "</tr>\n";
+std::string joinPath(const std::string& base, const std::string& path) {
+    if (base.empty()) {
+        return path;
+    }
+    if (path.empty()) {
+        return base;
+    }
+    if (base[base.size() - 1] == '/' || path[0] == '/') {
+        return base + path;
+    }
+    return base + "/" + path;
 }
 
-std::string readFile(const std::string& path) {
-    struct stat st;
-    if (stat(path.c_str(), &st) != 0) {
-        if (errno == ENOENT) {
-            throw std::runtime_error("File not found: " + path);
-        } else if (errno == EACCES) {
-            throw std::runtime_error("Permission denied: " + path);
-        }
+std::string getCurrentWorkingDir() {
+    char buffer[PATH_MAX];
+    if (getcwd(buffer, sizeof(buffer)) != NULL) {
+        return std::string(buffer);
     }
-    std::ifstream file(path.c_str(), std::ios::binary);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file: " + path);
-    }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    return buffer.str();
+    return ".";
 }
 
 std::string getContentType(const std::string& filename,
-    ExtentionMap& extentionMap) {
+    const ExtentionMap& extensionMap) {
     size_t pos = filename.find_last_of(".");
     if (pos == std::string::npos || pos == filename.size()) {
         return "application/octet-stream";
     }
     std::string ext = filename.substr(pos + 1);
-    ExtentionMap::iterator it = extentionMap.find(ext);
-    if (it != extentionMap.end()) {
+    ExtentionMap::const_iterator it = extensionMap.find(ext);
+    if (it != extensionMap.end()) {
         return it->second;
     }
     return "application/octet-stream";
 }
 
-void readDirectoryEntries(const std::string& dirPath,
-    std::string& responseBody) {
-    struct stat st;
-    DIR* dir = opendir(dirPath.c_str());
-    if (!dir) {
-        throw std::runtime_error("Could not open directory: " +
-            dirPath + " - " + strerror(errno));
-    }
+//  extension map
 
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        FileInfo info;
-        info.name = entry->d_name;
-        if (dirPath[dirPath.size() - 1] != '/') {
-            info.path = dirPath + "/" + info.name;
-        } else {
-            info.path = dirPath + info.name;
-        }
-        if (stat(info.path.c_str(), &st) != 0) {
-            closedir(dir);
-            throw std::runtime_error("Error accessing file: " +
-                info.path + " - " + strerror(errno));
-        }
-        info.time = st.st_mtime;
-        info.isDir = S_ISDIR(st.st_mode);
-        info.size = st.st_size;
-        appendBody(info, responseBody);
-    }
-    closedir(dir);
+void initExtensionMap(ExtentionMap& extensionMap) {
+    extensionMap["html"] = "text/html";
+    extensionMap["htm"] = "text/html";
+    extensionMap["css"] = "text/css";
+    extensionMap["js"] = "application/javascript";
+    extensionMap["json"] = "application/json";
+    extensionMap["txt"] = "text/plain";
+    extensionMap["jpg"] = "image/jpeg";
+    extensionMap["jpeg"] = "image/jpeg";
+    extensionMap["png"] = "image/png";
+    extensionMap["gif"] = "image/gif";
+    extensionMap["svg"] = "image/svg+xml";
+    extensionMap["ico"] = "image/x-icon";
+    extensionMap["pdf"] = "application/pdf";
+    extensionMap["xml"] = "application/xml";
+    extensionMap["zip"] = "application/zip";
+    extensionMap["gz"] = "application/gzip";
+    extensionMap["tar"] = "application/x-tar";
+    extensionMap["mp3"] = "audio/mpeg";
+    extensionMap["mp4"] = "video/mp4";
+    extensionMap["avi"] = "video/x-msvideo";
+    extensionMap["php"] = "application/x-httpd-php";
+    extensionMap["py"] = "text/x-python";
+    extensionMap["c"] = "text/x-c";
+    extensionMap["cpp"] = "text/x-c++";
+    extensionMap["h"] = "text/x-c";
+    extensionMap["hpp"] = "text/x-c++";
 }
 
-std::string processAutoindex(const std::string& path) {
-    std::string responseBody;
+//  append body
+
+void processAutoindex(const std::string& path, std::string& responseBody) {
     responseBody += "<!DOCTYPE html>\n"
                    "<html>\n"
                    "<head>\n"
@@ -132,12 +135,65 @@ std::string processAutoindex(const std::string& path) {
     responseBody += "  </table>\n"
                    "</body>\n"
                    "</html>\n";
-    return responseBody;
+}
+
+void appendFileInfoRow(FileInfo& info, std::string& responseBody) {
+    std::string size = info.isDir ? "-" : toolbox::to_string(info.size);
+    char timeStr[26];
+    ctime_r(&info.time, timeStr);
+    timeStr[24] = '\0';  // del newline
+    responseBody += "<tr>\n"
+                   "  <td><a href=\"" + info.path + "\">" +
+                   info.name + "</a></td>\n"
+                   "  <td>" + size + "</td>\n"
+                   "  <td>" + timeStr + "</td>\n"
+                   "</tr>\n";
+}
+
+//  file handling
+
+void readFile(const std::string& path, std::string& responseBody) {
+    std::ifstream file(path.c_str(), std::ios::binary);
+    if (!file.is_open()) {
+        toolbox::logger::StepMark::error("GetMethod: cannot readFile");
+        throw std::runtime_error("");
+    }
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    responseBody += buffer.str();
+}
+
+void readDirectoryEntries(const std::string& dirPath,
+    std::string& responseBody) {
+    struct stat st;
+    DIR* dir = opendir(dirPath.c_str());
+    if (!dir) {
+        toolbox::logger::StepMark::error("GetMethod: failed to open directory");
+        throw std::runtime_error("");
+    }
+
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        FileInfo info;
+        info.name = entry->d_name;
+        info.path = joinPath(dirPath, info.name);
+        if (stat(info.path.c_str(), &st) != 0) {
+            closedir(dir);
+            toolbox::logger::StepMark::error("GetMethod: failed to access");
+            throw std::runtime_error("");
+        }
+        info.time = st.st_mtime;
+        info.isDir = S_ISDIR(st.st_mode);
+        info.size = st.st_size;
+        appendFileInfoRow(info, responseBody);
+    }
+    closedir(dir);
 }
 
 http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
     const std::string& indexPath, bool isAutoindex, std::string& contentType,
-    ExtentionMap& extentionMap) {
+    ExtentionMap& extensionMap) {
+
     struct stat st;
     if (stat(path.c_str(), &st) != 0) {
         if (errno == ENOENT) {
@@ -150,76 +206,28 @@ http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
     if (!(st.st_mode & S_IRUSR)) {
         return http::FORBIDDEN;
     }
-
-    if (isDirectory(st)) {
-        if (!indexPath.empty()) {
-            struct stat indexSt;
-            if (stat((path + indexPath).c_str(), &indexSt) != 0) {
-                return http::NOT_FOUND;
+    try {
+        if (isDirectory(st)) {
+            if (!indexPath.empty()) {
+                struct stat indexSt;
+                if (stat((path + indexPath).c_str(), &indexSt) != 0) {
+                    return http::NOT_FOUND;
+                }
+                if (!(indexSt.st_mode & S_IRUSR)) {
+                    return http::FORBIDDEN;
+                }
+                readFile(path + indexPath, responseBody);
+                contentType = getContentType(indexPath, extensionMap);
+            }  else if (isAutoindex) {
+                    processAutoindex(path, responseBody);
+                    contentType = "text/html";
             }
-            if (!(indexSt.st_mode & S_IRUSR)) {
-                return http::FORBIDDEN;
-            }
-            responseBody = readFile(path + indexPath);
-            contentType = getContentType(indexPath, extentionMap);
-        }  else if (isAutoindex) {
-            try {
-                responseBody = processAutoindex(path);
-                contentType = "text/html";
-            } catch (const std::exception& e) {
-                return http::INTERNAL_SERVER_ERROR;
-            }
+        } else {
+            readFile(path, responseBody);
+            contentType = getContentType(path, extensionMap);
         }
-    } else {
-        responseBody = readFile(path);
-        contentType = getContentType(indexPath, extentionMap);
+    } catch (const std::exception& e) {
+        return http::INTERNAL_SERVER_ERROR;
     }
     return http::OK;
-}
-
-void initExtentionMap(ExtentionMap& extentionMap) {
-    extentionMap["html"] = "text/html";
-    extentionMap["htm"] = "text/html";
-    extentionMap["css"] = "text/css";
-    extentionMap["js"] = "application/javascript";
-    extentionMap["json"] = "application/json";
-    extentionMap["txt"] = "text/plain";
-    extentionMap["jpg"] = "image/jpeg";
-    extentionMap["jpeg"] = "image/jpeg";
-    extentionMap["png"] = "image/png";
-    extentionMap["gif"] = "image/gif";
-    extentionMap["svg"] = "image/svg+xml";
-    extentionMap["ico"] = "image/x-icon";
-    extentionMap["pdf"] = "application/pdf";
-    extentionMap["xml"] = "application/xml";
-    extentionMap["zip"] = "application/zip";
-    extentionMap["gz"] = "application/gzip";
-    extentionMap["tar"] = "application/x-tar";
-    extentionMap["mp3"] = "audio/mpeg";
-    extentionMap["mp4"] = "video/mp4";
-    extentionMap["avi"] = "video/x-msvideo";
-    extentionMap["php"] = "application/x-httpd-php";
-    extentionMap["py"] = "text/x-python";
-    extentionMap["c"] = "text/x-c";
-    extentionMap["cpp"] = "text/x-c++";
-    extentionMap["h"] = "text/x-c";
-    extentionMap["hpp"] = "text/x-c++";
-}
-
-int main(void) {
-    std::string path;
-    std::string responseBody;
-    std::string indexPath;
-    std::string contentType;
-    ExtentionMap extentionMap;
-
-    path = "/home/yooshima/42cursus/webserv/docs/html";
-    // path = "/home/yooshima/42cursus/webserv/docs/html/index.html";
-    // indexPath = "index.html";
-    indexPath = "";
-    initExtentionMap(extentionMap);
-    http::HttpStatus status = executeGet(path, responseBody, indexPath, true, contentType, extentionMap);
-    std::cout << "content-type = " << contentType << std::endl;
-    std::cout << "status = " << status << std::endl;
-    std::cout << responseBody;
 }
