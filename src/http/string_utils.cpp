@@ -5,23 +5,23 @@
 namespace http {
 namespace utils {
 bool hasWhiteSpace(const std::string& str) {
-    int (*is_space)(int) = std::isspace;
-    return toolbox::any_true(str.begin(), str.end(), is_space);
+    int (*isSpace)(int) = std::isspace;
+    return toolbox::any_true(str.begin(), str.end(), isSpace);
 }
 
 bool hasCtlChar(const std::string& str) {
-    int (*is_cntrl)(int) = std::iscntrl;
-    return toolbox::any_true(str.begin(), str.end(), is_cntrl);
+    int (*isCntrl)(int) = std::iscntrl;
+    return toolbox::any_true(str.begin(), str.end(), isCntrl);
 }
 
 bool isDigitStr(const std::string& str) {
-    int (*is_digit)(int) = std::isdigit;
-    return toolbox::all_true(str.begin(), str.end(), is_digit);
+    int (*isDigit)(int) = std::isdigit;
+    return toolbox::all_true(str.begin(), str.end(), isDigit);
 }
 
 bool isAlnumStr(const std::string& str) {
-    int (*is_alnum)(int) = std::isalnum;
-    return toolbox::all_true(str.begin(), str.end(), is_alnum);
+    int (*isAlnum)(int) = std::isalnum;
+    return toolbox::all_true(str.begin(), str.end(), isAlnum);
 }
 
 void trimSpace(std::string* str) {
