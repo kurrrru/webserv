@@ -236,7 +236,7 @@ http::HttpStatus handleFile(const std::string& path, std::string& responseBody,
     return http::OK;
 }
 
-http::HttpStatus executeGet(const std::string& path, std::string& responseBody,
+http::HttpStatus runGet(const std::string& path, std::string& responseBody,
     const std::string& indexPath, bool isAutoindex, std::string& contentType,
     ExtensionMap& extensionMap) {
     struct stat st;
