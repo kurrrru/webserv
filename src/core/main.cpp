@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <fcntl.h>
@@ -11,6 +9,7 @@
 #include <cstdio>
 #include <sstream>
 
+#include "../config/config_namespace.hpp"
 #include "../config/config_parser.hpp"
 #include "../socket/server.hpp"
 #include "../socket/client.hpp"
@@ -23,21 +22,21 @@ int main(int argc, char* argv[]) {
     try {
         toolbox::SharedPtr<config::Config> config;
         if (argc == 1) {
-            config = config::ConfigParser::parseFile("", true);
+            config = config::ConfigParser::parseFile(config::DEFAULT_FILE);
         } else if (argc == 2) {
-            config = config::ConfigParser::parseFile(argv[1], false);
+            config = config::ConfigParser::parseFile(argv[1]);
         }
         toolbox::SharedPtr<config::HttpConfig> http_config = config->getHttpConfig();
         toolbox::SharedPtr<config::ServerConfig> server_config1 = http_config->getServers()[0];
         toolbox::SharedPtr<config::ServerConfig> server_config2 = http_config->getServers()[1];
 
         Epoll epoll;
-        toolbox::SharedPtr<Server> server1(new Server(server_config1->listens[0].port));
-        server1->setName(server_config1->server_names[0].name);
+        toolbox::SharedPtr<Server> server1(new Server(server_config1->getListens()[0].getPort()));
+        server1->setName(server_config1->getServerNames()[0].getName());
         epoll.addServer(server1->getFd(), server1);
 
-        toolbox::SharedPtr<Server> server2(new Server(server_config2->listens[0].port));
-        server2->setName(server_config2->server_names[0].name);
+        toolbox::SharedPtr<Server> server2(new Server(server_config2->getListens()[0].getPort()));
+        server2->setName(server_config2->getServerNames()[0].getName());
         epoll.addServer(server2->getFd(), server2);
 
         int cnt = 0;  // for debug
