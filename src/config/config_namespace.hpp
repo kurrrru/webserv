@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 #include <string>
@@ -32,18 +30,18 @@ extern const char* LOCATION;
 }  // namespace context
 
 namespace directive {
-extern const char* CLIENT_MAX_BODY_SIZE;
-extern const char* LISTEN;
-extern const char* SERVER_NAME;
-extern const char* ROOT;
-extern const char* INDEX;
 extern const char* ALLOWED_METHODS;
-extern const char* UPLOAD_STORE;
-extern const char* CGI_PASS;
-extern const char* ERROR_PAGE;
 extern const char* AUTOINDEX;
 extern const char* CGI_EXTENSION;
+extern const char* CGI_PASS;
+extern const char* CLIENT_MAX_BODY_SIZE;
+extern const char* ERROR_PAGE;
+extern const char* INDEX;
+extern const char* LISTEN;
 extern const char* RETURN;
+extern const char* ROOT;
+extern const char* SERVER_NAME;
+extern const char* UPLOAD_STORE;
 extern const char* SEMICOLON;
 extern const char* ON;
 extern const char* OFF;
@@ -58,6 +56,7 @@ extern const size_t MAX_RETURN_CODE;
 
 namespace method {
 extern const char* GET;
+extern const char* HEAD;
 extern const char* POST;
 extern const char* DELETE;
 extern const size_t ALLOWED_METHODS_COUNT;
@@ -77,49 +76,4 @@ extern const char* DEFAULT_SERVER_NAME;
 extern const char* DEFAULT_UPLOAD_STORE;
 extern const char* DEFAULT_LOCATION_PATH;
 extern const size_t CONF_BUFFER;
-
-struct ErrorPage {
-    std::vector<size_t> codes;
-    std::string path;
-    ErrorPage()
-        : codes(),
-        path() {}
-};
-
-struct Listen {
-    size_t port;
-    std::string ip;
-    bool default_server;
-    Listen()
-        : port(DEFAULT_PORT),
-        ip(DEFAULT_IP),
-        default_server(false) {}
-};
-
-struct ServerName {
-    enum ServerNameType {
-        EXACT,
-        WILDCARD_START,
-        WILDCARD_END
-    };
-    std::string name;
-    ServerNameType type;
-    ServerName()
-        : name(DEFAULT_SERVER_NAME),
-        type(EXACT) {}
-};
-
-struct Return {
-    size_t status_code;
-    std::string text_or_url;
-    bool is_text_or_url_setting;
-    bool has_return_value;
-    Return()
-        : status_code(),
-        text_or_url(),
-        is_text_or_url_setting(false),
-        has_return_value(false) {}
-};
-
-
 }  // namespace config

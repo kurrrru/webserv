@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 #include <string>
@@ -20,11 +18,11 @@ class HttpConfig : public ConfigBase {
     HttpConfig(const HttpConfig&);
     virtual ~HttpConfig();
 
-    void addServer(const ServerConfig& server);
-    const std::vector<toolbox::SharedPtr<ServerConfig> >& getServers() const;
+    const std::vector<toolbox::SharedPtr<ServerConfig> >& getServers() const { return _servers; }
+    void addServer(const toolbox::SharedPtr<ServerConfig>& server) { _servers.push_back(server); }
 
-    std::vector<toolbox::SharedPtr<ServerConfig> > servers;
  private:
+    std::vector<toolbox::SharedPtr<ServerConfig> > _servers;
     HttpConfig& operator=(const HttpConfig&);
 };
 

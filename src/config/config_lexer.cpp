@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #include <string>
 #include <vector>
 #include <cstring>
@@ -7,6 +5,7 @@
 #include "config_lexer.hpp"
 #include "config_namespace.hpp"
 #include "config.hpp"
+#include "config_util.hpp"
 
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/string.hpp"
@@ -31,11 +30,6 @@ void skipWhitespace(const std::string& input, size_t* pos) {
 
 bool isNewline(const std::string& input, size_t pos) {
     if (input[pos] == config::token::LF[0] || input[pos] == config::token::CR[0]) {
-        return true;
-    }
-    if (pos + 1 < input.length() &&
-        input[pos] == config::token::CR[0] &&
-        input[pos + 1] == config::token::LF[0]) {
         return true;
     }
     return false;
@@ -77,8 +71,7 @@ void validateAfterQuotedString(const std::string& input, size_t pos) {
             ch != config::token::OPEN_BRACE[0] &&
             ch != config::token::CLOSE_BRACE[0] &&
             !isNewline(input, pos)) {
-            toolbox::logger::StepMark::error("unexpected \"" + std::string(1, ch) + "\"");
-            throw ConfigException("unexpected \"" + std::string(1, ch) + "\"");
+            throwConfigError("unexpected \"" + std::string(1, ch) + "\"");
         }
     }
 }
@@ -86,6 +79,8 @@ void validateAfterQuotedString(const std::string& input, size_t pos) {
 std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
     size_t pos = 0;
     std::vector<std::string> tokens;
+    std::string token;
+    std::string pre_token;
     while (pos < input.length()) {
         skipWhitespace(input, &pos);
         if (pos >= input.length()) {
@@ -95,18 +90,22 @@ std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
             skipComment(input, &pos);
             continue;
         }
-        std::string token;
+        pre_token = token;
         if (!readToken(input, &pos, &token)) {
-            toolbox::logger::StepMark::error("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \"" + std::string(config::token::CLOSE_BRACE) + "\"");
-            throw ConfigException("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \"" + std::string(config::token::CLOSE_BRACE) + "\"");
+            throwConfigError("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \"" + std::string(config::token::CLOSE_BRACE) + "\"");
         }
         if (token.size() + std::string(config::token::SEMICOLON).size() > config::CONF_BUFFER) {
-            toolbox::logger::StepMark::error("too long parameter");
-            throw ConfigException("too long parameter");
+            throwConfigError("too long parameter");
         }
-        if (!token.empty()) {
-            tokens.push_back(token);
+        if (pre_token == config::token::OPEN_BRACE ||
+            pre_token == config::token::CLOSE_BRACE ||
+            pre_token == config::token::SEMICOLON) {
+            if (token == config::token::OPEN_BRACE ||
+                token == config::token::SEMICOLON) {
+                throwConfigError("unexpected \"" + std::string(1, token[0]) + "\"");
+            }
         }
+        tokens.push_back(token);
     }
     return tokens;
 }
@@ -121,7 +120,7 @@ bool ConfigLexer::readToken(const std::string& input, size_t* pos, std::string* 
     } else if (input[*pos] == config::token::OPEN_BRACE[0] ||
                 input[*pos] == config::token::CLOSE_BRACE[0] ||
                 input[*pos] == config::token::SEMICOLON[0]) {
-                 *token = input[(*pos)++];
+                *token = input[(*pos)++];
     } else {
         if (!readPlainToken(input, pos, token)) {
             return false;
@@ -136,8 +135,7 @@ bool ConfigLexer::readQuotedString(const std::string& input, size_t* pos, std::s
     (*pos)++;
     while (*pos < input.length() && input[*pos] != quote) {
         if ((*token).length() >= config::CONF_BUFFER) {
-            toolbox::logger::StepMark::error("too long parameter, probably missing terminating character");
-            throw ConfigException("too long parameter, probably missing terminating character");
+            throwConfigError("too long parameter, probably missing terminating character");
         }
         if (input[*pos] == config::token::BACKSLASH[0] && *pos + 1 < input.length()) {
             processEscapeSequence(input, pos, token);
@@ -155,17 +153,16 @@ bool ConfigLexer::readQuotedString(const std::string& input, size_t* pos, std::s
 
 bool ConfigLexer::readPlainToken(const std::string& input, size_t* pos, std::string* token) {
     token->clear();
+    size_t start = *pos;
     while (*pos < input.length() &&
             !isWhitespace(input[*pos]) &&
             input[*pos] != config::token::OPEN_BRACE[0] &&
             input[*pos] != config::token::CLOSE_BRACE[0] &&
             input[*pos] != config::token::SEMICOLON[0] &&
             input[*pos] != config::token::COMMENT_CHAR[0]) {
-        (*token) += input[(*pos)++];
+        (*pos)++;
     }
-    if (*pos < input.length() && input[*pos] == config::token::COMMENT_CHAR[0]) {
-        skipComment(input, pos);
-    }
+    *token = input.substr(start, *pos - start);
     return true;
 }
 

@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 #include <string>
@@ -12,10 +10,10 @@
 namespace config {
 
 enum DirectiveContext {
-    CONTEXT_NONE = 0,
-    CONTEXT_HTTP = 1,
-    CONTEXT_SERVER = 2,
-    CONTEXT_LOCATION = 4,
+    CONTEXT_NONE = 0b000,
+    CONTEXT_HTTP = 0b001,
+    CONTEXT_SERVER = 0b010,
+    CONTEXT_LOCATION = 0b100,
     CONTEXT_ALL = CONTEXT_HTTP | CONTEXT_SERVER | CONTEXT_LOCATION,
     CONTEXT_HTTP_SERVER = CONTEXT_HTTP | CONTEXT_SERVER,
     CONTEXT_HTTP_LOCATION = CONTEXT_HTTP | CONTEXT_LOCATION,
@@ -27,7 +25,7 @@ struct DirectiveInfo {
     DirectiveContext context;
 
     DirectiveInfo()
-        : directive(""),
+        : directive(),
         context(CONTEXT_NONE) {}
 };
 

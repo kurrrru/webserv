@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #include "config_inherit.hpp"
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/shared.hpp"
@@ -13,143 +11,173 @@ _http_config(http_config) {
 ConfigInherit::~ConfigInherit() {
 }
 
+void indexEmptyCheck(HttpConfig* http) {
+    if (http->getIndices().empty()) {
+        http->setIndices(DEFAULT_INDICES);
+    }
+}
+
+void serverEmptyCheck(ServerConfig* server) {
+    if (server->getListens().empty()) {
+        Listen listen;
+        listen.setPort(DEFAULT_PORT);
+        listen.setIp(DEFAULT_IP);
+        listen.setDefaultServer(false);
+        server->addListen(listen);
+    }
+    if (server->getServerNames().empty()) {
+        ServerName server_name;
+        server_name.setName(DEFAULT_SERVER_NAME);
+        server_name.setType(config::ServerName::EXACT);
+        server->addServerName(server_name);
+    }
+}
+
 void ConfigInherit::applyInheritance() {
-    for (std::vector<toolbox::SharedPtr<ServerConfig> >::iterator server_it = _http_config->servers.begin();
-        server_it != _http_config->servers.end(); ++server_it) {
-        config::ConfigInherit::inheritHttpToServer(_http_config, server_it->get());
-        for (std::vector<toolbox::SharedPtr<LocationConfig> >::iterator loc_it = (*server_it)->locations.begin();
-            loc_it != (*server_it)->locations.end(); ++loc_it) {
-            config::ConfigInherit::inheritServerToLocation(server_it->get(), loc_it->get());
-            applyLocationInheritance(*loc_it->get());
+    indexEmptyCheck(_http_config);
+    for (size_t i = 0; i < _http_config->getServers().size(); ++i) {
+        ServerConfig* server = _http_config->getServers()[i].get();
+        config::ConfigInherit::inheritHttpToServer(_http_config, server);
+        serverEmptyCheck(server);
+        for (size_t j = 0; j < server->getLocations().size(); j++) {
+            LocationConfig* location = server->getLocations()[j].get();
+            config::ConfigInherit::inheritServerToLocation(server, location);
+            applyLocationInheritance(*location);
         }
     }
 }
 
 void ConfigInherit::applyLocationInheritance(LocationConfig& location) {
-    for (std::vector<toolbox::SharedPtr<LocationConfig> >::iterator child_it = location.locations.begin();
-        child_it != location.locations.end(); ++child_it) {
-        config::ConfigInherit::inheritLocationToLocation(&location, child_it->get());
-        if (!(*child_it)->locations.empty()) {
-            applyLocationInheritance(*child_it->get());
+    for (size_t i = 0; i < location.getLocations().size(); ++i) {
+        LocationConfig* child = location.getLocations()[i].get();
+        config::ConfigInherit::inheritLocationToLocation(&location, child);
+        if (!child->getLocations().empty()) {
+            applyLocationInheritance(*child);
         }
     }
 }
 
-void ConfigInherit::inheritHttpToServer(HttpConfig* http, ServerConfig* server) {
+void ConfigInherit::inheritHttpToServer(const HttpConfig* http, ServerConfig* server) {
     if (!http || !server) {
         return;
     }
-    if (server->allowed_methods.empty() && !http->allowed_methods.empty()) {
-        server->allowed_methods = http->allowed_methods;
+    if (server->getAllowedMethods().empty() && !http->getAllowedMethods().empty()) {
+        server->setAllowedMethods(http->getAllowedMethods());
     }
-    if (server->autoindex == DEFAULT_AUTOINDEX &&
-        http->autoindex != DEFAULT_AUTOINDEX) {
-        server->autoindex = http->autoindex;
+    if (server->getAutoindex() == DEFAULT_AUTOINDEX &&
+        http->getAutoindex() != DEFAULT_AUTOINDEX) {
+        server->setAutoindex(http->getAutoindex());
     }
-    if (server->cgi_extensions.empty() && !http->cgi_extensions.empty()) {
-        server->cgi_extensions = http->cgi_extensions;
+    if (server->getCgiExtensions().empty() && !http->getCgiExtensions().empty()) {
+        server->setCgiExtensions(http->getCgiExtensions());
     }
-    if (server->cgi_pass == DEFAULT_CGI_PATH &&
-        http->cgi_pass != DEFAULT_CGI_PATH) {
-        server->cgi_pass = http->cgi_pass;
+    if (server->getCgiPass() == DEFAULT_CGI_PATH &&
+        http->getCgiPass() != DEFAULT_CGI_PATH) {
+        server->setCgiPass(http->getCgiPass());
     }
-    if (server->client_max_body_size == DEFAULT_CLIENT_MAX_BODY_SIZE &&
-        http->client_max_body_size != DEFAULT_CLIENT_MAX_BODY_SIZE) {
-        server->client_max_body_size = http->client_max_body_size;
+    if (server->getClientMaxBodySize() == DEFAULT_CLIENT_MAX_BODY_SIZE &&
+        http->getClientMaxBodySize() != DEFAULT_CLIENT_MAX_BODY_SIZE) {
+        server->setClientMaxBodySize(http->getClientMaxBodySize());
     }
-    if (server->error_pages.empty() && !http->error_pages.empty()) {
-        server->error_pages = http->error_pages;
+    if (server->getErrorPages().empty() && !http->getErrorPages().empty()) {
+        // エラーページは個別に追加するか、一括で設定するかを検討
+        for (size_t i = 0; i < http->getErrorPages().size(); ++i) {
+            server->addErrorPage(http->getErrorPages()[i]);
+        }
     }
-    if (http->indices.empty()) {
-        http->indices = DEFAULT_INDICES;
+    if (server->getIndices().empty() && !http->getIndices().empty()) {
+        server->setIndices(http->getIndices());
     }
-    if (server->indices.empty() && !http->indices.empty()) {
-        server->indices = http->indices;
+    if (server->getRoot() == DEFAULT_ROOT && http->getRoot() != DEFAULT_ROOT) {
+        server->setRoot(http->getRoot());
     }
-    if (server->root == DEFAULT_ROOT && http->root != DEFAULT_ROOT) {
-        server->root = http->root;
+    if (server->getUploadStore() == DEFAULT_UPLOAD_STORE &&
+        http->getUploadStore() != DEFAULT_UPLOAD_STORE) {
+        server->setUploadStore(http->getUploadStore());
     }
-    if (server->upload_store == DEFAULT_UPLOAD_STORE &&
-        http->upload_store != DEFAULT_UPLOAD_STORE) {
-        server->upload_store = http->upload_store;
-    }
-    server->setParent(http);
+    server->setHttpParent(http);
 }
 
-void ConfigInherit::inheritServerToLocation(ServerConfig* server, LocationConfig* location) {
+void ConfigInherit::inheritServerToLocation(const ServerConfig* server, LocationConfig* location) {
     if (!server || !location) {
         return;
     }
-    if (location->allowed_methods.empty() && !server->allowed_methods.empty()) {
-        location->allowed_methods = server->allowed_methods;
+    if (location->getAllowedMethods().empty() && !server->getAllowedMethods().empty()) {
+        location->setAllowedMethods(server->getAllowedMethods());
     }
-    if (location->autoindex == DEFAULT_AUTOINDEX &&
-        server->autoindex != DEFAULT_AUTOINDEX) {
-        location->autoindex = server->autoindex;
+    if (location->getAutoindex() == DEFAULT_AUTOINDEX &&
+        server->getAutoindex() != DEFAULT_AUTOINDEX) {
+        location->setAutoindex(server->getAutoindex());
     }
-    if (location->cgi_extensions.empty() && !server->cgi_extensions.empty()) {
-        location->cgi_extensions = server->cgi_extensions;
+    if (location->getCgiExtensions().empty() && !server->getCgiExtensions().empty()) {
+        location->setCgiExtensions(server->getCgiExtensions());
     }
-    if (location->cgi_pass == DEFAULT_CGI_PATH &&
-        server->cgi_pass == DEFAULT_CGI_PATH) {
-        location->cgi_pass = server->cgi_pass;
+    if (location->getCgiPass() == DEFAULT_CGI_PATH &&
+        server->getCgiPass() != DEFAULT_CGI_PATH) {
+        location->setCgiPass(server->getCgiPass());
     }
-    if (location->client_max_body_size == DEFAULT_CLIENT_MAX_BODY_SIZE &&
-        server->client_max_body_size != DEFAULT_CLIENT_MAX_BODY_SIZE) {
-        location->client_max_body_size = server->client_max_body_size;
+    if (location->getClientMaxBodySize() == DEFAULT_CLIENT_MAX_BODY_SIZE &&
+        server->getClientMaxBodySize() != DEFAULT_CLIENT_MAX_BODY_SIZE) {
+        location->setClientMaxBodySize(server->getClientMaxBodySize());
     }
-    if (location->error_pages.empty() && !server->error_pages.empty()) {
-        location->error_pages = server->error_pages;
+    if (location->getErrorPages().empty() && !server->getErrorPages().empty()) {
+        // エラーページは個別に追加
+        for (size_t i = 0; i < server->getErrorPages().size(); ++i) {
+            location->addErrorPage(server->getErrorPages()[i]);
+        }
     }
-    if (location->indices.empty() && !server->indices.empty()) {
-        location->indices = server->indices;
+    if (location->getIndices().empty() && !server->getIndices().empty()) {
+        location->setIndices(server->getIndices());
     }
-    if (location->root == DEFAULT_ROOT && server->root != DEFAULT_ROOT) {
-        location->root = server->root;
+    if (location->getRoot() == DEFAULT_ROOT && server->getRoot() != DEFAULT_ROOT) {
+        location->setRoot(server->getRoot());
     }
-    if (location->upload_store == DEFAULT_UPLOAD_STORE &&
-        server->upload_store != DEFAULT_UPLOAD_STORE) {
-        location->upload_store = server->upload_store;
+    if (location->getUploadStore() == DEFAULT_UPLOAD_STORE &&
+        server->getUploadStore() != DEFAULT_UPLOAD_STORE) {
+        location->setUploadStore(server->getUploadStore());
     }
-    location->setParent(server);
+    location->setServerParent(server);
 }
 
-void ConfigInherit::inheritLocationToLocation(LocationConfig* parent, LocationConfig* child) {
+void ConfigInherit::inheritLocationToLocation(const LocationConfig* parent, LocationConfig* child) {
     if (!parent || !child) {
         return;
     }
-    if (child->allowed_methods.empty() && !parent->allowed_methods.empty()) {
-        child->allowed_methods = parent->allowed_methods;
+    if (child->getAllowedMethods().empty() && !parent->getAllowedMethods().empty()) {
+        child->setAllowedMethods(parent->getAllowedMethods());
     }
-    if (child->autoindex == DEFAULT_AUTOINDEX &&
-        parent->autoindex != DEFAULT_AUTOINDEX) {
-        child->autoindex = parent->autoindex;
+    if (child->getAutoindex() == DEFAULT_AUTOINDEX &&
+        parent->getAutoindex() != DEFAULT_AUTOINDEX) {
+        child->setAutoindex(parent->getAutoindex());
     }
-    if (child->cgi_extensions.empty() && !parent->cgi_extensions.empty()) {
-        child->cgi_extensions = parent->cgi_extensions;
+    if (child->getCgiExtensions().empty() && !parent->getCgiExtensions().empty()) {
+        child->setCgiExtensions(parent->getCgiExtensions());
     }
-    if (child->cgi_pass == DEFAULT_CGI_PATH &&
-        parent->cgi_pass == DEFAULT_CGI_PATH) {
-        child->cgi_pass = parent->cgi_pass;
+    if (child->getCgiPass() == DEFAULT_CGI_PATH &&
+        parent->getCgiPass() != DEFAULT_CGI_PATH) {
+        child->setCgiPass(parent->getCgiPass());
     }
-    if (child->client_max_body_size == DEFAULT_CLIENT_MAX_BODY_SIZE &&
-        parent->client_max_body_size != DEFAULT_CLIENT_MAX_BODY_SIZE) {
-        child->client_max_body_size = parent->client_max_body_size;
+    if (child->getClientMaxBodySize() == DEFAULT_CLIENT_MAX_BODY_SIZE &&
+        parent->getClientMaxBodySize() != DEFAULT_CLIENT_MAX_BODY_SIZE) {
+        child->setClientMaxBodySize(parent->getClientMaxBodySize());
     }
-    if (child->error_pages.empty() && !parent->error_pages.empty()) {
-        child->error_pages = parent->error_pages;
+    if (child->getErrorPages().empty() && !parent->getErrorPages().empty()) {
+        // エラーページは個別に追加
+        for (size_t i = 0; i < parent->getErrorPages().size(); ++i) {
+            child->addErrorPage(parent->getErrorPages()[i]);
+        }
     }
-    if (child->indices.empty() && !parent->indices.empty()) {
-        child->indices = parent->indices;
+    if (child->getIndices().empty() && !parent->getIndices().empty()) {
+        child->setIndices(parent->getIndices());
     }
-    if (child->root == DEFAULT_ROOT && parent->root != DEFAULT_ROOT) {
-        child->root = parent->root;
+    if (child->getRoot() == DEFAULT_ROOT && parent->getRoot() != DEFAULT_ROOT) {
+        child->setRoot(parent->getRoot());
     }
-    if (child->upload_store == DEFAULT_UPLOAD_STORE &&
-        parent->upload_store != DEFAULT_UPLOAD_STORE) {
-        child->upload_store = parent->upload_store;
+    if (child->getUploadStore() == DEFAULT_UPLOAD_STORE &&
+        parent->getUploadStore() != DEFAULT_UPLOAD_STORE) {
+        child->setUploadStore(parent->getUploadStore());
     }
-    child->setParent(parent);
+    child->setLocationParent(parent);
 }
 
 }  // namespace config

@@ -1,26 +1,36 @@
-// Copyright 2025 Ideal Broccoli
-
 #include <vector>
 
 #include "config_parser.hpp"
 #include "config_namespace.hpp"
 #include "config_http.hpp"
+#include "config_util.hpp"
 
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/string.hpp"
 
 namespace config {
 
-bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, size_t* pos) {
-    if (!validateBlockStart(tokens, pos, config::context::HTTP)) {
-        return false;
+void validateHttpBlockStart(const std::vector<std::string>& tokens, size_t* pos, const std::string& expectedDirective) {
+    if (*pos >= tokens.size() || tokens[*pos] != expectedDirective) {
+        if (isContextToken(tokens[*pos]) || isDirectiveToken(tokens[*pos])) {
+            throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
+        } else {
+            throwConfigError("unknown directive \"" + std::string(tokens[*pos]) + "\"");
+        }
     }
+    (*pos)++;
+    if (*pos >= tokens.size() || tokens[*pos] != config::token::OPEN_BRACE) {
+        throwConfigError("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \""+ std::string(config::token::CLOSE_BRACE) + "\"");
+    }
+    (*pos)++;
+}
+
+bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, size_t* pos) {
+    validateHttpBlockStart(tokens, pos, config::context::HTTP);
     if (!parseHttpDirectives(tokens, pos, _config.get())) {
         return false;
     }
-    if (!validateBlockEnd(tokens, pos)) {
-        return false;
-    }
+    validateBlockEnd(tokens, pos);
     return true;
 }
 
@@ -35,7 +45,7 @@ bool ConfigParser::parseHttpDirectives(const std::vector<std::string>& tokens, s
             if (!parseServerBlock(tokens, pos, serverConfig.get())) {
                 return false;
             }
-            config->servers.push_back(serverConfig);
+            config->addServer(serverConfig);
         } else if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_HTTP)) {
             if (processed_directives.find(directive_name) != processed_directives.end()) {
                 bool should_skip = false;
@@ -48,12 +58,14 @@ bool ConfigParser::parseHttpDirectives(const std::vector<std::string>& tokens, s
             }
             processed_directives[directive_name] = true;
             if (!_directiveParser.parseDirective(tokens, pos, directive_name, config, NULL, NULL)) {
-                toolbox::logger::StepMark::error("Error parsing '" + directive_name + "' directive in HTTP context.");
                 return false;
             }
         } else {
-            toolbox::logger::StepMark::error("Unknown directive \"" + directive_name + "\"");
-            return false;
+            if (isContextToken(directive_name)) {
+                throwConfigError("\"" + directive_name + "\" directive is not allowed here");
+            } else {
+                throwConfigError("Unknown directive \"" + directive_name + "\"");
+            }
         }
     }
     return true;

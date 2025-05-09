@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #include <string>
 #include <vector>
 
@@ -13,45 +11,27 @@ namespace config {
 
 ServerConfig::ServerConfig() :
 ConfigBase(),
-listens(),
-server_names(),
-return_value(),
-locations(),
+_listens(),
+_server_names(),
+_return_value(),
+_locations(),
 _parent(NULL) {
 }
 
 ServerConfig::ServerConfig(const ServerConfig& other) :
 ConfigBase(other),
-listens(other.listens),
-server_names(other.server_names),
-return_value(other.return_value),
+_listens(other._listens),
+_server_names(other._server_names),
+_return_value(other._return_value),
 _parent(NULL) {
-    for (std::vector<toolbox::SharedPtr<LocationConfig> >::const_iterator it = other.locations.begin();
-        it != other.locations.end(); ++it) {
-        toolbox::SharedPtr<LocationConfig> new_location(new LocationConfig(**it));
-        locations.push_back(new_location);
-        locations.back()->setParent(this);
+    for (size_t i = 0; i < other._locations.size(); ++i) {
+        toolbox::SharedPtr<LocationConfig> new_location(new LocationConfig(*other._locations[i]));
+        _locations.push_back(new_location);
+        _locations.back()->setServerParent(this);
     }
 }
 
-ServerConfig::~ServerConfig() {}
-
-void ServerConfig::setParent(HttpConfig* config_http) {
-    _parent = config_http;
-}
-
-HttpConfig* ServerConfig::getParent() const {
-    return _parent;
-}
-
-void ServerConfig::addLocation(const LocationConfig& location) {
-    toolbox::SharedPtr<LocationConfig> new_location(new LocationConfig(location));
-    locations.push_back(new_location);
-    locations.back()->setParent(this);
-}
-
-const std::vector<toolbox::SharedPtr<LocationConfig> >& ServerConfig::getLocations() const {
-    return locations;
+ServerConfig::~ServerConfig() {
 }
 
 }  // namespace config

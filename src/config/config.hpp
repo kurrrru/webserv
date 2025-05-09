@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 #include <string>
@@ -22,10 +20,10 @@ class Config {
     Config();
     ~Config();
 
-    const toolbox::SharedPtr<config::HttpConfig>& getHttpConfig() const;
-    void setHttpConfig(const toolbox::SharedPtr<config::HttpConfig>& config);
-    size_t getTokenCount() const;
-    void setTokenCount(const size_t token_count);
+    const toolbox::SharedPtr<config::HttpConfig>& getHttpConfig() const { return _http_config; }
+    void setHttpConfig(const toolbox::SharedPtr<config::HttpConfig>& http_config) { _http_config = http_config; }
+    size_t getTokenCount() const { return _token_count; }
+    void setTokenCount(const size_t token_count) { _token_count = token_count; }
 
  private:
     toolbox::SharedPtr<config::HttpConfig> _http_config;

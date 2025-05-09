@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #include <string>
 #include <vector>
 
@@ -32,18 +30,18 @@ const char* LOCATION = "location";
 }  // namespace context
 
 namespace directive {
-const char* CLIENT_MAX_BODY_SIZE = "client_max_body_size";
-const char* LISTEN = "listen";
-const char* SERVER_NAME = "server_name";
-const char* ROOT = "root";
-const char* INDEX = "index";
 const char* ALLOWED_METHODS = "allowed_methods";
-const char* UPLOAD_STORE = "upload_store";
-const char* CGI_PASS = "cgi_pass";
-const char* ERROR_PAGE = "error_page";
 const char* AUTOINDEX = "autoindex";
 const char* CGI_EXTENSION = "cgi_extension";
+const char* CGI_PASS = "cgi_pass";
+const char* CLIENT_MAX_BODY_SIZE = "client_max_body_size";
+const char* ERROR_PAGE = "error_page";
+const char* INDEX = "index";
+const char* LISTEN = "listen";
 const char* RETURN = "return";
+const char* ROOT = "root";
+const char* SERVER_NAME = "server_name";
+const char* UPLOAD_STORE = "upload_store";
 const char* SEMICOLON = ";";
 const char* ON = "on";
 const char* OFF = "off";
@@ -58,10 +56,11 @@ const size_t MAX_RETURN_CODE = 999;
 
 namespace method {
 const char* GET = "GET";
+const char* HEAD = "HEAD";
 const char* POST = "POST";
 const char* DELETE = "DELETE";
-const size_t ALLOWED_METHODS_COUNT = 3;
-const char* ALLOWED_METHODS[ALLOWED_METHODS_COUNT] = {GET, POST, DELETE};
+const size_t ALLOWED_METHODS_COUNT = 4;
+const char* ALLOWED_METHODS[ALLOWED_METHODS_COUNT] = {GET, HEAD, POST, DELETE};
 }  // namespace method
 
 const bool DEFAULT_AUTOINDEX = false;
