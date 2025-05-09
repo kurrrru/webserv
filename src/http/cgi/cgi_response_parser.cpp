@@ -13,7 +13,7 @@ BaseParser::ParseStatus CgiResponseParser::processFieldLine() {
             return P_NEED_MORE_DATA;
         }
         if (lineEnd.pos == 0) {
-            return handleFieldEnd();
+            return handleFieldEnd(lineEnd.len);
         }
         std::string line = getBuf()->substr(0, lineEnd.pos);
         setBuf(getBuf()->substr(lineEnd.pos + lineEnd.len));
@@ -29,13 +29,14 @@ BaseParser::ParseStatus CgiResponseParser::processBody() {
     return P_NEED_MORE_DATA;
 }
 
-BaseParser::ParseStatus CgiResponseParser::handleFieldEnd() {
+BaseParser::ParseStatus CgiResponseParser::handleFieldEnd(
+    const std::size_t lineEndLen) {
     if (!FieldValidator::validateCgiHeaders(_response.fields,
                                             _response.httpStatus)) {
         throw ParseException("");
     }
     setValidatePos(V_BODY);
-    setBuf(getBuf()->substr(2));  // Skip CRLF
+    setBuf(getBuf()->substr(lineEndLen));
     return P_IN_PROGRESS;
 }
 

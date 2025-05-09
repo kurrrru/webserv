@@ -19,7 +19,7 @@ class HTTPFields {
     typedef std::pair<FieldKey, FieldValue> FieldPair;
     typedef std::map<FieldKey, FieldValue, CaseInsensitiveLess> FieldMap;
 
-    HTTPFields() {}
+    HTTPFields() { initFieldsMap(); }
     ~HTTPFields() {}
 
     void initFieldsMap();

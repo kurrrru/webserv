@@ -18,7 +18,6 @@ class CgiResponse {
 
     inline CgiResponse() : cgiType(INVALID) {
         httpStatus.set(HttpStatus::UNSET);
-        fields.initFieldsMap();
     }
     ~CgiResponse() {}
 

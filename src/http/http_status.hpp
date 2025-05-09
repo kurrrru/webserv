@@ -54,6 +54,7 @@ class HttpStatus {
     };
 
     HttpStatus() : _status(OK) {}
+    explicit HttpStatus(EHttpStatus status) : _status(status) {}
     ~HttpStatus() {}
 
     void set(EHttpStatus status) { _status = status; }

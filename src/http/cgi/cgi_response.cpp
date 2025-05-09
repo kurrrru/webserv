@@ -5,7 +5,13 @@
 
 namespace http {
 static bool isLocalURI(const std::string& path) {
-    return (path.size() >= 2 && path[0] == '/' && path[1] != '/');
+    if (!path.empty() && path[0] != *symbols::SLASH) {
+        return false;
+    }
+    if (path.size() >= 2 && path[1] == *symbols::SLASH) {
+        return false;
+    }
+    return true;
 }
 
 static bool isAbsoluteURI(const std::string& path) {

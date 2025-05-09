@@ -31,7 +31,7 @@ class CgiResponseParser : public BaseParser {
     ParseStatus processBody();
     bool processFieldLineContent(std::string& line);
     LineEndInfo findLineEnd();
-    BaseParser::ParseStatus handleFieldEnd();
+    BaseParser::ParseStatus handleFieldEnd(const std::size_t lineEndLen);
     bool parseStatus(HTTPFields::FieldPair& pair);
     bool isValidStatusMessage(int code, const std::string& message);
 

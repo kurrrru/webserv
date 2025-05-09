@@ -20,9 +20,6 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
     if (getBuf()->find(symbols::CRLF) == std::string::npos) {
         return P_NEED_MORE_DATA;
     }
-    if (_request.fields.get().empty()) {
-        _request.fields.initFieldsMap();
-    }
     while (getBuf()->find(symbols::CRLF) != std::string::npos) {
         if (getBuf()->find(symbols::CRLF) == 0) {
             if (!FieldValidator::validateRequestHeaders
