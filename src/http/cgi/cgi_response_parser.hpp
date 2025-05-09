@@ -7,6 +7,7 @@
 #include "../parsing/base_field_parser.hpp"
 #include "../parsing/field_validator.hpp"
 #include "../parsing/base_parser.hpp"
+#include "../response/response.hpp"
 #include "../string_utils.hpp"
 #include "cgi_field_parser.hpp"
 #include "cgi_response.hpp"
@@ -32,6 +33,7 @@ class CgiResponseParser : public BaseParser {
     LineEndInfo findLineEnd();
     BaseParser::ParseStatus handleFieldEnd();
     bool parseStatus(HTTPFields::FieldPair& pair);
+    bool isValidStatusMessage(int code, const std::string& message);
 
     CgiResponse _response;
     CgiFieldParser _fieldParser;

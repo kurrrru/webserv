@@ -33,13 +33,13 @@ class Response {
     void setBody(const std::string& body);
 
     void sendResponse(int client_fd) const;
+    static std::string getStatusMessage(int code);
 
  private:
     int _status;
     std::map<FieldName, HeaderField> _headers;
     std::string _body;
 
-    std::string getStatusMessage(int code) const;
     std::string buildResponse() const;
 };
 

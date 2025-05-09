@@ -71,9 +71,13 @@ CgiResponseParser::LineEndInfo CgiResponseParser::findLineEnd() {
     return LineEndInfo(lfPos, 1);  // symbols::LF.size()
 }
 
+bool CgiResponseParser::isValidStatusMessage(int code,
+                                             const std::string& message) {
+    return message == Response::getStatusMessage(code);
+}
 
 bool CgiResponseParser::parseStatus(HTTPFields::FieldPair& pair) {
-    if (pair.second.empty()) {
+    if (pair.second.empty() || pair.second.size() > 1) {
         _response.httpStatus.set(HttpStatus::INTERNAL_SERVER_ERROR);
         return false;
     }
@@ -82,10 +86,13 @@ bool CgiResponseParser::parseStatus(HTTPFields::FieldPair& pair) {
         _response.httpStatus.set(HttpStatus::INTERNAL_SERVER_ERROR);
         return false;
     }
-    int statusCode = 0;
     std::istringstream iss(value);
+    int statusCode;
     iss >> statusCode;
-    if (statusCode < 100 || statusCode > 599) {
+    std::string message;
+    std::getline(iss >> std::ws, message);
+    if (statusCode < 100 || statusCode > 599 ||
+        !isValidStatusMessage(statusCode, message)) {
         _response.httpStatus.set(HttpStatus::INTERNAL_SERVER_ERROR);
         return false;
     }
