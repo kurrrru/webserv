@@ -24,9 +24,10 @@ re: fclean all
 
 fclean: clean
 	rm -f $(NAME)
-	rm -f config_test.log
+	rm -f config_test_syntax.log config_test_directive.log
 
 run: fclean all
-	./$(NAME)
+	chmod +x config_test.sh
+	./config_test.sh
 
 .PHONY: all clean fclean re run
