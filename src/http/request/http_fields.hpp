@@ -1,8 +1,5 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
-#include <iostream>
 #include <map>
 #include <string>
 #include <utility>
@@ -24,29 +21,14 @@ class HTTPFields {
 
     HTTPFields() {}
     ~HTTPFields() {}
-    void initFieldsMap();
-    bool parseHeaderLine(const FieldPair& pair, HttpStatus& hs);
-    bool validateRequestHeaders(HttpStatus& hs);
 
+    void initFieldsMap();
     FieldValue& getFieldValue(const std::string& key);
-    FieldMap& get();
+    FieldMap& get() { return _fieldsMap; }
 
  private:
     HTTPFields(const HTTPFields& other);
     HTTPFields& operator=(const HTTPFields& other);
-
-    bool hostFieldLine(FieldMap::iterator& target,
-                        const FieldPair& pair, HttpStatus& hs);
-    bool uniqueFieldLine(FieldMap::iterator& target,
-                        const FieldPair& pair, HttpStatus& hs);
-    void normalFieldLine(FieldMap::iterator& target, const FieldPair& pair);
-    bool validateHost(const FieldValue& values);
-    bool validateHostExists(HttpStatus& hs);
-    bool validateContentHeaders(HttpStatus& hs);
-    bool validateContentLength
-                        (FieldMap::iterator& content_length, HttpStatus& hs);
-    bool validateTransferEncoding
-                        (FieldMap::iterator& transfer_encoding, HttpStatus& hs);
 
     FieldMap _fieldsMap;
 };

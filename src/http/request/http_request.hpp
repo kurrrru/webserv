@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 #include <map>
@@ -17,7 +15,8 @@ class HTTPRequest {
             isChunked(false),
             lastChunk(false),
             contentLength(0),
-            recvedLength(0) {}
+            recvedLength(0) {
+            }
         bool isChunked;
         bool lastChunk;
         std::string content;
@@ -30,16 +29,10 @@ class HTTPRequest {
         std::string path;
         std::string fullQuery;
         std::map<std::string, std::string> queryMap;
-        std::string fragment;
     };
 
-    HTTPRequest() : httpStatus(http::OK) {}
+    HTTPRequest() {}
     ~HTTPRequest() {}
-    void setHttpStatus(HttpStatus status) {
-        if (httpStatus == http::OK) {
-            httpStatus = status;
-        }
-    }
 
     HttpStatus httpStatus;
     std::string method;

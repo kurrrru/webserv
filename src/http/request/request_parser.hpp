@@ -1,75 +1,52 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
-#include <ctime>
-#include <map>
 #include <string>
-#include <utility>
-#include <vector>
-#include <cstdlib>
 
-#include "../../../toolbox/string.hpp"
-#include "../http_namespace.hpp"
+#include "../parsing/base_parser.hpp"
+#include "../parsing/field_validator.hpp"
+#include "../parsing/base_field_parser.hpp"
 #include "../http_status.hpp"
+#include "../string_utils.hpp"
+#include "request_field_parser.hpp"
 #include "http_request.hpp"
-#include "http_fields.hpp"
+
 
 namespace http {
-class RequestParser {
+namespace parser {
+const std::size_t HEX_DIGIT_LENGTH = 2;
+}
+
+class RequestParser : public BaseParser {
  public:
-    class ParseException : public std::exception {
-     public:
-        explicit ParseException(const char* message);
-        const char* what() const throw();
-
-     private:
-        const char* _message;
-    };
-
-    enum ParseState {
-        REQUEST_LINE  = 0,
-        HEADERS     = 1,
-        BODY        = 2,
-        COMPLETED   = 3,
-        ERROR       = 4
-    };
-
-    RequestParser() : _validatePos(REQUEST_LINE) {}
+    RequestParser() { setValidatePos(V_REQUEST_LINE); }
     ~RequestParser() {}
-    void run(const std::string& buf);
     HTTPRequest& get() { return _request; }
 
  private:
     RequestParser(const RequestParser& other);
     RequestParser& operator=(const RequestParser& other);
 
-    void processRequestLine();
+    ParseStatus processRequestLine();
     void parseRequestLine();
+    void validateVersion();
+    bool isValidFormat();
     void validateMethod();
     void processURI();
     void parseURI();
+    void validatePath();
     void pathDecode();
     void percentDecode(std::string& line);
-    bool decodeHex(std::string& hexStr, std::string& decodedChar);
+    bool decodeHex(std::string& hexStr, std::string& decodedStr);
     void parseQuery();
-    void validatePath();
     void normalizationPath();
     void verifySafePath();
-    void validateVersion();
-    bool isValidFormat();
-    void processFields();
-    void validateFieldLine(std::string& line);
-    HTTPFields::FieldPair splitFieldLine(std::string* line);
+    ParseStatus processFieldLine();
+    ParseStatus processBody();
+    bool isChunkedEncoding();
     void parseChunkedEncoding();
-    void processBody();
 
-    std::string _buf;
     HTTPRequest _request;
-    ParseState _validatePos;
+    RequestFieldParser _fieldParser;
 };
-
-bool hasCtlChar(const std::string& str);
-void logInfo(HttpStatus status, const std::string& message);
 
 }  // namespace http

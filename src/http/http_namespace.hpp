@@ -1,5 +1,3 @@
-// Copyright 2025 Ideal Broccoli
-
 #pragma once
 
 #include <string>
@@ -53,6 +51,7 @@ extern const std::size_t MAX_BODY_SIZE;
 
 namespace symbols {
 extern const char* CR;
+extern const char* LF;
 extern const char* CRLF;
 extern const char* SP;
 extern const char* EQUAL;
