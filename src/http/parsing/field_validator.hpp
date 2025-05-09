@@ -10,17 +10,6 @@
 namespace http {
 class FieldValidator {
  public:
-    struct Result {
-        bool success;
-        HttpStatus::EHttpStatus status;
-
-        explicit Result(bool s = true,
-            HttpStatus::EHttpStatus st = HttpStatus::OK)
-            : success(s), status(st) {}
-        operator bool() const { return success; }
-        bool operator!() const { return !success; }
-    };
-
     FieldValidator() {}
     ~FieldValidator() {}
 
@@ -32,11 +21,11 @@ class FieldValidator {
     FieldValidator(const FieldValidator& other);
     FieldValidator& operator=(const FieldValidator& other);
 
-    static Result validateHostExists(HTTPFields& fields);
-    static Result validateContentHeaders(HTTPFields& fields);
-    static Result validateContentLength
+    static HttpStatus::EHttpStatus validateHostExists(HTTPFields& fields);
+    static HttpStatus::EHttpStatus validateContentHeaders(HTTPFields& fields);
+    static HttpStatus::EHttpStatus validateContentLength
         (HTTPFields::FieldMap::iterator contentLength);
-    static Result validateTransferEncoding
+    static HttpStatus::EHttpStatus validateTransferEncoding
         (HTTPFields::FieldMap::iterator transferEncoding);
 };
 

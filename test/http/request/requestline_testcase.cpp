@@ -19,7 +19,7 @@ bool compareRequestLine(http::RequestParser& r, RequestLineTest& t) {
     if (r.get().method != t._exceptRequest.method ||
         r.get().uri.path != t._exceptRequest.path ||
         r.get().version != t._exceptRequest.version) {
-            return false;
+        return false;
     }
     for (std::size_t i = 0; i < t._exceptRequest.queryVec.size(); ++i) {
         QueryMap::iterator it =
@@ -763,7 +763,7 @@ void makePercentEncodingTests(TestVector& t) {
     r._httpStatus.set(http::HttpStatus::OK);  // will Not Found
     r._isSuccessTest = true;
     r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/test%0A%0D.html";
+    r._exceptRequest.path = "/test\n\r.html";
     r._exceptRequest.version = "HTTP/1.1";
     t.push_back(r);
     clearUri(r);

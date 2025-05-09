@@ -1,4 +1,4 @@
-NAME = test.out
+NAME = cgi_test.out
 
 SRC_DIRS = ../../../src
 TOOLBOX_DIR = ../../../toolbox
