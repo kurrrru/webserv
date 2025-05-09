@@ -26,10 +26,11 @@ class Config {
     void setTokenCount(const size_t token_count) { _token_count = token_count; }
 
  private:
-    toolbox::SharedPtr<config::HttpConfig> _http_config;
-    Config& operator=(const Config& other);
-    size_t _token_count;
     Config(const Config& other);
+    Config& operator=(const Config& other);
+
+    toolbox::SharedPtr<config::HttpConfig> _http_config;
+    size_t _token_count;
 };
 
 class ConfigException : public std::exception {
