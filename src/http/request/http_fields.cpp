@@ -22,7 +22,6 @@ std::size_t HTTPFields::countNonEmptyValues() {
     return count;
 }
 
-
 HTTPFields::FieldValue& HTTPFields::getFieldValue(const std::string& key) {
     static HTTPFields::FieldValue emptyVector;
     if (_fieldsMap.find(key) != _fieldsMap.end()) {

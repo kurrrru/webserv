@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <cstdlib>
 
 #include "../parsing/base_field_parser.hpp"
@@ -12,6 +14,11 @@
 namespace http {
 class CgiResponseParser : public BaseParser {
  public:
+    struct LineEndInfo {
+        LineEndInfo(std::size_t pos, std::size_t len) : pos(pos), len(len) {}
+        std::size_t pos;
+        std::size_t len;
+    };
     inline CgiResponseParser() { setValidatePos(V_FIELD); }
     ~CgiResponseParser() {}
 
@@ -21,6 +28,9 @@ class CgiResponseParser : public BaseParser {
     ParseStatus processRequestLine() { return BaseParser::P_ERROR; }
     ParseStatus processFieldLine();
     ParseStatus processBody();
+    bool processFieldLineContent(std::string& line);
+    LineEndInfo findLineEnd();
+    BaseParser::ParseStatus handleFieldEnd();
     bool parseStatus(HTTPFields::FieldPair& pair);
 
     CgiResponse _response;

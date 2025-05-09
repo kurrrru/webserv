@@ -7,49 +7,70 @@ BaseParser::ParseStatus CgiResponseParser::processFieldLine() {
     if (getBuf()->find(symbols::CRLF) == std::string::npos) {
         return P_NEED_MORE_DATA;
     }
-    std::size_t crlfPos = getBuf()->find(symbols::CRLF);
-    std::size_t lfPos = getBuf()->find(symbols::LF);
-    while (crlfPos != std::string::npos || lfPos != std::string::npos) {
-        std::size_t lineEndPos;
-        std::size_t lineEndLen;
-        if (crlfPos < lfPos) {
-            lineEndPos = crlfPos;
-            lineEndLen = 2;  // symbolx::CRLF.size()
-        } else {
-            lineEndPos = lfPos;
-            lineEndLen = 1;  // symbols::LF.size()
+    while (true) {
+        LineEndInfo lineEnd = findLineEnd();
+        if (lineEnd.pos == std::string::npos) {
+            return P_NEED_MORE_DATA;
         }
-        if (lineEndPos == 0) {
-            if (!FieldValidator::validateCgiHeaders
-                (_response.fields, _response.httpStatus)) {
-                throw ParseException("");
-            }
-            setValidatePos(V_BODY);
-            setBuf(getBuf()->substr(lineEndLen));
-            return P_IN_PROGRESS;
+        if (lineEnd.pos == 0) {
+            return handleFieldEnd();
         }
-        std::string line = getBuf()->substr(0, lineEndPos);
-        setBuf(getBuf()->substr(lineEndPos + lineEndLen));
-        if (!FieldValidator::validateFieldLine(line)) {
-            _response.httpStatus.set(HttpStatus::INTERNAL_SERVER_ERROR);
+        std::string line = getBuf()->substr(0, lineEnd.pos);
+        setBuf(getBuf()->substr(lineEnd.pos + lineEnd.len));
+        if (!processFieldLineContent(line)) {
             continue;
         }
-        HTTPFields::FieldPair pair = BaseFieldParser::splitFieldLine(&line);
-        if (pair.second.empty()) {
-            continue;
-        }
-        if (utils::isEqualCaseInsensitive(pair.first, "status") &&
-            _response.httpStatus.get() == HttpStatus::UNSET) {
-                parseStatus(pair);
-        } else {
-            _fieldParser.parseFieldLine(pair, _response.fields.get(),
-                _response.httpStatus);
-        }
-        crlfPos = getBuf()->find(symbols::CRLF);
-        lfPos = getBuf()->find(symbols::LF);
     }
+}
+
+BaseParser::ParseStatus CgiResponseParser::processBody() {
+    _response.body.append(*getBuf());
+    getBuf()->clear();
     return P_NEED_MORE_DATA;
 }
+
+BaseParser::ParseStatus CgiResponseParser::handleFieldEnd() {
+    if (!FieldValidator::validateCgiHeaders(_response.fields,
+                                            _response.httpStatus)) {
+        throw ParseException("");
+    }
+    setValidatePos(V_BODY);
+    setBuf(getBuf()->substr(2));  // Skip CRLF
+    return P_IN_PROGRESS;
+}
+
+bool CgiResponseParser::processFieldLineContent(std::string& line) {
+    if (!FieldValidator::validateFieldLine(line)) {
+        _response.httpStatus.set(HttpStatus::INTERNAL_SERVER_ERROR);
+        return false;
+    }
+    HTTPFields::FieldPair pair = BaseFieldParser::splitFieldLine(&line);
+    if (pair.second.empty()) {
+        return false;
+    }
+    if (utils::isEqualCaseInsensitive(pair.first, "status") &&
+        _response.httpStatus.get() == HttpStatus::UNSET) {
+        parseStatus(pair);
+    } else {
+        _fieldParser.parseFieldLine(pair, _response.fields.get(),
+                                    _response.httpStatus);
+    }
+    return true;
+}
+
+
+CgiResponseParser::LineEndInfo CgiResponseParser::findLineEnd() {
+    std::size_t crlfPos = getBuf()->find(symbols::CRLF);
+    std::size_t lfPos = getBuf()->find(symbols::LF);
+    if (crlfPos == std::string::npos && lfPos == std::string::npos) {
+        return LineEndInfo(std::string::npos, 0);
+    }
+    if (crlfPos < lfPos) {
+        return LineEndInfo(crlfPos, 2);  // symbols::CRLF.size()
+    }
+    return LineEndInfo(lfPos, 1);  // symbols::LF.size()
+}
+
 
 bool CgiResponseParser::parseStatus(HTTPFields::FieldPair& pair) {
     if (pair.second.empty()) {
@@ -70,12 +91,6 @@ bool CgiResponseParser::parseStatus(HTTPFields::FieldPair& pair) {
     }
     _response.httpStatus.set(static_cast<HttpStatus::EHttpStatus>(statusCode));
     return true;
-}
-
-BaseParser::ParseStatus CgiResponseParser::processBody() {
-    _response.body.append(*getBuf());
-    getBuf()->clear();
-    return P_NEED_MORE_DATA;
 }
 
 }  // namespace http

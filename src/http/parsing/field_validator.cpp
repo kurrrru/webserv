@@ -4,7 +4,7 @@
 #include "field_validator.hpp"
 
 namespace http {
-bool FieldValidator::validateFieldLine(std::string& line) {
+bool FieldValidator::validateFieldLine(const std::string& line) {
     if (utils::hasCtlChar(line) || line.size() > fields::MAX_FIELDLINE_SIZE ||
         line.find(symbols::COLON) == std::string::npos) {
         return false;

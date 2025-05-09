@@ -13,7 +13,7 @@ class FieldValidator {
     FieldValidator() {}
     ~FieldValidator() {}
 
-    static bool validateFieldLine(std::string& line);
+    static bool validateFieldLine(const std::string& line);
     static bool validateRequestHeaders(HTTPFields& fields, HttpStatus& hs);
     static bool validateCgiHeaders(HTTPFields& fields, HttpStatus& hs);
 
