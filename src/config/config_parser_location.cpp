@@ -9,7 +9,25 @@
 
 namespace config {
 
-void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* location_config) {
+void locationPathDuplicateCheck(const std::string& path, const config::ServerConfig& server_config) {
+    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = server_config.getLocations();
+    for (size_t i = 0; i < locations.size(); ++i) {
+        if (path == locations[i]->getPath()) {
+            throwConfigError("duplicate location \""  + path + "\"" );
+        }
+    }
+}
+
+void nestLocationPathDuplicateCheck(const std::string& path, const config::LocationConfig& parent_config) {
+    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = parent_config.getLocations();
+    for (size_t i = 0; i < locations.size(); ++i) {
+        if (path == locations[i]->getPath()) {
+            throwConfigError("duplicate location \""  + path + "\"");
+        }
+    }
+}
+
+void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config ,config::LocationConfig* location_config) {
     if (*pos >= tokens.size() || tokens[*pos] != config::context::LOCATION) {
         if (isContextToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -22,6 +40,7 @@ void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, 
         throwConfigError("invalid number of arguments in \"" + std::string(config::context::LOCATION) + "\" directive");
     }
     location_config->setPath(tokens[*pos]);
+    locationPathDuplicateCheck(location_config->getPath(), *server_config);
     (*pos)++;
     if (*pos >= tokens.size() || tokens[*pos] != config::token::OPEN_BRACE) {
         throwConfigError("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \""+ std::string(config::token::CLOSE_BRACE) + "\"");
@@ -42,6 +61,7 @@ void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& to
         throwConfigError("invalid number of arguments in \"" + std::string(config::context::LOCATION) + "\" directive");
     }
     child_config->setPath(tokens[*pos]);
+    nestLocationPathDuplicateCheck(child_config->getPath(), *parent_config);
     if (pathCmp(parent_config->getPath(), child_config->getPath()) != 0) {
         throwConfigError("location \"" + child_config->getPath() +  "\" is outside location \"" + parent_config->getPath() + "\"");
     }
@@ -53,7 +73,7 @@ void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& to
 }
 
 bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config, config::LocationConfig* location_config) {
-    validateAndParseLocationBlockStart(tokens, pos, location_config);
+    validateAndParseLocationBlockStart(tokens, pos, server_config, location_config);
     if (!parseLocationDirectives(tokens, pos, location_config)) {
         return false;
     }

@@ -69,10 +69,15 @@ bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens,
             }
         }
     }
-    if (location_counter == 0) {
-        toolbox::SharedPtr<config::LocationConfig> location_config(new config::LocationConfig());
-        server_config->addLocation(location_config);
+    // If not location path (/), add location path (/).
+    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = server_config->getLocations();
+    for (size_t i = 0; i < locations.size(); ++i) {
+        if (locations[i]->getPath() == config::DEFAULT_LOCATION_PATH) {
+            return true;
+        }
     }
+    toolbox::SharedPtr<config::LocationConfig> location_config(new config::LocationConfig());
+    server_config->addLocation(location_config);
     return true;
 }
 

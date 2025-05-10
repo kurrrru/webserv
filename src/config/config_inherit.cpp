@@ -80,7 +80,6 @@ void ConfigInherit::inheritHttpToServer(const HttpConfig* http, ServerConfig* se
         server->setClientMaxBodySize(http->getClientMaxBodySize());
     }
     if (server->getErrorPages().empty() && !http->getErrorPages().empty()) {
-        // エラーページは個別に追加するか、一括で設定するかを検討
         for (size_t i = 0; i < http->getErrorPages().size(); ++i) {
             server->addErrorPage(http->getErrorPages()[i]);
         }
@@ -121,7 +120,6 @@ void ConfigInherit::inheritServerToLocation(const ServerConfig* server, Location
         location->setClientMaxBodySize(server->getClientMaxBodySize());
     }
     if (location->getErrorPages().empty() && !server->getErrorPages().empty()) {
-        // エラーページは個別に追加
         for (size_t i = 0; i < server->getErrorPages().size(); ++i) {
             location->addErrorPage(server->getErrorPages()[i]);
         }
@@ -162,7 +160,6 @@ void ConfigInherit::inheritLocationToLocation(const LocationConfig* parent, Loca
         child->setClientMaxBodySize(parent->getClientMaxBodySize());
     }
     if (child->getErrorPages().empty() && !parent->getErrorPages().empty()) {
-        // エラーページは個別に追加
         for (size_t i = 0; i < parent->getErrorPages().size(); ++i) {
             child->addErrorPage(parent->getErrorPages()[i]);
         }
