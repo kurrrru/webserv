@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include "stepmark.hpp"
 
 #include <iostream>
@@ -14,8 +16,7 @@ namespace toolbox {
  * @note The reason for not opening the log file in the constructor is to allow
  *       the user to set the log file name before opening it.
  */
-logger::StepMark::StepMark()
-    : _level(INFO), _logFileName("stepmark.log") {
+logger::StepMark::StepMark() : _level(INFO), _logFileName("stepmark.log") {
 }
 
 logger::StepMark::~StepMark() {
