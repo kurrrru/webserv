@@ -9,6 +9,11 @@
 
 namespace toolbox {
 
+/*
+ * @brief StepMark constructor.
+ * @note The reason for not opening the log file in the constructor is to allow
+ *       the user to set the log file name before opening it.
+ */
 logger::StepMark::StepMark()
     : _level(INFO), _logFileName("stepmark.log") {
 }
@@ -42,6 +47,13 @@ logger::StepMark& logger::StepMark::getInstance() {
     return instance;
 }
 
+/*
+ * @brief Logs a message to the log file.
+ * @param level The log level.
+ * @param message The message to log.
+ * @throws std::runtime_error if the log file cannot be opened.
+ * @note This function will create the log file if it does not exist.
+ */
 void logger::StepMark::log(StepmarkLevel level, const std::string& message) {
     const char* levelStr[] = {
         "DEBUG",
