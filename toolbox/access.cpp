@@ -92,11 +92,11 @@ void logger::AccessLog::log(
 }
 
 std::string logger::AccessLog::getTimeStamp() {
-    std::time_t now = std::time(nullptr);
-    std::tm* tm_now = std::gmtime(&now);
-    std::ostringstream oss;
-    oss << std::put_time(tm_now, "%d/%b/%Y:%H:%M:%S %z");
-    return oss.str();
+    std::time_t now = std::time(NULL);
+    std::tm* localTime = std::localtime(&now);
+    char buffer[100];
+    std::strftime(buffer, sizeof(buffer), "%d/%b/%Y:%H:%M:%S %z", localTime);
+    return std::string(buffer);
 }
 
 }  // namespace toolbox
