@@ -1,6 +1,9 @@
 NAME = method_test
 SRCS = main.cpp get.cpp ../../../../src/http/response/get_method.cpp \
-../../../../toolbox/stepmark.cpp ../../../../toolbox/string.cpp
+../../../../toolbox/stepmark.cpp ../../../../toolbox/string.cpp \
+../../../../src/http/response/method_utils.cpp \
+../../../../src/http/response/head_method.cpp \
+
 OBJS = $(SRCS:.cpp=.o)
 
 # compiler
