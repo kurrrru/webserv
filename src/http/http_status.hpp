@@ -50,7 +50,7 @@ class HttpStatus {
         BAD_GATEWAY = 502,
         SERVICE_UNAVAILABLE = 503,
         GATEWAY_TIMEOUT = 504,
-        HTTP_VERSION_NOT_SUPPORTED = 505
+        HTTP_VERSION_NOT_SUPPORTED = 505,
     };
 
     HttpStatus() : _status(OK) {}
