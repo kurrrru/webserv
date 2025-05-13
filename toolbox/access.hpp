@@ -26,11 +26,12 @@ class AccessLog {
     std::ofstream _logFile;
 
     static AccessLog& getInstance();
+    void openLogFile();
 
     AccessLog();
     ~AccessLog();
-    AccessLog(const AccessLog&);
-    AccessLog& operator=(const AccessLog&);
+    AccessLog(const AccessLog&);  // Not implemented
+    AccessLog& operator=(const AccessLog&);  // Not implemented
     std::string getTimeStamp();
 };
 

@@ -31,14 +31,7 @@ void logger::AccessLog::setLogFile(const std::string& file) {
         instance._logFile.close();
     }
     instance._logFileName = file;
-    instance._logFile.open(instance._logFileName.c_str(), std::ios::app);
-    if (!instance._logFile.is_open()) {
-        throw std::runtime_error("Failed to open log file: "
-            + instance._logFileName);
-    }
-    instance._logFile << "[" << instance.getTimeStamp() << "] "
-                      << "Log file opened: " << instance._logFileName
-                      << std::endl;
+    instance.openLogFile();
 }
 
 logger::AccessLog& logger::AccessLog::getInstance() {
@@ -55,7 +48,6 @@ logger::AccessLog& logger::AccessLog::getInstance() {
  * @param body_bytes_sent The size of the response body in bytes.
  * @param http_referer The HTTP referer header.
  * @param http_user_agent The HTTP user agent header.
- * @throws std::runtime_error if the log file cannot be opened.
  * @note This function will create the log file if it does not exist.
  */
 void logger::AccessLog::log(
@@ -69,15 +61,8 @@ void logger::AccessLog::log(
 ) {
     logger::AccessLog& instance = getInstance();
     if (!instance._logFile.is_open()) {
-        instance._logFile.open(instance._logFileName.c_str(), std::ios::app);
-        if (!instance._logFile.is_open()) {
-            throw std::runtime_error("Failed to open log file: "
-                + instance._logFileName);
-        }
-        instance._logFile << "[" << instance.getTimeStamp() << "] "
-                          << "Log file opened: " << instance._logFileName
-                          << std::endl;
-    }
+        instance.openLogFile();
+    } 
 
     instance._logFile << remote_addr << " "
                       << "- "
@@ -97,6 +82,18 @@ std::string logger::AccessLog::getTimeStamp() {
     char buffer[100];
     std::strftime(buffer, sizeof(buffer), "%d/%b/%Y:%H:%M:%S %z", localTime);
     return std::string(buffer);
+}
+
+void logger::AccessLog::openLogFile() {
+    _logFile.open(_logFileName.c_str(), std::ios::app);
+    if (!_logFile.is_open()) {
+        _logFileName = "access.log";
+        std::cerr << "Error opening log file: " << _logFileName
+                  << ". Defaulting to access.log." << std::endl;
+    }
+    _logFile << "[" << getTimeStamp() << "] "
+             << "Log file opened: " << _logFileName
+             << std::endl;
 }
 
 }  // namespace toolbox
