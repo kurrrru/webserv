@@ -297,9 +297,6 @@ BaseParser::ParseStatus RequestParser::processBody() {
         parseChunkedEncoding();
         return P_COMPLETED;
     }
-
-    std::cout << "RequestParser: processBody" << std::endl;
-    std::cout << getBuf()->c_str()<< std::endl;
     if (!_request.body.contentLength) {
         std::vector<std::string>& contentLen =
             _request.fields.getFieldValue(fields::CONTENT_LENGTH);
