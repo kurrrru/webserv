@@ -3,6 +3,7 @@
 #include <deque>
 #include <numeric>
 #include <cstdlib>
+#include <iostream>
 
 #include "request_parser.hpp"
 
@@ -17,19 +18,20 @@ static std::size_t calcTotalLength(const std::deque<std::string>& deq) {
 }
 
 BaseParser::ParseStatus RequestParser::processFieldLine() {
-    if (getBuf()->find(symbols::CRLF) == std::string::npos) {
-        return P_NEED_MORE_DATA;
-    }
-    while (getBuf()->find(symbols::CRLF) != std::string::npos) {
-        if (getBuf()->find(symbols::CRLF) == 0) {
-            if (!FieldValidator::validateRequestHeaders
-                (_request.fields, _request.httpStatus)) {
+    while (true) {
+        std::size_t lineEndPos = getBuf()->find(symbols::CRLF);
+        if (lineEndPos == std::string::npos) {
+            return P_NEED_MORE_DATA;
+        }
+        if (lineEndPos == 0) {
+            if (!FieldValidator::validateRequestHeaders(_request.fields, _request.httpStatus)) {
                 throw ParseException("");
             }
             setValidatePos(V_BODY);
             setBuf(getBuf()->substr(symbols::CRLF_SIZE));
             return P_IN_PROGRESS;
         }
+
         std::string line = toolbox::trim(getBuf(), symbols::CRLF);
         if (!FieldValidator::validateFieldLine(line)) {
             _request.httpStatus.set(HttpStatus::BAD_REQUEST);
@@ -295,6 +297,9 @@ BaseParser::ParseStatus RequestParser::processBody() {
         parseChunkedEncoding();
         return P_COMPLETED;
     }
+
+    std::cout << "RequestParser: processBody" << std::endl;
+    std::cout << getBuf()->c_str()<< std::endl;
     if (!_request.body.contentLength) {
         std::vector<std::string>& contentLen =
             _request.fields.getFieldValue(fields::CONTENT_LENGTH);

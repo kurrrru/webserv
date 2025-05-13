@@ -28,8 +28,8 @@ void testRequestParser() {
 
         status = parser.run(chunk);
 
-        // std::cout << "チャンク処理: [" << chunk << "]\n";
-        // std::cout << "ステータス: " << statusToString(status) << "\n";
+        std::cout << "チャンク処理: [" << chunk << "]\n";
+        std::cout << "ステータス: " << statusToString(status) << "\n";
 
         if (status == http::BaseParser::P_COMPLETED) {
             http::HTTPRequest& req = parser.get();
