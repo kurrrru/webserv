@@ -62,18 +62,22 @@ void logger::AccessLog::log(
     logger::AccessLog& instance = getInstance();
     if (!instance._logFile.is_open()) {
         instance.openLogFile();
-    } 
-
-    instance._logFile << remote_addr << " "
-                      << "- "
-                      << remote_user << " "
-                      << "[" << instance.getTimeStamp() << "] "
-                      << "\"" << request << "\" "
-                      << status << " "
-                      << body_bytes_sent << " "
-                      << "\"" << http_referer << "\" "
-                      << "\"" << http_user_agent << "\""
-                      << std::endl;
+    }
+    if (instance._logFile.is_open())
+    {
+        instance._logFile << remote_addr << " "
+                << "- "
+                << remote_user << " "
+                << "[" << instance.getTimeStamp() << "] "
+                << "\"" << request << "\" "
+                << status << " "
+                << body_bytes_sent << " "
+                << "\"" << http_referer << "\" "
+                << "\"" << http_user_agent << "\""
+                << std::endl;
+    } else {
+        std::cerr << "Error: Log file is not open." << std::endl;
+    }
 }
 
 std::string logger::AccessLog::getTimeStamp() {
@@ -87,13 +91,16 @@ std::string logger::AccessLog::getTimeStamp() {
 void logger::AccessLog::openLogFile() {
     _logFile.open(_logFileName.c_str(), std::ios::app);
     if (!_logFile.is_open()) {
-        _logFileName = "access.log";
         std::cerr << "Error opening log file: " << _logFileName
-                  << ". Defaulting to access.log." << std::endl;
+                << ". Defaulting to access.log." << std::endl;
+        _logFileName = "access.log";
+        _logFile.open(_logFileName.c_str(), std::ios::app);
     }
-    _logFile << "[" << getTimeStamp() << "] "
-             << "Log file opened: " << _logFileName
-             << std::endl;
+    if (_logFile.is_open()) {
+        _logFile << "[" << getTimeStamp() << "] "
+                << "Log file opened: " << _logFileName
+                << std::endl;
+    }
 }
 
 }  // namespace toolbox
