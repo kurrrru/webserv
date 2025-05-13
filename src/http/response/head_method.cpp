@@ -61,14 +61,14 @@ HttpStatus::EHttpStatus runHead(const std::string& path,
     }
 
     try {
-    if (isDirectory(st)) {
-        status = handleDirectory(path, indexPath, isAutoindex,
-            extensionMap, response);
-    } else if (isRegularFile(st)) {
-        status = handleFile(path, extensionMap, response);
-    } else {
-        status = HttpStatus::INTERNAL_SERVER_ERROR;
-    }
+        if (isDirectory(st)) {
+            status = handleDirectory(path, indexPath, isAutoindex,
+                extensionMap, response);
+        } else if (isRegularFile(st)) {
+            status = handleFile(path, extensionMap, response);
+        } else {
+            status = HttpStatus::INTERNAL_SERVER_ERROR;
+        }
     } catch (const std::exception& e) {
         status = HttpStatus::INTERNAL_SERVER_ERROR;
         toolbox::logger::StepMark::error("runHead: exception "
