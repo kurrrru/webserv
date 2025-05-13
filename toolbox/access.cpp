@@ -63,8 +63,7 @@ void logger::AccessLog::log(
     if (!instance._logFile.is_open()) {
         instance.openLogFile();
     }
-    if (instance._logFile.is_open())
-    {
+    if (instance._logFile.is_open()) {
         instance._logFile << remote_addr << " "
                 << "- "
                 << remote_user << " "
