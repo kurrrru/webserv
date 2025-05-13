@@ -21,62 +21,30 @@
 #include "get_method.hpp"
 
 namespace http {
-void readFile(const std::string& path, std::string& responseBody) {
+std::string readFile(const std::string& path) {
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file.is_open()) {
         toolbox::logger::StepMark::error("GetMethod: cannot readFile");
         throw std::runtime_error("");
     }
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    responseBody += buffer.str();
+    std::stringstream ss;
+    ss << file.rdbuf();
+    return ss.str();
 }
 
 // Directory handling functions
 
-void appendFileInfoRow(FileInfo& info, std::string& responseBody) {
+void buildFileInfoRow(FileInfo& info, std::stringstream& ss) {
     std::string size = info.isDir ? "-" : toolbox::to_string(info.size);
-    std::stringstream ss;
     ss << "<tr>\n"
-        << "  <td><a href=\"" << info.path << "\">"
-        << info.name << "</a></td>\n"
-        << "  <td>" << size << "</td>\n"
-        << "  <td>" << info.time << "</td>\n"
-        << "</tr>\n";
-    responseBody += ss.str();
+       << "  <td><a href=\"" << info.path << "\">"
+       << info.name << "</a></td>\n"
+       << "  <td>" << size << "</td>\n"
+       << "  <td>" << info.time << "</td>\n"
+       << "</tr>\n";
 }
 
-void processAutoindex(const std::string& path, std::string& responseBody) {
-    responseBody += "<!DOCTYPE html>\n"
-                   "<html>\n"
-                   "<head>\n"
-                   "  <title>Index of " + path + "</title>\n"
-                   "  <style>\n"
-                   "    body { font-family: Arial, sans-serif; margin: 20px; }\n"
-                   "    h1 { color: #333; }\n"
-                   "    table { width: 100%; border-collapse: collapse; margin-top: 20px; }\n"
-                   "    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }\n"
-                   "    th { background-color: #f5f5f5; }\n"
-                   "    a { color: #0066cc; text-decoration: none; }\n"
-                   "    a:hover { text-decoration: underline; }\n"
-                   "  </style>\n"
-                   "</head>\n"
-                   "<body>\n"
-                   "  <h1>Index of " + path + "</h1>\n"
-                   "  <table>\n"
-                   "    <tr>\n"
-                   "      <th>Name</th>\n"
-                   "      <th>Size</th>\n"
-                   "      <th>Last Modified</th>\n"
-                   "    </tr>\n";
-    readDirectoryEntries(path, responseBody);
-    responseBody += "  </table>\n"
-                   "</body>\n"
-                   "</html>\n";
-}
-
-void readDirectoryEntries(const std::string& dirPath,
-                          std::string& responseBody) {
+void readDirectoryEntries(const std::string& dirPath, std::stringstream& ss) {
     struct stat st;
     DIR* dir = opendir(dirPath.c_str());
     if (!dir) {
@@ -97,47 +65,79 @@ void readDirectoryEntries(const std::string& dirPath,
         info.time = getModifiedTime(st);
         info.isDir = S_ISDIR(st.st_mode);
         info.size = st.st_size;
-        appendFileInfoRow(info, responseBody);
+        buildFileInfoRow(info, ss);
     }
     closedir(dir);
 }
 
+std::string processAutoindex(const std::string& path) {
+    std::stringstream ss;
+    ss << "<!DOCTYPE html>\n"
+       << "<html>\n"
+       << "<head>\n"
+       << "  <title>Index of " << path << "</title>\n"
+       << "  <style>\n"
+       << "    body { font-family: Arial, sans-serif; margin: 20px; }\n"
+       << "    h1 { color: #333; }\n"
+       << "    table { width: 100%; border-collapse: collapse; margin-top: 20px; }\n"
+       << "    th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }\n"
+       << "    th { background-color: #f5f5f5; }\n"
+       << "    a { color: #0066cc; text-decoration: none; }\n"
+       << "    a:hover { text-decoration: underline; }\n"
+       << "  </style>\n"
+       << "</head>\n"
+       << "<body>\n"
+       << "  <h1>Index of " << path << "</h1>\n"
+       << "  <table>\n"
+       << "    <tr>\n"
+       << "      <th>Name</th>\n"
+       << "      <th>Size</th>\n"
+       << "      <th>Last Modified</th>\n"
+       << "    </tr>\n";
+
+    readDirectoryEntries(path, ss);
+
+    ss << "  </table>\n"
+       << "</body>\n"
+       << "</html>\n";
+    return ss.str();
+}
+
 HttpStatus::EHttpStatus handleDirectory(const std::string& path,
                                         const std::string& indexPath,
-                                        std::string& responseBody,
-                                        std::string& contentType,
+                                        Response& response,
                                         ExtensionMap& extensionMap,
                                         bool isAutoindex) {
     HttpStatus::EHttpStatus status;
+
     if (!indexPath.empty()) {
         struct stat indexSt;
         status = checkFileAccess(path + indexPath, indexSt);
         if (status != HttpStatus::OK) {
             return status;
         }
-        readFile(path + indexPath, responseBody);
-        contentType = getContentType(indexPath, extensionMap);
+        response.setBody(readFile(path + indexPath));
+        response.setHeader(fields::CONTENT_TYPE, getContentType(indexPath, extensionMap));
+        response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
-        processAutoindex(path, responseBody);
-        contentType = "text/html";
+        response.setBody(processAutoindex(path));
+        response.setHeader(fields::CONTENT_TYPE, "text/html");
     }
     return HttpStatus::OK;
 }
 
 HttpStatus::EHttpStatus handleFile(const std::string& path,
-                                   std::string& responseBody,
-                                   std::string& contentType,
+                                   Response& response,
                                    ExtensionMap& extensionMap) {
-    readFile(path, responseBody);
-    contentType = getContentType(path, extensionMap);
+    response.setBody(readFile(path));
+    response.setHeader(fields::CONTENT_TYPE,getContentType(path, extensionMap));
     return HttpStatus::OK;
 }
 
 HttpStatus::EHttpStatus runGet(const std::string& path,
-                               std::string& responseBody,
                                const std::string& indexPath,
                                bool isAutoindex,
-                               std::string& contentType,
+                               Response& response,
                                ExtensionMap& extensionMap) {
     struct stat st;
 
@@ -148,10 +148,10 @@ HttpStatus::EHttpStatus runGet(const std::string& path,
 
     try {
         if (isDirectory(st)) {
-            return handleDirectory(path, indexPath, responseBody, contentType,
+            return handleDirectory(path, indexPath, response,
                 extensionMap, isAutoindex);
         } else if (isRegularFile(st)) {
-            return handleFile(path, responseBody, contentType, extensionMap);
+            return handleFile(path, response, extensionMap);
         } else {
             status = HttpStatus::INTERNAL_SERVER_ERROR;
         }

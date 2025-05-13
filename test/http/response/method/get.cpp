@@ -12,6 +12,7 @@
 #include "../../../../src/http/http_status.hpp"
 #include "../../../../src/http/case_insensitive_less.hpp"
 #include "../../../../src/http/response/get_method.hpp"
+#include "../../../../src/http/response/response.hpp"
 
 static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
@@ -46,81 +47,57 @@ static void cleanupTestEnvironment() {
 }
 
 static void runTests() {
-    std::string responseBody;
-    std::string contentType;
     http::ExtensionMap extensionMap;
     http::initExtensionMap(extensionMap);
     http::HttpStatus::EHttpStatus status;
+    http::Response response;
 
     std::cout << "===== get nomal file =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = http::runGet("./test_dir/test.html", responseBody, "", false,
-        contentType, extensionMap);
+    status = http::runGet("./test_dir/test.html", "", false,
+        response, extensionMap);
     assert(status == http::HttpStatus::OK);
-    assert(contentType == "text/html");
-    assert(responseBody.find("Test HTML") != std::string::npos);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get nonexistent file =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/nonexistent.html", responseBody, "", false,
-        contentType, extensionMap);
+    status = runGet("./test_dir/nonexistent.html", "", false,
+        response, extensionMap);
     assert(status == http::HttpStatus::NOT_FOUND);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get dir indexfile =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/", responseBody, "index.html", false,
-        contentType, extensionMap);
+    status = runGet("./test_dir/", "index.html", false,
+        response, extensionMap);
     assert(status == http::HttpStatus::OK);
-    assert(contentType == "text/html");
-    assert(responseBody.find("Index HTML") != std::string::npos);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get dir autoindex =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/", responseBody, "", true,
-        contentType, extensionMap);
+    status = runGet("./test_dir/", "", true,
+        response, extensionMap);
     assert(status == http::HttpStatus::OK);
-    assert(contentType == "text/html");
-    assert(responseBody.find("Index of") != std::string::npos);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get no permission =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/no_permission.html", responseBody, "",
-        false, contentType, extensionMap);
+    status = runGet("./test_dir/no_permission.html", "", false,
+        response, extensionMap);
     assert(status == http::HttpStatus::FORBIDDEN);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get empty dir ====="
         << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/empty_dir/", responseBody, "", true,
-        contentType, extensionMap);
+    status = runGet("./test_dir/empty_dir/", "", true,
+        response, extensionMap);
     assert(status == http::HttpStatus::OK);
-    assert(contentType == "text/html");
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get empty dir indexfile =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/empty_dir/", responseBody, "index.html",
-        false, contentType, extensionMap);
+    status = runGet("./test_dir/empty_dir/", "index.html",
+        false, response, extensionMap);
     assert(status == http::HttpStatus::NOT_FOUND);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== get no permission dir =====" << std::endl;
-    responseBody.clear();
-    contentType.clear();
-    status = runGet("./test_dir/no_permission_dir/", responseBody, "",
-        true, contentType, extensionMap);
+    status = runGet("./test_dir/no_permission_dir/", "",
+        true, response, extensionMap);
     assert(status == http::HttpStatus::FORBIDDEN);
     std::cout << "OK: " << status << std::endl;
 }

@@ -51,6 +51,7 @@ static void cleanupTestEnvironment() {
 
 static void runTests() {
     http::ExtensionMap extensionMap;
+    http::initExtensionMap(extensionMap);
     http::HttpStatus::EHttpStatus status;
     http::Response response;
 
