@@ -15,11 +15,12 @@ HttpStatus::EHttpStatus handleDirectory(const std::string& path,
 
     if (!indexPath.empty()) {
         struct stat indexSt;
-        status = checkFileAccess(path + indexPath, indexSt);
+        std::string fullPath = joinPath(path, indexPath);
+        status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
             return status;
         }
-        response.setHeader(fields::CONTENT_TYPE, getContentType(indexPath, extensionMap));
+        response.setHeader(fields::CONTENT_TYPE, getContentType(fullPath, extensionMap));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
         response.setHeader(fields::CONTENT_TYPE, "text/html");
