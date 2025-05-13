@@ -4,9 +4,6 @@
 
 namespace http {
 BaseParser::ParseStatus CgiResponseParser::processFieldLine() {
-    if (getBuf()->find(symbols::CRLF) == std::string::npos) {
-        return P_NEED_MORE_DATA;
-    }
     while (true) {
         LineEndInfo lineEnd = findLineEnd();
         if (lineEnd.pos == std::string::npos) {
@@ -67,9 +64,9 @@ CgiResponseParser::LineEndInfo CgiResponseParser::findLineEnd() {
         return LineEndInfo(std::string::npos, 0);
     }
     if (crlfPos < lfPos) {
-        return LineEndInfo(crlfPos, 2);  // symbols::CRLF.size()
+        return LineEndInfo(crlfPos, symbols::CRLF_SIZE);
     }
-    return LineEndInfo(lfPos, 1);  // symbols::LF.size()
+    return LineEndInfo(lfPos, symbols::LF_SIZE);
 }
 
 bool CgiResponseParser::isValidStatusMessage(int code,

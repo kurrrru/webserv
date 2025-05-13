@@ -66,6 +66,8 @@ const char* PERCENT = "%";
 const char* COLON = ":";
 const char* COMMA = ",";
 const char* COMMASP = ", ";
+const std::size_t LF_SIZE = 1;
+const std::size_t CRLF_SIZE = 2;
 }  // namespace symbols
 
 }  // namespace http

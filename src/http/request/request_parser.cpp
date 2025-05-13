@@ -27,8 +27,8 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
                 throw ParseException("");
             }
             setValidatePos(V_BODY);
-            setBuf(getBuf()->substr(sizeof(*symbols::CRLF)));
-            break;
+            setBuf(getBuf()->substr(symbols::CRLF_SIZE));
+            return P_IN_PROGRESS;
         }
         std::string line = toolbox::trim(getBuf(), symbols::CRLF);
         if (!FieldValidator::validateFieldLine(line)) {
@@ -41,10 +41,13 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
             throw ParseException("");
         }
     }
-    return P_IN_PROGRESS;
+    return P_NEED_MORE_DATA;
 }
 
 BaseParser::ParseStatus RequestParser::processRequestLine() {
+    if (getBuf()->find(symbols::CRLF) == std::string::npos) {
+        return P_NEED_MORE_DATA;
+    }
     parseRequestLine();
     validateVersion();
     validateMethod();
@@ -298,21 +301,21 @@ BaseParser::ParseStatus RequestParser::processBody() {
         if (contentLen.empty()) {
             _request.body.contentLength = 0;
         } else {
-            _request.body.contentLength =
-                std::atoi(contentLen.begin()->c_str());
+            _request.body.contentLength = std::atoi(contentLen.front().c_str());
         }
     }
     if (_request.body.contentLength > _request.body.recvedLength) {
-        _request.body.content.append(getBuf()->substr(
-            0, _request.body.contentLength - _request.body.recvedLength));
-        _request.body.recvedLength += getBuf()->size();
+        std::size_t remainLen = _request.body.contentLength - _request.body.recvedLength;
+
+        _request.body.content += getBuf()->substr(0, remainLen);
+        _request.body.recvedLength += _request.body.content.size();
     }
-    if (_request.body.contentLength <= _request.body.recvedLength ||
-        getBuf()->empty()) {
-            setValidatePos(V_COMPLETED);
+    if (_request.body.contentLength <= _request.body.recvedLength) {
+        setValidatePos(V_COMPLETED);
+        return P_COMPLETED;
     }
     getBuf()->clear();
-    return P_IN_PROGRESS;
+    return P_NEED_MORE_DATA;
 }
 
 bool RequestParser::isChunkedEncoding() {
