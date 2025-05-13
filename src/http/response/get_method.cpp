@@ -36,15 +36,12 @@ void readFile(const std::string& path, std::string& responseBody) {
 
 void appendFileInfoRow(FileInfo& info, std::string& responseBody) {
     std::string size = info.isDir ? "-" : toolbox::to_string(info.size);
-    char timeStr[26];
-    ctime_r(&info.time, timeStr);
-    timeStr[24] = '\0';  // del newline
     std::stringstream ss;
     ss << "<tr>\n"
         << "  <td><a href=\"" << info.path << "\">"
         << info.name << "</a></td>\n"
         << "  <td>" << size << "</td>\n"
-        << "  <td>" << timeStr << "</td>\n"
+        << "  <td>" << info.time << "</td>\n"
         << "</tr>\n";
     responseBody += ss.str();
 }
@@ -97,7 +94,7 @@ void readDirectoryEntries(const std::string& dirPath,
             toolbox::logger::StepMark::error("GetMethod: failed to access");
             throw std::runtime_error("");
         }
-        info.time = st.st_mtime;
+        info.time = getModifiedTime(st);
         info.isDir = S_ISDIR(st.st_mode);
         info.size = st.st_size;
         appendFileInfoRow(info, responseBody);

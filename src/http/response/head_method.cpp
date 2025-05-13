@@ -1,65 +1,63 @@
 #include <string>
+#include <iostream>
 
 #include "../request/http_fields.hpp"
-#include <method_utils.hpp>
+#include "head_method.hpp"
+#include "method_utils.hpp"
 
 namespace http {
 HttpStatus::EHttpStatus handleDirectory(const std::string& path,
                                         const std::string& indexPath,
                                         bool isAutoindex,
                                         ExtensionMap& extensionMap,
-                                        HTTPFields& responseFields) {
+                                        Response& response) {
     HttpStatus::EHttpStatus status;
+
     if (!indexPath.empty()) {
         struct stat indexSt;
         status = checkFileAccess(path + indexPath, indexSt);
         if (status != HttpStatus::OK) {
             return status;
         }
-        responseFields.getFieldValue("Content-Length").push_back(
-            toolbox::to_string(indexSt.st_size));
-        responseFields.getFieldValue("Content-Type").push_back(
-            getContentType(indexPath, extensionMap));
+        response.setHeader(fields::CONTENT_TYPE, getContentType(indexPath, extensionMap));
+        response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
-        responseFields.getFieldValue("Content-Type").push_back("text/html");
+        response.setHeader(fields::CONTENT_TYPE, "text/html");
     }
     return HttpStatus::OK;
 }
 
 HttpStatus::EHttpStatus handleFile(const std::string& path,
                                     ExtensionMap& extensionMap,
-                                    HTTPFields& responseFields) {
+                                    Response& response) {
     struct stat st;
+
     HttpStatus::EHttpStatus status = checkFileAccess(path, st);
     if (status != HttpStatus::OK) {
         return status;
     }
-    responseFields.getFieldValue("Content-Length").push_back(
-        toolbox::to_string(st.st_size));
-    responseFields.getFieldValue("Content-Type").push_back(
-        getContentType(path, extensionMap));
+    response.setHeader(fields::CONTENT_TYPE, getContentType(path, extensionMap));
+    response.setHeader(fields::LAST_MODIFIED, getModifiedTime(st));
     return HttpStatus::OK;
 }
 
 HttpStatus::EHttpStatus runHead(const std::string& path,
-                               std::string& responseBody,
                                const std::string& indexPath,
                                bool isAutoindex,
                                ExtensionMap& extensionMap,
-                               HTTPFields& responseFields) {
+                               Response& response) {
     struct stat st;
 
     HttpStatus::EHttpStatus status = checkFileAccess(path, st);
     if (status != HttpStatus::OK) {
         return status;
     }
-
     try {
         if (isDirectory(st)) {
             status = handleDirectory(path, indexPath, isAutoindex,
-                extensionMap, responseFields);
+                extensionMap, response);
         } else if (isRegularFile(st)) {
-            status = handleFile(path, extensionMap, responseFields);
+            status = handleFile(path, extensionMap, response);
         } else {
             status = HttpStatus::INTERNAL_SERVER_ERROR;
         }

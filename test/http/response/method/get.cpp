@@ -13,7 +13,7 @@
 #include "../../../../src/http/case_insensitive_less.hpp"
 #include "../../../../src/http/response/get_method.hpp"
 
-void setupTestEnvironment() {
+static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
     mkdir("./test_dir/empty_dir", 0755);
     mkdir("./test_dir/no_permission_dir", 0000);
@@ -32,7 +32,7 @@ void setupTestEnvironment() {
     chmod("./test_dir/no_permission.html", 0000);
 }
 
-void cleanupTestEnvironment() {
+static void cleanupTestEnvironment() {
     chmod("./test_dir/no_permission.html", 0644);
     chmod("./test_dir/no_permission_dir", 0755);
 
@@ -45,7 +45,7 @@ void cleanupTestEnvironment() {
     rmdir("./test_dir");
 }
 
-void runTests() {
+static void runTests() {
     std::string responseBody;
     std::string contentType;
     http::ExtensionMap extensionMap;

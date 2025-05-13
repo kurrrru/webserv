@@ -83,4 +83,11 @@ HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
     return HttpStatus::OK;
 }
 
+std::string getModifiedTime(const struct stat& st) {
+    char timeStr[26];
+    ctime_r(&st.st_mtime, timeStr);
+    timeStr[24] = '\0';  // del newline
+    return std::string(timeStr);
+}
+
 }  // namespace http

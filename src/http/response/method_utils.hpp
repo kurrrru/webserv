@@ -17,7 +17,7 @@ typedef std::map<std::string, std::string, CaseInsensitiveLess> ExtensionMap;
 struct FileInfo {
     std::string name;
     std::string path;
-    time_t time;
+    std::string time;
     bool isDir;
     size_t size;
 };
@@ -30,4 +30,5 @@ std::string getContentType(const std::string& filename,
 void initExtensionMap(ExtensionMap& extensionMap);
 HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
                                         struct stat& st);
+std::string getModifiedTime(const struct stat& st);
 }  // namespace http
