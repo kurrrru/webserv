@@ -14,8 +14,8 @@ class BaseFieldParser {
     bool parseFieldLine(const HTTPFields::FieldPair& pair,
         HTTPFields::FieldMap& fields, HttpStatus& hs);
     static HTTPFields::FieldPair splitFieldLine(std::string* line);
-    // bool parseCgiFieldLine(const HTTPFields::FieldPair& pair,
-                            // HttpStatus& hs);
+    bool parseCgiFieldLine(const HTTPFields::FieldPair& pair,
+                            HttpStatus& hs);
 
  protected:
     BaseFieldParser(const BaseFieldParser& other);
@@ -24,7 +24,7 @@ class BaseFieldParser {
     bool hostFieldLine(HTTPFields::FieldMap::iterator& target,
                     const HTTPFields::FieldPair& pair,
                     HttpStatus& hs);
-    virtual bool uniqueFieldLine(HTTPFields::FieldMap::iterator& target,
+    bool uniqueFieldLine(HTTPFields::FieldMap::iterator& target,
                     const HTTPFields::FieldPair& pair,
                     HttpStatus& hs);
     void normalFieldLine(HTTPFields::FieldMap::iterator& target,

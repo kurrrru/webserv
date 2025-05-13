@@ -13,20 +13,20 @@ class FieldValidator {
     FieldValidator() {}
     ~FieldValidator() {}
 
-    static bool validateFieldLine(std::string& line);
+    static bool validateFieldLine(const std::string& line);
     static bool validateRequestHeaders(HTTPFields& fields, HttpStatus& hs);
-    // static bool validateResponseHeaders(HTTPFields& fields, HttpStatus& hs);
+    static bool validateCgiHeaders(HTTPFields& fields, HttpStatus& hs);
 
  private:
     FieldValidator(const FieldValidator& other);
     FieldValidator& operator=(const FieldValidator& other);
 
-    static bool validateHostExists(HTTPFields& fields, HttpStatus& hs);
-    static bool validateContentHeaders(HTTPFields& fields, HttpStatus& hs);
-    static bool validateContentLength
-        (HTTPFields::FieldMap::iterator contentLength, HttpStatus& hs);
-    static bool validateTransferEncoding
-        (HTTPFields::FieldMap::iterator transferEncoding, HttpStatus& hs);
+    static HttpStatus::EHttpStatus validateHostExists(HTTPFields& fields);
+    static HttpStatus::EHttpStatus validateContentHeaders(HTTPFields& fields);
+    static HttpStatus::EHttpStatus validateContentLength
+        (HTTPFields::FieldMap::iterator contentLength);
+    static HttpStatus::EHttpStatus validateTransferEncoding
+        (HTTPFields::FieldMap::iterator transferEncoding);
 };
 
 }  // namespace http

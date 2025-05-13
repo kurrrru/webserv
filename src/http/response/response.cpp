@@ -93,7 +93,7 @@ std::string Response::buildResponse() const {
     return oss.str();
 }
 
-std::string Response::getStatusMessage(int code) const {
+std::string Response::getStatusMessage(int code) {
     switch (code) {
         case 200: return "OK";
         case 201: return "Created";

@@ -54,10 +54,12 @@ class HttpStatus {
     };
 
     HttpStatus() : _status(OK) {}
+    explicit HttpStatus(EHttpStatus status) : _status(status) {}
     ~HttpStatus() {}
 
     void set(EHttpStatus status) { _status = status; }
-    EHttpStatus get() { return _status; }
+    void set(int status) { _status = static_cast<EHttpStatus>(status); }
+    EHttpStatus get() const { return _status; }
 
  private:
     EHttpStatus _status;

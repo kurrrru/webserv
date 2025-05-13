@@ -14,6 +14,11 @@ bool hasCtlChar(const std::string& str) {
     return toolbox::any_true(str.begin(), str.end(), isCntrl);
 }
 
+bool isUpperStr(const std::string& str) {
+    int (*isUpper)(int) = std::isupper;
+    return toolbox::all_true(str.begin(), str.end(), isUpper);
+}
+
 bool isDigitStr(const std::string& str) {
     int (*isDigit)(int) = std::isdigit;
     return toolbox::all_true(str.begin(), str.end(), isDigit);

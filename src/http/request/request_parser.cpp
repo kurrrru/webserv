@@ -20,11 +20,12 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
     if (getBuf()->find(symbols::CRLF) == std::string::npos) {
         return P_NEED_MORE_DATA;
     }
-    if (_request.fields.get().empty()) {
-        _request.fields.initFieldsMap();
-    }
     while (getBuf()->find(symbols::CRLF) != std::string::npos) {
         if (getBuf()->find(symbols::CRLF) == 0) {
+            if (!FieldValidator::validateRequestHeaders
+                (_request.fields, _request.httpStatus)) {
+                throw ParseException("");
+            }
             setValidatePos(V_BODY);
             setBuf(getBuf()->substr(sizeof(*symbols::CRLF)));
             break;
@@ -40,11 +41,6 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
             throw ParseException("");
         }
     }
-    if (!FieldValidator::validateRequestHeaders(_request.fields,
-                                                _request.httpStatus)) {
-        throw ParseException("");
-    }
-    setValidatePos(V_BODY);
     return P_IN_PROGRESS;
 }
 
@@ -128,19 +124,9 @@ void RequestParser::validateMethod() {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
         return;
     }
-    if (_request.version == uri::HTTP_VERSION_1_0) {
-        if (_request.method != method::GET &&
-            _request.method != method::HEAD &&
-            _request.method != method::POST) {
-            _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-        }
-    } else {
-        if (_request.method != method::GET &&
-            _request.method != method::HEAD &&
-            _request.method != method::POST &&
-            _request.method != method::DELETE) {
-            _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-        }
+    if (!utils::isUpperStr(_request.method)) {
+        _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        return;
     }
 }
 
@@ -180,16 +166,6 @@ void RequestParser::validatePath() {
         _request.httpStatus.set(HttpStatus::URI_TOO_LONG);
         toolbox::logger::StepMark::info(
             "RequestParser: uri too large");
-
-        return;
-    }
-    if (_request.uri.fullUri[0] != *symbols::SLASH ||
-        utils::hasCtlChar(_request.uri.fullUri)) {
-        _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-        toolbox::logger::StepMark::info(
-            "RequestParser: invalid uri");
-
-        return;
     }
 }
 
@@ -230,10 +206,7 @@ void RequestParser::percentDecode(std::string& line) {
             ++i;
         }
     }
-    if (!utils::hasCtlChar(res)) {
-        line = res;
-    }
-    return;
+    line = res;
 }
 
 bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {

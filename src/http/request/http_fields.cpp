@@ -11,6 +11,17 @@ void HTTPFields::initFieldsMap() {
         }
 }
 
+std::size_t HTTPFields::countNonEmptyValues() {
+    std::size_t count = 0;
+    for (FieldMap::iterator it = _fieldsMap.begin();
+         it != _fieldsMap.end(); ++it) {
+        if (!it->second.empty()) {
+            ++count;
+        }
+    }
+    return count;
+}
+
 HTTPFields::FieldValue& HTTPFields::getFieldValue(const std::string& key) {
     static HTTPFields::FieldValue emptyVector;
     if (_fieldsMap.find(key) != _fieldsMap.end()) {
