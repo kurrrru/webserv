@@ -40,12 +40,13 @@ const char* SERVER = "Server";
 const char* SET_COOKIE = "Set-Cookie";
 const char* LOCATION = "Location";
 const char* WWW_AUTHENTICATE = "WWW-Authenticate";
+const char* LAST_MODIFIED = "Last-Modified";
 const char* FIELDS[] = {
 DATE,          CACHE_CONTROL,    CONNECTION,       CONTENT_LENGTH,
 CONTENT_TYPE,  CONTENT_ENCODING, CONTENT_LANGUAGE, TRANSFER_ENCODING,
 HOST,          ACCEPT,           ACCEPT_ENCODING,  ACCEPT_LANGUAGE,
 AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
-SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE
+SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE, LAST_MODIFIED
 };
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 const std::size_t MAX_FIELDLINE_SIZE = 8192;

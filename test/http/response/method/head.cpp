@@ -11,8 +11,11 @@
 
 #include "../../../../src/http/http_status.hpp"
 #include "../../../../src/http/case_insensitive_less.hpp"
-#include "../../../../src/http/response/get_method.hpp"
+#include "../../../../src/http/request/http_fields.hpp"
+#include "../../../../src/http/response/method_utils.hpp"
+#include "../../../../src/http/response/head_method.hpp"
 #include "../../../../src/http/response/response.hpp"
+#include "../../../../src/http/http_namespace.hpp"
 
 static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
@@ -52,57 +55,57 @@ static void runTests() {
     http::HttpStatus::EHttpStatus status;
     http::Response response;
 
-    std::cout << "===== get nomal file =====" << std::endl;
-    status = http::runGet("./test_dir/test.html", "", false,
+    std::cout << "===== head normal file (modified time) =====" << std::endl;
+    status = http::runHead("./test_dir/test.html", "", false,
         extensionMap, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get nonexistent file =====" << std::endl;
-    status = runGet("./test_dir/nonexistent.html", "", false,
+    std::cout << "===== head nonexistent file =====" << std::endl;
+    status = http::runHead("./test_dir/nonexistent.html", "", false,
         extensionMap, response);
     assert(status == http::HttpStatus::NOT_FOUND);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get dir indexfile =====" << std::endl;
-    status = runGet("./test_dir/", "index.html", false,
+    std::cout << "===== head dir indexfile (modified time) =====" << std::endl;
+    status = http::runHead("./test_dir/", "index.html", false,
         extensionMap, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get dir autoindex =====" << std::endl;
-    status = runGet("./test_dir/", "", true,
+    std::cout << "===== head dir autoindex =====" << std::endl;
+    status = http::runHead("./test_dir/", "", true,
         extensionMap, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get no permission =====" << std::endl;
-    status = runGet("./test_dir/no_permission.html", "", false,
-        extensionMap, response);
+    std::cout << "===== head no permission =====" << std::endl;
+    status = http::runHead("./test_dir/no_permission.html", "",
+        false, extensionMap, response);
     assert(status == http::HttpStatus::FORBIDDEN);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get empty dir ====="
+    std::cout << "===== head empty dir ====="
         << std::endl;
-    status = runGet("./test_dir/empty_dir/", "", true,
-        extensionMap, response);
+    status = http::runHead("./test_dir/empty_dir/", "",
+        true, extensionMap, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get empty dir indexfile =====" << std::endl;
-    status = runGet("./test_dir/empty_dir/", "index.html",
+    std::cout << "===== head empty dir indexfile =====" << std::endl;
+    status = http::runHead("./test_dir/empty_dir/", "index.html",
         false, extensionMap, response);
     assert(status == http::HttpStatus::NOT_FOUND);
     std::cout << "OK: " << status << std::endl;
 
-    std::cout << "===== get no permission dir =====" << std::endl;
-    status = runGet("./test_dir/no_permission_dir/", "",
+    std::cout << "===== head no permission dir =====" << std::endl;
+    status = http::runHead("./test_dir/no_permission_dir/", "",
         true, extensionMap, response);
     assert(status == http::HttpStatus::FORBIDDEN);
     std::cout << "OK: " << status << std::endl;
 }
 
-void get_test() {
+void head_test() {
     try {
         setupTestEnvironment();
         runTests();
