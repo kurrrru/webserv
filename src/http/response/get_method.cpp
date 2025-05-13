@@ -12,10 +12,10 @@
 #include <ctime>
 #include <cstring>
 
-#include "../case_insensitive_less.hpp"
-#include "../http_status.hpp"
 #include "../../../toolbox/stepmark.hpp"
 #include "../../../toolbox/string.hpp"
+#include "../case_insensitive_less.hpp"
+#include "../http_status.hpp"
 #include "../http_namespace.hpp"
 #include "method_utils.hpp"
 #include "get_method.hpp"
@@ -24,8 +24,7 @@ namespace http {
 std::string readFile(const std::string& path) {
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file.is_open()) {
-        toolbox::logger::StepMark::error("GetMethod: cannot readFile");
-        throw std::runtime_error("");
+        throw std::runtime_error("file open error " + path);
     }
     std::stringstream ss;
     ss << file.rdbuf();
@@ -48,8 +47,7 @@ void readDirectoryEntries(const std::string& dirPath, std::stringstream& ss) {
     struct stat st;
     DIR* dir = opendir(dirPath.c_str());
     if (!dir) {
-        toolbox::logger::StepMark::error("GetMethod: failed to open directory");
-        throw std::runtime_error("");
+        throw std::runtime_error("failed to open directory " + dirPath);
     }
 
     struct dirent* entry;
@@ -58,9 +56,7 @@ void readDirectoryEntries(const std::string& dirPath, std::stringstream& ss) {
         info.name = entry->d_name;
         info.path = joinPath(dirPath, info.name);
         if (stat(info.path.c_str(), &st) != 0) {
-            closedir(dir);
-            toolbox::logger::StepMark::error("GetMethod: failed to access");
-            throw std::runtime_error("");
+            throw std::runtime_error("failed to access " + info.path);
         }
         info.time = getModifiedTime(st);
         info.isDir = S_ISDIR(st.st_mode);
@@ -115,6 +111,8 @@ HttpStatus::EHttpStatus handleDirectory(const std::string& path,
         std::string fullPath = joinPath(path, indexPath);
         status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
+            toolbox::logger::StepMark::error("runGet: checkFileAccess fail "
+                + fullPath + " " + toolbox::to_string(status));
             return status;
         }
         response.setBody(readFile(fullPath));
@@ -138,12 +136,14 @@ HttpStatus::EHttpStatus handleFile(const std::string& path,
 HttpStatus::EHttpStatus runGet(const std::string& path,
                                const std::string& indexPath,
                                bool isAutoindex,
-                               Response& response,
-                               ExtensionMap& extensionMap) {
+                               ExtensionMap& extensionMap,
+                               Response& response) {
     struct stat st;
 
     HttpStatus::EHttpStatus status = checkFileAccess(path, st);
     if (status != HttpStatus::OK) {
+        toolbox::logger::StepMark::error("runGet: checkFileAccess fail " + path
+            + " " + toolbox::to_string(status));
         return status;
     }
 
@@ -158,6 +158,8 @@ HttpStatus::EHttpStatus runGet(const std::string& path,
         }
     } catch (const std::exception& e) {
         status = HttpStatus::INTERNAL_SERVER_ERROR;
+        toolbox::logger::StepMark::error("runGet: exception "
+            + std::string(e.what()) + " " + toolbox::to_string(status));
     }
     return status;
 }

@@ -75,7 +75,7 @@ HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
         return HttpStatus::NOT_FOUND;
     }
     if (stat(path.c_str(), &st) != 0) {
-        return HttpStatus::INTERNAL_SERVER_ERROR;
+        throw std::runtime_error("stat() failed");
     }
     if (!(st.st_mode & S_IRUSR) || access(path.c_str(), R_OK) != 0) {
         return HttpStatus::FORBIDDEN;
