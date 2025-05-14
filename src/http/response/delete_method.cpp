@@ -7,8 +7,7 @@ namespace {
 HttpStatus::EHttpStatus handleFile(const std::string& path) {
     if (std::remove(path.c_str()) != 0) {
         toolbox::logger::StepMark::error("runDelete: remove fail "
-            + path + " " + toolbox::to_string(HttpStatus::INTERNAL_SERVER_ERROR)
-            + " " + std::strerror(errno));
+            + path + " " + toolbox::to_string(HttpStatus::INTERNAL_SERVER_ERROR));
         return HttpStatus::INTERNAL_SERVER_ERROR;
     }
     toolbox::logger::StepMark::info("runDelete: remove success "

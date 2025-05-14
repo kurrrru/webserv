@@ -20,7 +20,6 @@
 
 static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
-    mkdir("./test_dir/no_permission_dir", 0000);
 
     std::ofstream test_file("./test_dir/test.html");
     test_file << "<html><body><h1>Test HTML</h1></body></html>";
@@ -39,13 +38,11 @@ static void setupTestEnvironment() {
 
 static void cleanupTestEnvironment() {
     chmod("./test_dir/no_permission.html", 0644);
-    chmod("./test_dir/no_permission_dir", 0755);
 
     remove("./test_dir/test.html");
     remove("./test_dir/index.html");
     remove("./test_dir/no_permission.html");
 
-    rmdir("./test_dir/no_permission_dir");
     rmdir("./test_dir");
 }
 
