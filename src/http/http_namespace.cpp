@@ -65,6 +65,7 @@ const char* SLASH = "/";
 const char* QUESTION = "?";
 const char* PERCENT = "%";
 const char* COLON = ":";
+const char* SEMICOLON = ";";
 const char* COMMA = ",";
 const char* COMMASP = ", ";
 }  // namespace symbols

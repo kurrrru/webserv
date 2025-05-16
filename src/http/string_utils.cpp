@@ -1,4 +1,5 @@
 #include <string>
+#include <iostream>
 
 #include "string_utils.hpp"
 
@@ -50,9 +51,64 @@ void skipSpace(std::string* line) {
     *line = line->substr(not_sp_pos);
 }
 
+std::size_t getLineEndLen(std::string& line, std::size_t lineEndPos) {
+    if (line.find(symbols::CRLF) == lineEndPos) {
+        return 2;
+    } else if (line.find(symbols::LF) == lineEndPos) {
+        return 1;
+    }
+    return 0;
+}
+
 bool isEqualCaseInsensitive(const std::string& str1, const std::string& str2) {
     CaseInsensitiveLess less;
     return !less(str1, str2) && !less(str2, str1);
+}
+
+std::string decodeHex(const std::string& hexStr) {
+    if (hexStr.size() != 2 || !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
+        return "";
+    }
+
+    std::string decodedStr;
+    char* endptr = NULL;
+    std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
+    decodedStr = static_cast<char>(hex);
+    if (*endptr != '\0' || hex == '\0') {
+        return "";
+    }
+    return decodedStr;
+}
+
+bool percentDecode(std::string& str, std::string* buf) {
+    std::size_t pos = str.find(symbols::PERCENT);
+    if (pos == std::string::npos) {
+        *buf += str;
+        return true;
+    }
+
+    std::size_t start = 0;
+    while (pos != std::string::npos) {
+        *buf += str.substr(start, pos - start);
+
+        if (pos + 2 >= str.length()) {  // 2 hex digits
+            return false;
+        }
+
+        std::string hexStr = str.substr(pos + 1, 2);
+        std::string decodedStr = decodeHex(hexStr);
+        if (decodedStr.empty()) {
+            return false;
+        }
+        *buf += decodedStr;
+
+        start = pos + 3;  // % + 2 hex digits
+        pos = str.find(symbols::PERCENT, start);
+    }
+    if (start < str.length()) {
+        *buf += str.substr(start);
+    }
+    return true;
 }
 
 }  // namespace utils
