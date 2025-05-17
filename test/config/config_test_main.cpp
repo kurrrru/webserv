@@ -110,18 +110,17 @@ int main(int argc, char* argv[]) {
         g_filter_directive = argv[2];
     }
     try {
-        toolbox::SharedPtr<config::Config> config;
         try {
             if (argc == 1) {
-                config = config::ConfigParser::parseFile("../../conf/default.conf");
+                config::Config::loadConfig("../../conf/default.conf");
             } else if (argc >= 2) {
-                config = config::ConfigParser::parseFile(argv[1]);
+                config::Config::loadConfig(argv[1]);
             }
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
             return EXIT_FAILURE;
         }
-        const toolbox::SharedPtr<config::HttpConfig>& http = config->getHttpConfig();
+        const toolbox::SharedPtr<config::HttpConfig>& http = config::Config::getHttpConfig();
         if (!http) {
             return EXIT_SUCCESS;
         }

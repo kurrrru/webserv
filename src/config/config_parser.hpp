@@ -16,13 +16,14 @@ class LocationConfig;
 class HttpConfig;
 class ConfigParser {
  public:
-    static toolbox::SharedPtr<Config> parseFile(const std::string& filepath);
-
- private:
     ConfigParser();
     ~ConfigParser();
+    toolbox::SharedPtr<Config> parseFile(const std::string& filepath);
+
+ private:
     ConfigParser(const ConfigParser&);
     ConfigParser& operator=(const ConfigParser&);
+
     bool readFile(const std::string& filepath);
     bool parse();
     bool parseHttpBlock(const std::vector<std::string>& tokens, size_t* pos);

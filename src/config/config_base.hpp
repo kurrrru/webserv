@@ -7,7 +7,25 @@
 #include "config_namespace.hpp"
 
 namespace config {
-
+/**
+ * @class ErrorPage
+ * @brief Class for managing error page settings
+ *
+ * Maps HTTP error status codes to corresponding display page paths.
+ * Multiple status codes can be mapped to a single error page.
+ *
+ * Usage example:
+ * @code
+ * ErrorPage errorPage;
+ * errorPage.addCode(404);
+ * errorPage.addCode(403);
+ * errorPage.setPath("/404.html");
+ * 
+ * // Accessing the configured settings
+ * const std::vector<size_t>& codes = errorPage.getCodes(); // Returns [404, 403]
+ * const std::string& path = errorPage.getPath();           // Returns "/404.html"
+ * @endcode
+ */
 class ErrorPage {
  public:
     ErrorPage();
@@ -25,6 +43,26 @@ class ErrorPage {
     std::string _path;
 };
 
+/**
+ * @class Listen
+ * @brief Class for managing server listening settings
+ *
+ * Maintains the combination of IP address and port number that the server
+ * listens on, as well as configuration as a default server.
+ *
+ * Usage example:
+ * @code
+ * Listen listen;
+ * listen.setPort(80);
+ * listen.setIp("0.0.0.0");
+ * listen.setDefaultServer(true);
+ * 
+ * // Accessing the configured settings
+ * size_t port = listen.getPort();                // Returns 80
+ * const std::string& ip = listen.getIp();        // Returns "0.0.0.0"
+ * bool isDefault = listen.isDefaultServer();     // Returns true
+ * @endcode
+ */
 class Listen {
  public:
     Listen();
@@ -45,6 +83,30 @@ class Listen {
     bool _default_server;
 };
 
+/**
+ * @class ServerName
+ * @brief Class for managing server name settings
+ *
+ * Manages server name settings for virtual hosting functionality.
+ * Supports three types of matching: exact match, wildcard prefix, and wildcard suffix.
+ *
+ * Usage example:
+ * @code
+ * ServerName serverName;
+ * serverName.setName("example.com");
+ * serverName.setType(ServerName::EXACT);
+ * 
+ * // Accessing the configured settings
+ * const std::string& name = serverName.getName();       // Returns "example.com"
+ * ServerName::ServerNameType type = serverName.getType(); // Returns ServerName::EXACT
+ * 
+ * // Wildcard example
+ * ServerName wildcard;
+ * wildcard.setName("example.com");
+ * wildcard.setType(ServerName::WILDCARD_START);
+ * // This represents *.example.com
+ * @endcode
+ */
 class ServerName {
  public:
     enum ServerNameType {
@@ -67,6 +129,28 @@ class ServerName {
     ServerNameType _type;
 };
 
+/**
+ * @class Return
+ * @brief Class for managing redirect settings
+ *
+ * Manages HTTP redirect settings. Can combine status codes with
+ * optional text or URLs.
+ *
+ * Usage example:
+ * @code
+ * Return redirect;
+ * redirect.setStatusCode(301);
+ * redirect.setTextOrUrl("https://example.com");
+ * redirect.setIsTextOrUrlSetting(true);
+ * redirect.setHasReturnValue(true);
+ * 
+ * // Accessing the configured settings
+ * size_t code = redirect.getStatusCode();                // Returns 301
+ * const std::string& url = redirect.getTextOrUrl();      // Returns "https://example.com"
+ * bool hasUrl = redirect.isTextOrUrlSetting();           // Returns true
+ * bool hasValue = redirect.hasReturnValue();             // Returns true
+ * @endcode
+ */
 class Return {
  public:
     Return();
@@ -90,6 +174,41 @@ class Return {
     bool _has_return_value;
 };
 
+/**
+ * @class ConfigBase
+ * @brief Base class for web server configuration
+ *
+ * An abstract base class that manages basic server configuration items.
+ * Serves as a common foundation for HTTP, server, and location configuration classes.
+ *
+ * Key configuration items:
+ * - Allowed HTTP methods
+ * - Directory listing (autoindex)
+ * - CGI extensions and execution path
+ * - Maximum client body size
+ * - Error page mappings
+ * - Index files
+ * - Document root
+ * - Upload directory
+ *
+ * @note This class is intended to be used as a base class and
+ * inherited by specific configuration classes.
+ *
+ * Usage example:
+ * @code
+ * ConfigBase* config = new ServerConfig();
+ * config->setRoot("/var/www");
+ * config->setAutoindex(true);
+ * config->addAllowedMethod("GET");
+ * config->addAllowedMethod("POST");
+ * 
+ * // Accessing the configured settings
+ * const std::string& root = config->getRoot();           // Returns "/var/www"
+ * bool autoindex = config->getAutoindex();               // Returns true
+ * const std::vector<std::string>& methods = config->getAllowedMethods(); // Returns ["GET", "POST"]
+ * size_t maxBodySize = config->getClientMaxBodySize();   // Returns default or configured value
+ * @endcode
+ */
 class ConfigBase {
  public:
     ConfigBase();
