@@ -33,10 +33,7 @@ namespace config {
  *   config::Config::loadConfig("server.conf");
  *   
  *   // Get singleton instance
- *   const config::Config& config = config::Config::getConfig();
- *   
- *   // Access HTTP configuration (via singleton)
- *   const toolbox::SharedPtr<config::HttpConfig>& httpConfig = config.getHttpConfig();
+ *   const config::Config& config1 = config::Config::getConfig();
  *   
  *   // Or access directly using static method
  *   const toolbox::SharedPtr<config::HttpConfig>& httpConfig = config::Config::getHttpConfig();
@@ -51,12 +48,10 @@ namespace config {
  */
 class Config {
  public:
-    Config();
-    ~Config();
     static void loadConfig(const std::string& configFile);
     static Config& getConfig() { return getInstance(); }
     static const toolbox::SharedPtr<config::HttpConfig>&
-                     getHttpConfig() { return getInstance()._httpConfig; }
+                    getHttpConfig() { return getInstance()._httpConfig; }
     static size_t getTokenCount() { return getInstance()._tokenCount; }
     static void setHttpConfig
     (const toolbox::SharedPtr<config::HttpConfig>& httpConfig) {
@@ -67,6 +62,8 @@ class Config {
     }
 
  private:
+    Config();
+    ~Config();
     Config(const Config& other);
     Config& operator=(const Config& other);
 

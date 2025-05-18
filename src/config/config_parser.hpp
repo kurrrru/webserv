@@ -18,7 +18,8 @@ class ConfigParser {
  public:
     ConfigParser();
     ~ConfigParser();
-    toolbox::SharedPtr<Config> parseFile(const std::string& filepath);
+    toolbox::SharedPtr<HttpConfig> parseFile(const std::string& filepath);
+    size_t getTokenCount() const { return _tokens.size(); }
 
  private:
     ConfigParser(const ConfigParser&);

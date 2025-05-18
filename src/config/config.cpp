@@ -35,12 +35,12 @@ Config& Config::getInstance() {
 void Config::loadConfig(const std::string& configFile) {
     Config& instance = getInstance();
     ConfigParser parser;
-    toolbox::SharedPtr<Config> configPtr = parser.parseFile(configFile);
-    if (!configPtr) {
+    toolbox::SharedPtr<HttpConfig> httpConfig = parser.parseFile(configFile);
+    if (!httpConfig) {
         throwConfigError("Failed to parse configuration file: " + configFile);
     }
-    instance._httpConfig = configPtr->getHttpConfig();
-    instance._tokenCount = configPtr->getTokenCount();
+    instance._httpConfig = httpConfig;
+    instance._tokenCount = parser.getTokenCount();
     toolbox::logger::StepMark::info("Configuration loaded successfully");
 }
 
