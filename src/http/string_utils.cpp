@@ -61,8 +61,8 @@ std::string decodeHex(const std::string& hexStr) {
     }
 
     char* endptr = NULL;
-    std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
-    if (*endptr != '\0' || hex < 1 || hex > 255) {
+    std::size_t hex = strtoul(hexStr.c_str(), &endptr, 16);
+    if (*endptr != '\0' || hex > 255) {
         return "";
     }
     return std::string(1, static_cast<char>(hex));
