@@ -23,24 +23,20 @@ _config(toolbox::SharedPtr<HttpConfig>(new HttpConfig())) {
 ConfigParser::~ConfigParser() {
 }
 
-toolbox::SharedPtr<Config> ConfigParser::parseFile(const std::string& filepath) {
-    ConfigParser parser;
-    if (!parser.readFile(filepath)) {
+toolbox::SharedPtr<HttpConfig> ConfigParser::parseFile(const std::string& filepath) {
+    if (!readFile(filepath)) {
         throwConfigError("open() \"" + filepath + "\" failed");
     }
     ConfigLexer lexer;
-    parser._tokens = lexer.tokenize(parser._input);
-    toolbox::SharedPtr<Config> config(new Config());
-    if (parser._tokens.empty()) {
+    _tokens = lexer.tokenize(_input);
+    if (_tokens.empty()) {
         toolbox::logger::StepMark::warning("No tokens found in config file.");
-        return config;
+        return toolbox::SharedPtr<HttpConfig>(new HttpConfig());
     }
-    if (!parser.parse()) {
+    if (!parse()) {
         throwConfigError("Failed to parse configuration");
     }
-    config->setHttpConfig(parser._config);
-    config->setTokenCount(parser._tokens.size());
-    return config;
+    return _config;
 }
 
 bool ConfigParser::readFile(const std::string& filepath) {

@@ -10,7 +10,35 @@
 #include "../../toolbox/shared.hpp"
 
 namespace config {
-
+/**
+ * @class ServerConfig
+ * @brief Class for managing server configuration settings
+ *
+ * This class extends ConfigBase to provide server-specific configuration capabilities.
+ * Each instance represents a virtual server that can listen on specific IP:port 
+ * combinations and respond to requests for specific server names (domains).
+ * 
+ * ServerConfig inherits common configuration properties from ConfigBase and can
+ * contain multiple location configurations for path-specific settings. It also
+ * maintains a reference to its parent HttpConfig to access global defaults.
+ *
+ * Usage example:
+ * @code
+ * ServerConfig server;
+ * 
+ * // Copy an existing location with modifications
+ * LocationConfig* copyOfLocation = new LocationConfig(*location);
+ * toolbox::SharedPtr<LocationConfig> newLocation(copyOfLocation);
+ * newLocation->setPath("/api/v2");
+ * newLocation->setRoot("/var/www/api/v2");
+ * server.addLocation(newLocation);
+ * 
+ * // Accessing the configured settings
+ * const std::vector<Listen>& listens = server.getListens();
+ * const std::vector<ServerName>& names = server.getServerNames();
+ * const std::vector<toolbox::SharedPtr<LocationConfig> >& locations = server.getLocations();
+ * @endcode
+ */
 class ServerConfig : public ConfigBase {
  public:
     ServerConfig();

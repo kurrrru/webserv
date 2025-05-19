@@ -20,13 +20,13 @@
 
 int main(int argc, char* argv[]) {
     try {
-        toolbox::SharedPtr<config::Config> config;
         if (argc == 1) {
-            config = config::ConfigParser::parseFile(config::DEFAULT_FILE);
+            config::Config::loadConfig(config::DEFAULT_FILE);
         } else if (argc == 2) {
-            config = config::ConfigParser::parseFile(argv[1]);
+            config::Config::loadConfig(argv[1]);
         }
-        toolbox::SharedPtr<config::HttpConfig> http_config = config->getHttpConfig();
+        const config::Config& config = config::Config::getConfig();
+        toolbox::SharedPtr<config::HttpConfig> http_config = config.getHttpConfig();
         toolbox::SharedPtr<config::ServerConfig> server_config1 = http_config->getServers()[0];
         toolbox::SharedPtr<config::ServerConfig> server_config2 = http_config->getServers()[1];
 
