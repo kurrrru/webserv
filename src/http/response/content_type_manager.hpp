@@ -17,13 +17,16 @@ class ContentTypeManager {
     }
     std::string getContentType(const std::string& filename);
     std::string getExtension(const std::string& filename);
+
  private:
-    static void initContentTypeMap();
     static ContentTypeMap _contentTypeMap;
+
     ContentTypeManager() { initContentTypeMap(); };
     ~ContentTypeManager() {};
     ContentTypeManager(const ContentTypeManager&);
     ContentTypeManager& operator=(const ContentTypeManager&) { return *this; };
+
+    static void initContentTypeMap();
 };
 
 }  // namespace http

@@ -45,9 +45,6 @@ void ContentTypeManager::initContentTypeMap() {
 }
 
 std::string ContentTypeManager::getContentType(const std::string& filename) {
-    if (_contentTypeMap.empty()) {
-        initContentTypeMap();
-    }
     std::string extension = extractExtension(filename);
     if (_contentTypeMap.find(extension) != _contentTypeMap.end()) {
         return _contentTypeMap[extension];
@@ -56,9 +53,6 @@ std::string ContentTypeManager::getContentType(const std::string& filename) {
 }
 
 std::string ContentTypeManager::getExtension(const std::string& content_type) {
-    if (_contentTypeMap.empty()) {
-        initContentTypeMap();
-    }
     if (content_type.empty()) {
         return "";
     }
