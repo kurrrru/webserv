@@ -264,6 +264,7 @@ void runPost(const std::string& uploadPath, std::string& recvBody, HTTPFields& f
         toolbox::logger::StepMark::error("runPost: setStatus " + toolbox::to_string(static_cast<int>(e)));
         response.setStatus(e);
     }
+    response.setStatus(HttpStatus::CREATED);
 }
 
 }  // namespace http

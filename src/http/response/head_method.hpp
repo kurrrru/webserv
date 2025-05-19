@@ -11,8 +11,6 @@
 #include "response.hpp"
 
 namespace http {
-HttpStatus::EHttpStatus runHead(const std::string& path,
-                               const std::string& indexPath,
-                               bool isAutoindex,
-                               Response& response);
+void runHead(const std::string& path, const std::string& indexPath,
+            bool isAutoindex, Response& response);
 }  // namespace http

@@ -24,7 +24,7 @@ void setupTestEnvironment() {
 }
 
 void testSimplePost() {
-    toolbox::logger::StepMark::info("==== POST testSimplePost: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 simple post: success case ====");
 
     http::HTTPFields fields;
     http::Response response;
@@ -38,7 +38,7 @@ void test_normal_post() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST test_normal_post: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 normal post: success case ====");
     std::string successBody = "This is a test content for normal POST request";
     std::ostringstream lengthStr;
     lengthStr << successBody.length();
@@ -48,7 +48,7 @@ void test_normal_post() {
 }
 
 void testUrlEncodedForm() {
-    toolbox::logger::StepMark::info("==== POST testUrlEncodedForm: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 urlencoded: success case ====");
 
     http::HTTPFields fields;
     http::Response response;
@@ -64,7 +64,7 @@ void test_urlencoded() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST test_urlencoded: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 urlencoded: success case ====");
     std::string successBody = "name=test_user&age=25&comment=Hello%20World";
     std::ostringstream lengthStr1;
     lengthStr1 << successBody.length();
@@ -78,7 +78,7 @@ void test_urlencoded_failure() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST test_urlencoded_failure: failure case ====");
+    toolbox::logger::StepMark::info("==== [POST] FAIL:400 urlencoded failure case ====");
     std::string failureBody = "name=fail_user%1operation=write_to_forbidden";
     std::ostringstream lengthStr2;
     lengthStr2 << failureBody.length();
@@ -89,7 +89,7 @@ void test_urlencoded_failure() {
 }
 
 void testMultipartFormData() {
-    toolbox::logger::StepMark::info("==== POST testMultipartFormData: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 multipart/form-data: success case ====");
 
     http::HTTPFields fields;
     http::Response response;
@@ -115,7 +115,7 @@ void test_multipart_form_data() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST multipart/form-data: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 multipart/form-data: success case ====");
     std::string successBody = "--boundary\r\n"
                               "Content-Disposition: form-data; name=\"field1\"; filename=\"example1.txt\"\r\n"
                               "\r\n"
@@ -141,7 +141,7 @@ void test_multipart_form_data_failure() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST multipart/form-data: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 multipart/form-data: success case ====");
     std::string failureBody = "--boundary\r\n"
                               "Content-Disposition: form-data; name=\"field1\"\r\n"
                               "\r\n"
@@ -158,7 +158,7 @@ void test_image_upload() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST test_image_upload: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 image upload ====");
 
     const unsigned char png_data[] = {
         0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
@@ -182,7 +182,7 @@ void test_multipart_image_upload() {
     http::HTTPFields fields;
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== POST test_multipart_image_upload: success case ====");
+    toolbox::logger::StepMark::info("==== [POST] SUCCESS:201 multipart/form-data image upload ====");
 
     const unsigned char png_data[] = {
         0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
@@ -218,7 +218,7 @@ void test_multipart_image_upload() {
 }
 
 void testErrorCase() {
-    toolbox::logger::StepMark::info("==== POST testErrorCase: failure case ====");
+    toolbox::logger::StepMark::info("==== [POST] FAIL:500 no permission directory ====");
     http::HTTPFields fields;
     http::Response response;
 
