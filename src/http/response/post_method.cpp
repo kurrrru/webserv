@@ -46,7 +46,6 @@ void saveToFile(const std::string& filepath, const std::string& content) {
     toolbox::logger::StepMark::info("runPost: file created: " + filepath);
 }
 
-// Content type handling
 bool isMultipartFormData(HTTPFields::FieldValue& contentType) {
     return !contentType.empty() && startsWith(contentType[0], MULTIPART_FORM_DATA);
 }
@@ -114,10 +113,7 @@ void handleCreateFile(const std::string& uploadPath, std::string filename, const
     saveToFile(filepath, content);
 }
 
-// Multipart form data parsing
-void extractMultipartSegments(std::vector<std::string>& bodyParts,
-                              std::string& recvBody,
-                              const std::string& boundary) {
+void extractMultipartSegments(std::vector<std::string>& bodyParts, const std::string& recvBody, const std::string& boundary) {
     std::string endBoundary = symbols::CRLF + boundary + "--";
     std::size_t boundaryPos = 0;
 

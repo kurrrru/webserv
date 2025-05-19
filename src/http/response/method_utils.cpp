@@ -5,13 +5,6 @@
 #include "method_utils.hpp"
 
 namespace http {
-bool isDirectory(const struct stat& st) {
-    return S_ISDIR(st.st_mode);
-}
-
-bool isRegularFile(const struct stat& st) {
-    return S_ISREG(st.st_mode);
-}
 
 std::string joinPath(const std::string& base, const std::string& path) {
     if (base.empty()) {

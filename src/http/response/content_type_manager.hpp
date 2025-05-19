@@ -18,7 +18,7 @@ class ContentTypeManager {
     static ContentTypeMap _contentTypeMap;
     ContentTypeManager();
     ~ContentTypeManager();
-    ContentTypeManager(const ContentTypeManager&) {};
+    ContentTypeManager(const ContentTypeManager&);
     ContentTypeManager& operator=(const ContentTypeManager&) { return *this; };
 };
 

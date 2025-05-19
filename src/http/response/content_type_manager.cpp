@@ -6,7 +6,11 @@ std::map<std::string, std::string> ContentTypeManager::_contentTypeMap;
 
 namespace {
 std::string extractExtension(const std::string& filename) {
-    std::string extension = filename.substr(filename.find_last_of('.') + 1);
+    std::size_t dot_pos = filename.find_last_of('.');
+    if (dot_pos == std::string::npos) {
+        return "";
+    }
+    std::string extension = filename.substr(dot_pos + 1);
     return extension;
 }
 }
