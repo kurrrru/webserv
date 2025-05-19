@@ -19,7 +19,7 @@ void handleDirectory(const std::string& path, const std::string& indexPath,
             toolbox::logger::StepMark::error("runHead: handleDirectory: checkFileAccess fail " + fullPath + " " + toolbox::to_string(status));
             throw status;
         }
-        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getContentType(fullPath));
+        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(fullPath));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
         response.setHeader(fields::CONTENT_TYPE, "text/html");
@@ -35,7 +35,7 @@ void handleFile(const std::string& path, Response& response) {
             + path + " " + toolbox::to_string(status));
         throw status;
     }
-    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getContentType(path));
+    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(path));
     response.setHeader(fields::LAST_MODIFIED, getModifiedTime(st));
 }
 }  // namespace

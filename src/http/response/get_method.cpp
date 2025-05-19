@@ -114,7 +114,7 @@ void handleDirectory(const std::string& path, const std::string& indexPath,
             throw status;
         }
         response.setBody(readFile(fullPath));
-        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getContentType(fullPath));
+        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(fullPath));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
         response.setBody(processAutoindex(path));
@@ -124,7 +124,7 @@ void handleDirectory(const std::string& path, const std::string& indexPath,
 
 void handleFile(const std::string& path, Response& response) {
     response.setBody(readFile(path));
-    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getContentType(path));
+    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(path));
 }
 }  // namespace
 

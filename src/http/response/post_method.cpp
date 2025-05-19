@@ -98,7 +98,7 @@ void handleCreateFile(const std::string& uploadPath, std::string filename, const
     if (filename.find('.') == std::string::npos) {
         HTTPFields::FieldValue contentType = fields.getFieldValue(fields::CONTENT_TYPE);
         if (!contentType.empty()) {
-            std::string extension = ContentTypeManager::getExtension(contentType[0]);
+            std::string extension = ContentTypeManager::getInstance().getExtension(contentType[0]);
             if (!extension.empty()) {
                 filename += "." + extension;
             }
