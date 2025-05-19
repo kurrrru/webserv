@@ -8,12 +8,12 @@
 #include "../http_namespace.hpp"
 #include "response.hpp"
 #include "method_utils.hpp"
+#include "content_type_manager.hpp"
 
 namespace http {
 struct FormDataField {
-    std::string name;
     std::string filename;
-    std::string content_type;
+    std::string content;
 };
 
 void runPost(const std::string& uploadPath, std::string& recvBody, HTTPFields& fields, Response& response);

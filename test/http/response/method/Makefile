@@ -8,7 +8,8 @@ SRCS = main.cpp get.cpp head.cpp post.cpp \
 ../../../../src/http/http_namespace.cpp \
 ../../../../src/http/response/response.cpp \
 ../../../../src/http/response/post_method.cpp \
-../../../../src/http/string_utils.cpp
+../../../../src/http/string_utils.cpp \
+../../../../src/http/response/content_type_manager.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
