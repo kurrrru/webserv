@@ -21,6 +21,7 @@
 #include "get_method.hpp"
 
 namespace http {
+namespace {
 std::string readFile(const std::string& path) {
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file.is_open()) {
@@ -102,7 +103,6 @@ std::string processAutoindex(const std::string& path) {
 HttpStatus::EHttpStatus handleDirectory(const std::string& path,
                                         const std::string& indexPath,
                                         Response& response,
-                                        ExtensionMap& extensionMap,
                                         bool isAutoindex) {
     HttpStatus::EHttpStatus status;
 
@@ -116,7 +116,7 @@ HttpStatus::EHttpStatus handleDirectory(const std::string& path,
             return status;
         }
         response.setBody(readFile(fullPath));
-        response.setHeader(fields::CONTENT_TYPE, getContentType(fullPath, extensionMap));
+        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getContentType(fullPath));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
         response.setBody(processAutoindex(path));
@@ -126,17 +126,16 @@ HttpStatus::EHttpStatus handleDirectory(const std::string& path,
 }
 
 HttpStatus::EHttpStatus handleFile(const std::string& path,
-                                   Response& response,
-                                   ExtensionMap& extensionMap) {
+                                   Response& response) {
     response.setBody(readFile(path));
-    response.setHeader(fields::CONTENT_TYPE,getContentType(path, extensionMap));
+    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getContentType(path));
     return HttpStatus::OK;
 }
+}  // namespace
 
 HttpStatus::EHttpStatus runGet(const std::string& path,
                                const std::string& indexPath,
                                bool isAutoindex,
-                               ExtensionMap& extensionMap,
                                Response& response) {
     struct stat st;
 
@@ -150,9 +149,9 @@ HttpStatus::EHttpStatus runGet(const std::string& path,
     try {
         if (isDirectory(st)) {
             return handleDirectory(path, indexPath, response,
-                extensionMap, isAutoindex);
+                isAutoindex);
         } else if (isRegularFile(st)) {
-            return handleFile(path, response, extensionMap);
+            return handleFile(path, response);
         } else {
             status = HttpStatus::INTERNAL_SERVER_ERROR;
         }

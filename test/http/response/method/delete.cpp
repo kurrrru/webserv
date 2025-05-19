@@ -47,8 +47,6 @@ static void cleanupTestEnvironment() {
 }
 
 static void runTests() {
-    http::ExtensionMap extensionMap;
-    http::initExtensionMap(extensionMap);
     http::Response response;
 
     std::string path = "./test_dir/test.html";

@@ -50,57 +50,47 @@ static void cleanupTestEnvironment() {
 }
 
 static void runTests() {
-    http::ExtensionMap extensionMap;
-    http::initExtensionMap(extensionMap);
     http::HttpStatus::EHttpStatus status;
     http::Response response;
 
     std::cout << "===== head normal file (modified time) =====" << std::endl;
-    status = http::runHead("./test_dir/test.html", "", false,
-        extensionMap, response);
+    status = http::runHead("./test_dir/test.html", "", false, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head nonexistent file =====" << std::endl;
-    status = http::runHead("./test_dir/nonexistent.html", "", false,
-        extensionMap, response);
+    status = http::runHead("./test_dir/nonexistent.html", "", false, response);
     assert(status == http::HttpStatus::NOT_FOUND);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head dir indexfile (modified time) =====" << std::endl;
-    status = http::runHead("./test_dir/", "index.html", false,
-        extensionMap, response);
+    status = http::runHead("./test_dir/", "index.html", false, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head dir autoindex =====" << std::endl;
-    status = http::runHead("./test_dir/", "", true,
-        extensionMap, response);
+    status = http::runHead("./test_dir/", "", true, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head no permission =====" << std::endl;
-    status = http::runHead("./test_dir/no_permission.html", "",
-        false, extensionMap, response);
+    status = http::runHead("./test_dir/no_permission.html", "", false, response);
     assert(status == http::HttpStatus::FORBIDDEN);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head empty dir ====="
         << std::endl;
-    status = http::runHead("./test_dir/empty_dir/", "",
-        true, extensionMap, response);
+    status = http::runHead("./test_dir/empty_dir/", "", true, response);
     assert(status == http::HttpStatus::OK);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head empty dir indexfile =====" << std::endl;
-    status = http::runHead("./test_dir/empty_dir/", "index.html",
-        false, extensionMap, response);
+    status = http::runHead("./test_dir/empty_dir/", "index.html", false, response);
     assert(status == http::HttpStatus::NOT_FOUND);
     std::cout << "OK: " << status << std::endl;
 
     std::cout << "===== head no permission dir =====" << std::endl;
-    status = http::runHead("./test_dir/no_permission_dir/", "",
-        true, extensionMap, response);
+    status = http::runHead("./test_dir/no_permission_dir/", "", true, response);
     assert(status == http::HttpStatus::FORBIDDEN);
     std::cout << "OK: " << status << std::endl;
 }
