@@ -50,7 +50,7 @@ static void cleanupTestEnvironment() {
 static void runTests() {
     http::Response response;
 
-    toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 nomal file =====");
+    toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 normal file =====");
     http::runGet("./test_dir/test.html", "", false, response);
 
     toolbox::logger::StepMark::info("==== [GET] FAIL:404 nonexistent file =====");

@@ -1,5 +1,4 @@
 #include <string>
-#include <iostream>
 
 #include "string_utils.hpp"
 
@@ -51,15 +50,6 @@ void skipSpace(std::string* line) {
     *line = line->substr(not_sp_pos);
 }
 
-std::size_t getLineEndLen(std::string& line, std::size_t lineEndPos) {
-    if (line.find(symbols::CRLF) == lineEndPos) {
-        return 2;
-    } else if (line.find(symbols::LF) == lineEndPos) {
-        return 1;
-    }
-    return 0;
-}
-
 bool isEqualCaseInsensitive(const std::string& str1, const std::string& str2) {
     CaseInsensitiveLess less;
     return !less(str1, str2) && !less(str2, str1);
@@ -70,17 +60,18 @@ std::string decodeHex(const std::string& hexStr) {
         return "";
     }
 
-    std::string decodedStr;
     char* endptr = NULL;
     std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
-    decodedStr = static_cast<char>(hex);
-    if (*endptr != '\0' || hex == '\0') {
+    if (*endptr != '\0' || hex < 1 || hex > 255) {
         return "";
     }
-    return decodedStr;
+    return std::string(1, static_cast<char>(hex));
 }
 
 bool percentDecode(std::string& str, std::string* buf) {
+    if (buf == NULL) {
+        return false;
+    }
     std::size_t pos = str.find(symbols::PERCENT);
     if (pos == std::string::npos) {
         *buf += str;

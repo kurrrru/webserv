@@ -246,12 +246,12 @@ void handleUrlEncoded(const std::string& uploadPath, std::string& recvBody, HTTP
 }  // namespace
 
 void runPost(const std::string& uploadPath, std::string& recvBody, HTTPFields& fields, Response& response) {
-    if (uploadPath.empty()) {
-        toolbox::logger::StepMark::error("runPost: uploadPath is empty");
-        response.setStatus(HttpStatus::NOT_IMPLEMENTED);
-        return;
-    }
     try {
+        if (uploadPath.empty()) {
+            toolbox::logger::StepMark::error("runPost: uploadPath is empty");
+            throw HttpStatus::NOT_IMPLEMENTED;
+        }
+
         HTTPFields::FieldValue contentType = fields.getFieldValue(fields::CONTENT_TYPE);
         if (isMultipartFormData(contentType)) {
             handleMultipartFormData(uploadPath, recvBody, fields);
@@ -260,11 +260,11 @@ void runPost(const std::string& uploadPath, std::string& recvBody, HTTPFields& f
         } else {
             handleCreateFile(uploadPath, "", recvBody, fields);
         }
+        response.setStatus(HttpStatus::CREATED);
     } catch (const HttpStatus::EHttpStatus& e) {
         toolbox::logger::StepMark::error("runPost: setStatus " + toolbox::to_string(static_cast<int>(e)));
         response.setStatus(e);
     }
-    response.setStatus(HttpStatus::CREATED);
 }
 
 }  // namespace http

@@ -47,7 +47,7 @@ void runHead(const std::string& path, const std::string& indexPath,
     try {
         HttpStatus::EHttpStatus status = checkFileAccess(path, st);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runHead: runHead: checkFileAccess fail " + path + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runHead: checkFileAccess fail " + path + " " + toolbox::to_string(status));
             throw status;
         }
 
@@ -58,12 +58,12 @@ void runHead(const std::string& path, const std::string& indexPath,
         } else {
             throw HttpStatus::INTERNAL_SERVER_ERROR;
         }
+        response.setStatus(HttpStatus::OK);
     } catch (const HttpStatus::EHttpStatus& e) {
         toolbox::logger::StepMark::error("runHead: set status "
             + toolbox::to_string(e));
         response.setStatus(e);
     }
-    response.setStatus(HttpStatus::OK);
 }
 
 }  // namespace http

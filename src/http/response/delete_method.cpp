@@ -37,12 +37,12 @@ void runDelete(const std::string& path, Response& response) {
                 + path + " " + toolbox::to_string(HttpStatus::INTERNAL_SERVER_ERROR));
             throw HttpStatus::INTERNAL_SERVER_ERROR;
         }
+        response.setStatus(HttpStatus::NO_CONTENT);
     } catch (const HttpStatus::EHttpStatus& e) {
         toolbox::logger::StepMark::error("runDelete: set status "
             + toolbox::to_string(e));
         response.setStatus(e);
     }
-    response.setStatus(HttpStatus::NO_CONTENT);
 }
 
 }  // namespace http

@@ -147,12 +147,12 @@ void runGet(const std::string& path, const std::string& indexPath,
         } else {
             throw HttpStatus::INTERNAL_SERVER_ERROR;
         }
+        response.setStatus(HttpStatus::OK);
     } catch (const HttpStatus::EHttpStatus& e) {
         toolbox::logger::StepMark::error("runGet: set status "
             + toolbox::to_string(e));
         response.setStatus(e);
     }
-    response.setStatus(HttpStatus::OK);
 }
 
 }  // namespace http

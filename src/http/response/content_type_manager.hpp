@@ -21,12 +21,10 @@ class ContentTypeManager {
  private:
     static ContentTypeMap _contentTypeMap;
 
-    ContentTypeManager() { initContentTypeMap(); };
+    ContentTypeManager();
     ~ContentTypeManager() {};
     ContentTypeManager(const ContentTypeManager&);
     ContentTypeManager& operator=(const ContentTypeManager&) { return *this; };
-
-    static void initContentTypeMap();
 };
 
 }  // namespace http

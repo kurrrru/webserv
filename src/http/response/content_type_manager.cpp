@@ -15,7 +15,7 @@ std::string extractExtension(const std::string& filename) {
 }
 }
 
-void ContentTypeManager::initContentTypeMap() {
+ContentTypeManager::ContentTypeManager() {
     _contentTypeMap["html"] = "text/html";
     _contentTypeMap["htm"] = "text/html";
     _contentTypeMap["css"] = "text/css";
