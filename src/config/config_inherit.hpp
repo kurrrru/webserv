@@ -9,7 +9,7 @@ namespace config {
 
 class ConfigInherit {
  public:
-    explicit ConfigInherit(HttpConfig* http_config);
+    explicit ConfigInherit(HttpConfig* httpConfig);
     ~ConfigInherit();
 
     void applyInheritance();
@@ -24,7 +24,7 @@ class ConfigInherit {
     void inheritServerToLocation(const ServerConfig* server, LocationConfig* location);
     void inheritLocationToLocation(const LocationConfig* parent, LocationConfig* child);
 
-    HttpConfig* _http_config;
+    HttpConfig* _httpConfig;
 };
 
 }  // namespace config

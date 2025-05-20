@@ -33,7 +33,7 @@ namespace directive {
 const char* ALLOWED_METHODS = "allowed_methods";
 const char* AUTOINDEX = "autoindex";
 const char* CGI_EXTENSION = "cgi_extension";
-const char* CGI_PASS = "cgi_pass";
+const char* CGI_PATH = "cgi_path";
 const char* CLIENT_MAX_BODY_SIZE = "client_max_body_size";
 const char* ERROR_PAGE = "error_page";
 const char* INDEX = "index";

@@ -16,9 +16,9 @@
 
 namespace config {
 
-bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, std::string directive_name) {
+bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, std::string directiveName) {
     if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
-        throwConfigError("invalid number of arguments in \"" + directive_name + "\" directive");
+        throwConfigError("invalid number of arguments in \"" + directiveName + "\" directive");
     }
     (*pos)++;
     return true;
@@ -73,7 +73,7 @@ bool parseSize(const std::string& str, size_t* result) {
     return true;
 }
 
-void validateHost(const std::string& host, const std::string& full_value) {
+void validateHost(const std::string& host, const std::string& fullValue) {
     struct addrinfo hints;
     struct addrinfo* result = NULL;
     std::memset(&hints, 0, sizeof(hints));
@@ -81,10 +81,10 @@ void validateHost(const std::string& host, const std::string& full_value) {
     hints.ai_socktype = SOCK_STREAM;
     int status = getaddrinfo(host.c_str(), NULL, &hints, &result);
     if (status != 0) {
-        throwConfigError("host not found in \"" + full_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive: ");
+        throwConfigError("host not found in \"" + fullValue + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive: ");
     }
     if (result == NULL) {
-        throwConfigError("host not found in \"" + full_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive: ");
+        throwConfigError("host not found in \"" + fullValue + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive: ");
     }
     freeaddrinfo(result);
 }
@@ -99,14 +99,14 @@ bool DirectiveParser::parseAllowedMethodsDirective(const std::vector<std::string
     }
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string method = tokens[*pos];
-        bool is_valid_method = false;
+        bool isValidMethod = false;
         for (size_t i = 0; i < config::method::ALLOWED_METHODS_COUNT; ++i) {
             if (isCaseInsensitiveIdentical(method, config::method::ALLOWED_METHODS[i])) {
-                is_valid_method = true;
+                isValidMethod = true;
                 break;
             }
         }
-        if (!is_valid_method) {
+        if (!isValidMethod) {
             throwConfigError("Invalid value \"" +  method + "\" in \"" + std::string(config::directive::ALLOWED_METHODS) + "\" directive");
         }
         methods->push_back(method);
@@ -134,8 +134,8 @@ bool DirectiveParser::parseAutoindexDirective(const std::vector<std::string>& to
     return expectSemicolon(tokens, pos, std::string(config::directive::AUTOINDEX));
 }
 
-bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* cgi_extensions) {
-    if (!cgi_extensions || *pos >= tokens.size()) {
+bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* cgiExtensions) {
+    if (!cgiExtensions || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CGI_EXTENSION));
         return false;
     }
@@ -144,25 +144,25 @@ bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>&
     }
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string extension = tokens[(*pos)++];
-        cgi_extensions->push_back(extension);
+        cgiExtensions->push_back(extension);
     }
     return expectSemicolon(tokens, pos, std::string(config::directive::CGI_EXTENSION));
 }
 
-bool DirectiveParser::parseCgiPassDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* cgi_pass) {
-    if (!cgi_pass || *pos >= tokens.size()) {
-        toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CGI_PASS));
+bool DirectiveParser::parseCgiPathDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* cgiPath) {
+    if (!cgiPath || *pos >= tokens.size()) {
+        toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CGI_PATH));
         return false;
     }
     if (tokens[*pos] == config::directive::SEMICOLON) {
-        throwConfigError("invalid number of arguments in \"" + std::string(config::directive::CGI_PASS) + "\" directive");
+        throwConfigError("invalid number of arguments in \"" + std::string(config::directive::CGI_PATH) + "\" directive");
     }
     std::string path = tokens[(*pos)++];
-    *cgi_pass = path;
-    return expectSemicolon(tokens, pos, std::string(config::directive::CGI_PASS));
+    *cgiPath = path;
+    return expectSemicolon(tokens, pos, std::string(config::directive::CGI_PATH));
 }
 
-bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tokens, size_t* pos, size_t* client_max_body_size) {
+bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tokens, size_t* pos, size_t* clientMaxBodySize) {
     if (*pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CLIENT_MAX_BODY_SIZE));
         return false;
@@ -170,15 +170,15 @@ bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tok
     if (tokens[*pos] == config::directive::SEMICOLON) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::CLIENT_MAX_BODY_SIZE) + "\" directive");
     }
-    std::string size_str = tokens[(*pos)++];
-    if (!parseSize(size_str, client_max_body_size)) {
+    std::string sizeStr = tokens[(*pos)++];
+    if (!parseSize(sizeStr, clientMaxBodySize)) {
         throwConfigError("\"" + std::string(config::directive::CLIENT_MAX_BODY_SIZE) + "\" directive invalid value");
     }
     return expectSemicolon(tokens, pos, std::string(config::directive::CLIENT_MAX_BODY_SIZE));
 }
 
-bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ErrorPage>* error_pages) {
-    if (!error_pages || *pos >= tokens.size()) {
+bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ErrorPage>* errorPages) {
+    if (!errorPages || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::ERROR_PAGE));
         return false;
     }
@@ -188,13 +188,13 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     std::vector<size_t> codes;
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string token = tokens[(*pos)];
-        size_t code_value;
-        if (config::stringToSizeT(token, &code_value)) {
-            if (code_value < config::directive::MIN_ERROR_PAGE_CODE || 
-                code_value > config::directive::MAX_ERROR_PAGE_CODE) {
+        size_t codeValue;
+        if (config::stringToSizeT(token, &codeValue)) {
+            if (codeValue < config::directive::MIN_ERROR_PAGE_CODE || 
+                codeValue > config::directive::MAX_ERROR_PAGE_CODE) {
                 throwConfigError("value \"" + token + "\" must be between 300 and 599");
             }
-            codes.push_back(code_value);
+            codes.push_back(codeValue);
             (*pos)++;
         } else {
             break;
@@ -209,17 +209,17 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     if (tokens[*pos] != config::directive::SEMICOLON) {
         throwConfigError("invalid value in \"" + tokens[*pos] + "\"");
     }
-    ErrorPage error_page;
+    ErrorPage errorPage;
     for (size_t i = 0; i < codes.size(); ++i) {
-        error_page.addCode(codes[i]);
+        errorPage.addCode(codes[i]);
     }
-    error_page.setPath(path);
-    error_pages->push_back(error_page);
+    errorPage.setPath(path);
+    errorPages->push_back(errorPage);
     return expectSemicolon(tokens, pos, std::string(config::directive::ERROR_PAGE));
 }
 
-bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* index_files) {
-    if (!index_files || *pos >= tokens.size()) {
+bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* indexFiles) {
+    if (!indexFiles || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::INDEX));
         return false;
     }
@@ -231,7 +231,7 @@ bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens
         if (file.empty()) {
             throwConfigError("index \"" + tokens[*pos] + "\" in \"" + std::string(config::directive::INDEX) + "\" directive is invalid");
         }
-        index_files->push_back(file);
+        indexFiles->push_back(file);
         (*pos)++;
     }
     return expectSemicolon(tokens, pos, std::string(config::directive::INDEX));
@@ -245,84 +245,84 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
     if (tokens[*pos] == config::directive::SEMICOLON) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::LISTEN) + "\" directive");
     }
-    std::string listen_value = tokens[(*pos)++];
-    Listen tmp_listen;
+    std::string listenValue = tokens[(*pos)++];
+    Listen tmpListen;
     size_t port;
-    size_t colon_pos = listen_value.find(config::token::COLON);
-    if (colon_pos != std::string::npos) {
-        std::string port_str = listen_value.substr(colon_pos + 1);
-        if (!config::stringToSizeT(port_str, &port))
-            throwConfigError("invalid port in \"" + listen_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
+    size_t colonPos = listenValue.find(config::token::COLON);
+    if (colonPos != std::string::npos) {
+        std::string portStr = listenValue.substr(colonPos + 1);
+        if (!config::stringToSizeT(portStr, &port))
+            throwConfigError("invalid port in \"" + listenValue + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
         if (port < config::directive::MIN_PORT || port > config::directive::MAX_PORT) {
-            throwConfigError("invalid port in \"" + port_str + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
+            throwConfigError("invalid port in \"" + portStr + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
         }
-        tmp_listen.setPort(port);
-        std::string host_str = listen_value.substr(0, colon_pos);
-        if (host_str.empty()) {
-            throwConfigError("no host in \"" + listen_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
-        } else if (host_str == config::directive::ASTERISK) {
-            tmp_listen.setIp(config::DEFAULT_IP);
+        tmpListen.setPort(port);
+        std::string hostStr = listenValue.substr(0, colonPos);
+        if (hostStr.empty()) {
+            throwConfigError("no host in \"" + listenValue + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
+        } else if (hostStr == config::directive::ASTERISK) {
+            tmpListen.setIp(config::DEFAULT_IP);
         } else {
-            validateHost(host_str, listen_value);
-            tmp_listen.setIp(host_str);
+            validateHost(hostStr, listenValue);
+            tmpListen.setIp(hostStr);
         }
 
     } else {
-        if (config::stringToSizeT(listen_value, &port)) {
+        if (config::stringToSizeT(listenValue, &port)) {
             if (port < config::directive::MIN_PORT || port > config::directive::MAX_PORT) {
-                throwConfigError("invalid port in \"" + listen_value + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
+                throwConfigError("invalid port in \"" + listenValue + "\" of the \"" + std::string(config::directive::LISTEN) + "\" directive");
             }
-            tmp_listen.setPort(port);
-            tmp_listen.setIp(config::DEFAULT_IP);
+            tmpListen.setPort(port);
+            tmpListen.setIp(config::DEFAULT_IP);
         } else {
-            validateHost(listen_value, listen_value);
-            tmp_listen.setIp(listen_value);
+            validateHost(listenValue, listenValue);
+            tmpListen.setIp(listenValue);
         }
     }
     if (tokens[(*pos)] != config::directive::SEMICOLON) {
         if (tokens[(*pos)] == config::directive::LISTEN_DEFAULT_SERVER) {
-            tmp_listen.setDefaultServer(true);
+            tmpListen.setDefaultServer(true);
             (*pos)++;
         } else {
             throwConfigError("invalid parameter \"" + tokens[(*pos)] + "\"" );
         }
     } else {
-        tmp_listen.setDefaultServer(false);
+        tmpListen.setDefaultServer(false);
     }
     for (size_t i = 0; i < listen->size(); ++i) {
-        if ((*listen)[i].getPort() == tmp_listen.getPort() && (*listen)[i].getIp() == tmp_listen.getIp()) {
+        if ((*listen)[i].getPort() == tmpListen.getPort() && (*listen)[i].getIp() == tmpListen.getIp()) {
             throwConfigError("duplicate ip port \"" + std::string(config::directive::LISTEN) + "\" directive");
         }
     }
-    listen->push_back(tmp_listen);
+    listen->push_back(tmpListen);
 
     return expectSemicolon(tokens, pos, std::string(config::directive::LISTEN));
 }
 
-bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* return_value) {
-    if (!return_value || *pos >= tokens.size()) {
+bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* returnValue) {
+    if (!returnValue || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::RETURN));
         return false;
     }
     if (tokens[*pos] == config::directive::SEMICOLON) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::RETURN) + "\" directive");
     }
-    std::string first_token = tokens[(*pos)++];
+    std::string firstToken = tokens[(*pos)++];
     size_t code;
-    if (!stringToSizeT(first_token, &code)) {
-        throwConfigError("Invalid return code: \"" + first_token + "\"");
+    if (!stringToSizeT(firstToken, &code)) {
+        throwConfigError("Invalid return code: \"" + firstToken + "\"");
     }
     if (code > config::directive::MAX_RETURN_CODE) {
-        throwConfigError("Invalid return code: \"" + first_token + "\"");
+        throwConfigError("Invalid return code: \"" + firstToken + "\"");
     }
-    return_value->setStatusCode(code);
-    return_value->setHasReturnValue(true);
+    returnValue->setStatusCode(code);
+    returnValue->setHasReturnValue(true);
     if (tokens[*pos] == config::directive::SEMICOLON) {
-        return_value->setIsTextOrUrlSetting(false);
+        returnValue->setIsTextOrUrlSetting(false);
     } else {
-        std::string second_token = tokens[(*pos)++];
-        return_value->setTextOrUrl(second_token);
-        return_value->setIsTextOrUrlSetting(true);
+        std::string secondToken = tokens[(*pos)++];
+        returnValue->setTextOrUrl(secondToken);
+        returnValue->setIsTextOrUrlSetting(true);
     }
     return expectSemicolon(tokens, pos, std::string(config::directive::RETURN));
 }
@@ -340,8 +340,8 @@ bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens,
     return expectSemicolon(tokens, pos, std::string(config::directive::ROOT));
 }
 
-bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ServerName>* server_names) {
-    if (!server_names || *pos >= tokens.size()) {
+bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ServerName>* serverNames) {
+    if (!serverNames || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::SERVER_NAME));
         return false;
     }
@@ -355,24 +355,24 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
     }
     for (size_t i = 0; i < names.size(); ++i) {
         const std::string& name = names[i];
-        ServerName server_name;
+        ServerName serverName;
         if (name[0] == config::directive::ASTERISK[0]) {
             if (name.size() < 3 || name[1] != config::token::PERIOD[0]) {
                 throwConfigError(std::string(config::directive::SERVER_NAME) + " \"" + name + "\" is invalid");
             }
-            server_name.setType(ServerName::WILDCARD_START);
-            server_name.setName(name);
+            serverName.setType(ServerName::WILDCARD_START);
+            serverName.setName(name);
         } else {
-            server_name.setType(ServerName::EXACT);
-            server_name.setName(name);
+            serverName.setType(ServerName::EXACT);
+            serverName.setName(name);
         }
-        server_names->push_back(server_name);
+        serverNames->push_back(serverName);
     }
     return expectSemicolon(tokens, pos, std::string(config::directive::SERVER_NAME));
 }
 
-bool DirectiveParser::parseUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* upload_store) {
-    if (!upload_store || *pos >= tokens.size()) {
+bool DirectiveParser::parseUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* uploadStore) {
+    if (!uploadStore || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::UPLOAD_STORE));
         return false;
     }
@@ -380,7 +380,7 @@ bool DirectiveParser::parseUploadStoreDirective(const std::vector<std::string>& 
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::UPLOAD_STORE) + "\" directive");
     }
     std::string path = tokens[(*pos)++];
-    *upload_store = path;
+    *uploadStore = path;
     return expectSemicolon(tokens, pos, std::string(config::directive::UPLOAD_STORE));
 }
 

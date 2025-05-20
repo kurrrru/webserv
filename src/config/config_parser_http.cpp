@@ -35,36 +35,36 @@ bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, size_t
 }
 
 bool ConfigParser::parseHttpDirectives(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* config) {
-    std::map<std::string, bool> processed_directives;
+    std::map<std::string, bool> processedDirectives;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
-        std::string directive_name = tokens[*pos];
+        std::string directiveName = tokens[*pos];
         (*pos)++;
-        if (directive_name == config::context::SERVER) {
+        if (directiveName == config::context::SERVER) {
             toolbox::SharedPtr<ServerConfig> serverConfig(new ServerConfig());
             (*pos)--;
             if (!parseServerBlock(tokens, pos, serverConfig.get())) {
                 return false;
             }
             config->addServer(serverConfig);
-        } else if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_HTTP)) {
-            if (processed_directives.find(directive_name) != processed_directives.end()) {
-                bool should_skip = false;
-                if (!_directiveParser.handleDuplicateDirective(directive_name, tokens, pos, &should_skip)) {
+        } else if (_directiveParser.isDirectiveAllowedInContext(directiveName, config::CONTEXT_HTTP)) {
+            if (processedDirectives.find(directiveName) != processedDirectives.end()) {
+                bool shouldSkip = false;
+                if (!_directiveParser.handleDuplicateDirective(directiveName, tokens, pos, &shouldSkip)) {
                     return false;
                 }
-                if (should_skip) {
+                if (shouldSkip) {
                     continue;
                 }
             }
-            processed_directives[directive_name] = true;
-            if (!_directiveParser.parseDirective(tokens, pos, directive_name, config, NULL, NULL)) {
+            processedDirectives[directiveName] = true;
+            if (!_directiveParser.parseDirective(tokens, pos, directiveName, config, NULL, NULL)) {
                 return false;
             }
         } else {
-            if (isContextToken(directive_name)) {
-                throwConfigError("\"" + directive_name + "\" directive is not allowed here");
+            if (isContextToken(directiveName)) {
+                throwConfigError("\"" + directiveName + "\" directive is not allowed here");
             } else {
-                throwConfigError("Unknown directive \"" + directive_name + "\"");
+                throwConfigError("Unknown directive \"" + directiveName + "\"");
             }
         }
     }

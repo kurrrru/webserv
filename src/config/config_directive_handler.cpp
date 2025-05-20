@@ -19,51 +19,51 @@ void DirectiveParser::initDirectiveInfo() {
 
     info.directive = config::directive::ROOT;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::ROOT] = info;
+    _directiveInfo[config::directive::ROOT] = info;
 
     info.directive = config::directive::INDEX;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::INDEX] = info;
+    _directiveInfo[config::directive::INDEX] = info;
 
     info.directive = config::directive::AUTOINDEX;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::AUTOINDEX] = info;
+    _directiveInfo[config::directive::AUTOINDEX] = info;
 
     info.directive = config::directive::ALLOWED_METHODS;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::ALLOWED_METHODS] = info;
+    _directiveInfo[config::directive::ALLOWED_METHODS] = info;
 
     info.directive = config::directive::ERROR_PAGE;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::ERROR_PAGE] = info;
+    _directiveInfo[config::directive::ERROR_PAGE] = info;
 
     info.directive = config::directive::UPLOAD_STORE;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::UPLOAD_STORE] = info;
+    _directiveInfo[config::directive::UPLOAD_STORE] = info;
 
-    info.directive = config::directive::CGI_PASS;
+    info.directive = config::directive::CGI_PATH;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::CGI_PASS] = info;
+    _directiveInfo[config::directive::CGI_PATH] = info;
 
     info.directive = config::directive::CGI_EXTENSION;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::CGI_EXTENSION] = info;
+    _directiveInfo[config::directive::CGI_EXTENSION] = info;
 
     info.directive = config::directive::CLIENT_MAX_BODY_SIZE;
     info.context = CONTEXT_ALL;
-    _directive_info[config::directive::CLIENT_MAX_BODY_SIZE] = info;
+    _directiveInfo[config::directive::CLIENT_MAX_BODY_SIZE] = info;
 
     info.directive = config::directive::LISTEN;
     info.context = CONTEXT_SERVER;
-    _directive_info[config::directive::LISTEN] = info;
+    _directiveInfo[config::directive::LISTEN] = info;
 
     info.directive = config::directive::SERVER_NAME;
     info.context = CONTEXT_SERVER;
-    _directive_info[config::directive::SERVER_NAME] = info;
+    _directiveInfo[config::directive::SERVER_NAME] = info;
 
     info.directive = config::directive::RETURN;
     info.context = CONTEXT_SERVER_LOCATION;
-    _directive_info[config::directive::RETURN] = info;
+    _directiveInfo[config::directive::RETURN] = info;
 }
 
 bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
@@ -79,8 +79,8 @@ bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, siz
         return handleErrorPageDirective(tokens, pos, http, server, location);
     } else if (directive == config::directive::UPLOAD_STORE) {
         return handleUploadStoreDirective(tokens, pos, http, server, location);
-    } else if (directive == config::directive::CGI_PASS) {
-        return handleCgiPassDirective(tokens, pos, http, server, location);
+    } else if (directive == config::directive::CGI_PATH) {
+        return handleCgiPathDirective(tokens, pos, http, server, location);
     } else if (directive == config::directive::CGI_EXTENSION) {
         return handleCgiExtensionDirective(tokens, pos, http, server, location);
     } else if (directive == config::directive::RETURN) {
@@ -96,8 +96,8 @@ bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, siz
 }
 
 bool DirectiveParser::isDirectiveAllowedInContext(const std::string& directive, DirectiveContext context) const {
-    std::map<std::string, DirectiveInfo>::const_iterator it = _directive_info.find(directive);
-    if (it == _directive_info.end()) {
+    std::map<std::string, DirectiveInfo>::const_iterator it = _directiveInfo.find(directive);
+    if (it == _directiveInfo.end()) {
         return false;
     }
     if (!((it->second.context & context) != 0)) {
@@ -176,54 +176,54 @@ bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>
     return result;
 }
 
-bool DirectiveParser::handleCgiPassDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
-    std::string cgi_pass;
+bool DirectiveParser::handleCgiPathDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    std::string cgiPath;
     if (http) {
-        cgi_pass = http->getCgiPass();
+        cgiPath = http->getCgiPath();
     } else if (server) {
-        cgi_pass = server->getCgiPass();
+        cgiPath = server->getCgiPath();
     } else if (location) {
-        cgi_pass = location->getCgiPass();
+        cgiPath = location->getCgiPath();
     } else {
         return false;
     }
-    bool result = parseCgiPassDirective(tokens, pos, &cgi_pass);
+    bool result = parseCgiPathDirective(tokens, pos, &cgiPath);
     if (result) {
         if (http) {
-            http->setCgiPass(cgi_pass);
+            http->setCgiPath(cgiPath);
         } else if (server) {
-            server->setCgiPass(cgi_pass);
+            server->setCgiPath(cgiPath);
         } else if (location) {
-            location->setCgiPass(cgi_pass);
+            location->setCgiPath(cgiPath);
         }
     }
     return result;
 }
 
 bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
-    std::vector<ErrorPage> error_pages;
+    std::vector<ErrorPage> errorPages;
     if (http) {
-        error_pages = http->getErrorPages();
+        errorPages = http->getErrorPages();
     } else if (server) {
-        error_pages = server->getErrorPages();
+        errorPages = server->getErrorPages();
     } else if (location) {
-        error_pages = location->getErrorPages();
+        errorPages = location->getErrorPages();
     } else {
         return false;
     }
-    bool result = parseErrorPageDirective(tokens, pos, &error_pages);
+    bool result = parseErrorPageDirective(tokens, pos, &errorPages);
     if (result) {
         if (http) {
-            for (size_t i = 0; i < error_pages.size(); ++i) {
-                http->addErrorPage(error_pages[i]);
+            for (size_t i = 0; i < errorPages.size(); ++i) {
+                http->addErrorPage(errorPages[i]);
             }
         } else if (server) {
-            for (size_t i = 0; i < error_pages.size(); ++i) {
-                server->addErrorPage(error_pages[i]);
+            for (size_t i = 0; i < errorPages.size(); ++i) {
+                server->addErrorPage(errorPages[i]);
             }
         } else if (location) {
-            for (size_t i = 0; i < error_pages.size(); ++i) {
-                location->addErrorPage(error_pages[i]);
+            for (size_t i = 0; i < errorPages.size(); ++i) {
+                location->addErrorPage(errorPages[i]);
             }
         }
     }
@@ -299,20 +299,20 @@ bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& toke
     if (http) {
         throwConfigError("\"" + std::string(config::directive::RETURN) + "\" directive is not allowed here");
     }
-    Return return_value;
+    Return returnValue;
     if (server) {
-        return_value = server->getReturnValue();
+        returnValue = server->getReturnValue();
     } else if (location) {
-        return_value = location->getReturnValue();
+        returnValue = location->getReturnValue();
     } else {
         return false;
     }
-    bool result = parseReturnDirective(tokens, pos, &return_value);
+    bool result = parseReturnDirective(tokens, pos, &returnValue);
     if (result) {
         if (server) {
-            server->setReturnValue(return_value);
+            server->setReturnValue(returnValue);
         } else if (location) {
-            location->setReturnValue(return_value);
+            location->setReturnValue(returnValue);
         }
     }
     return result;
@@ -351,54 +351,54 @@ bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& 
     if (!server) {
         return false;
     }
-    std::vector<ServerName> server_names = server->getServerNames();
-    bool result = parseServerNameDirective(tokens, pos, &server_names);
+    std::vector<ServerName> serverNames = server->getServerNames();
+    bool result = parseServerNameDirective(tokens, pos, &serverNames);
     if (result) {
-        server->setServerNames(server_names);
+        server->setServerNames(serverNames);
     }
     return result;
 }
 
 bool DirectiveParser::handleUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
-    std::string upload_store;
+    std::string uploadStore;
     if (http) {
-        upload_store = http->getUploadStore();
+        uploadStore = http->getUploadStore();
     } else if (server) {
-        upload_store = server->getUploadStore();
+        uploadStore = server->getUploadStore();
     } else if (location) {
-        upload_store = location->getUploadStore();
+        uploadStore = location->getUploadStore();
     } else {
         return false;
     }
-    bool result = parseUploadStoreDirective(tokens, pos, &upload_store);
+    bool result = parseUploadStoreDirective(tokens, pos, &uploadStore);
     if (result) {
         if (http) {
-            http->setUploadStore(upload_store);
+            http->setUploadStore(uploadStore);
         } else if (server) {
-            server->setUploadStore(upload_store);
+            server->setUploadStore(uploadStore);
         } else if (location) {
-            location->setUploadStore(upload_store);
+            location->setUploadStore(uploadStore);
         }
     }
     return result;
 }
 
-bool DirectiveParser::handleDuplicateDirective(const std::string& directive_name, const std::vector<std::string>& tokens, size_t* pos, bool* should_skip) {
-    *should_skip = false;
-    if (isAllowedDuplicate(directive_name)) {
+bool DirectiveParser::handleDuplicateDirective(const std::string& directiveName, const std::vector<std::string>& tokens, size_t* pos, bool* shouldSkip) {
+    *shouldSkip = false;
+    if (isAllowedDuplicate(directiveName)) {
         return true;
-    } else if (isIgnoredDuplicate(directive_name)) {
+    } else if (isIgnoredDuplicate(directiveName)) {
         skipUntilSemicolon(tokens, pos);
-        *should_skip = true;
+        *shouldSkip = true;
         return true;
     } else {
-        throwConfigError("\"" + directive_name + "\" directive is duplicate");
+        throwConfigError("\"" + directiveName + "\" directive is duplicate");
     }
     return false;
 }
 
-bool DirectiveParser::isAllowedDuplicate(const std::string& directive_name) {
-    const std::string allowed_duplicates[] = {
+bool DirectiveParser::isAllowedDuplicate(const std::string& directiveName) {
+    const std::string allowedDuplicates[] = {
         config::directive::ALLOWED_METHODS,
         config::directive::CGI_EXTENSION,
         config::directive::ERROR_PAGE,
@@ -406,22 +406,22 @@ bool DirectiveParser::isAllowedDuplicate(const std::string& directive_name) {
         config::directive::SERVER_NAME,
         config::directive::LISTEN,
     };
-    const size_t allowed_count = sizeof(allowed_duplicates) / sizeof(allowed_duplicates[0]);
-    for (size_t i = 0; i < allowed_count; ++i) {
-        if (directive_name == allowed_duplicates[i]) {
+    const size_t allowedCount = sizeof(allowedDuplicates) / sizeof(allowedDuplicates[0]);
+    for (size_t i = 0; i < allowedCount; ++i) {
+        if (directiveName == allowedDuplicates[i]) {
             return true;
         }
     }
     return false;
 }
 
-bool DirectiveParser::isIgnoredDuplicate(const std::string& directive_name) {
-    const std::string ignored_duplicates[] = {
+bool DirectiveParser::isIgnoredDuplicate(const std::string& directiveName) {
+    const std::string ignoredDuplicates[] = {
         config::directive::RETURN
     };
-    const size_t ignored_count = sizeof(ignored_duplicates) / sizeof(ignored_duplicates[0]);
-    for (size_t i = 0; i < ignored_count; ++i) {
-        if (directive_name == ignored_duplicates[i]) {
+    const size_t ignoredCount = sizeof(ignoredDuplicates) / sizeof(ignoredDuplicates[0]);
+    for (size_t i = 0; i < ignoredCount; ++i) {
+        if (directiveName == ignoredDuplicates[i]) {
             return true;
         }
     }

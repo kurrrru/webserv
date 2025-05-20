@@ -33,7 +33,7 @@ namespace directive {
 extern const char* ALLOWED_METHODS;
 extern const char* AUTOINDEX;
 extern const char* CGI_EXTENSION;
-extern const char* CGI_PASS;
+extern const char* CGI_PATH;
 extern const char* CLIENT_MAX_BODY_SIZE;
 extern const char* ERROR_PAGE;
 extern const char* INDEX;
