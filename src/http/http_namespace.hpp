@@ -48,6 +48,9 @@ extern const char* FIELDS[];
 extern const std::size_t FIELD_SIZE;
 extern const std::size_t MAX_FIELDLINE_SIZE;
 extern const std::size_t MAX_BODY_SIZE;
+namespace cgi {
+extern const char* STATUS;
+}  // namespace cgi
 }  // namespace fields
 
 namespace symbols {
@@ -64,6 +67,36 @@ extern const char* PERCENT;
 extern const char* COLON;
 extern const char* COMMA;
 extern const char* COMMASP;
+extern const std::size_t LF_SIZE;
+extern const std::size_t CRLF_SIZE;
 }  // namespace symbols
 
+namespace cgi {
+extern const size_t MAX_REDIRECTS;
+extern const size_t TIMEOUT;
+extern const size_t READ_BUFFER_SIZE;
+extern const size_t READ_TIMEOUT_SEC;
+extern const char* GATEWAY_INTERFACE;
+extern const char* SERVER_SOFTWARE;
+extern const char* ENV_PREFIX;
+namespace meta {
+extern const char* AUTH_TYPE;
+extern const char* CONTENT_LENGTH;
+extern const char* CONTENT_TYPE;
+extern const char* GATEWAY_INTERFACE;
+extern const char* PATH_INFO;
+extern const char* PATH_TRANSLATED;
+extern const char* QUERY_STRING;
+extern const char* REMOTE_ADDR;
+extern const char* REMOTE_HOST;
+extern const char* REMOTE_IDENT;
+extern const char* REMOTE_USER;
+extern const char* REQUEST_METHOD;
+extern const char* SCRIPT_NAME;
+extern const char* SERVER_NAME;
+extern const char* SERVER_PORT;
+extern const char* SERVER_PROTOCOL;
+extern const char* SERVER_SOFTWARE;
+}  // namespace meta
+}  // namespace cgi
 }  // namespace http
