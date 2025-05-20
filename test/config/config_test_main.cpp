@@ -12,13 +12,13 @@
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/stepmark.hpp"
 
-std::string g_filter_directive = "";
+std::string g_filterDirective = "";
 
 bool shouldPrintDirective(const std::string& directiveName) {
-    if (g_filter_directive.empty()) {
+    if (g_filterDirective.empty()) {
         return true;
     }
-    return g_filter_directive == directiveName;
+    return g_filterDirective == directiveName;
 }
 
 void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
@@ -78,7 +78,7 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("upload_store")) {
         std::cout << prefix << "upload_store: " << conf.getUploadStore() << std::endl;
     }
-    if (g_filter_directive.empty()) {
+    if (g_filterDirective.empty()) {
         std::cout << std::endl;
     }
 }
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     toolbox::logger::StepMark::setLogFile("config_test.log");
     toolbox::logger::StepMark::setLevel(toolbox::logger::DEBUG);
     if (argc >= 3) {
-        g_filter_directive = argv[2];
+        g_filterDirective = argv[2];
     }
     try {
         try {
@@ -131,13 +131,13 @@ int main(int argc, char* argv[]) {
             std::cout << "server #" << (i + 1) << std::endl;
             if (shouldPrintDirective("listen")) {
                 std::cout << "listen: ";
-                for (size_t listen_idx = 0; listen_idx < http->getServers()[i]->getListens().size(); ++listen_idx) {
-                    const config::Listen& listen_config = http->getServers()[i]->getListens()[listen_idx];
-                    std::cout << listen_config.getIp() << ":" << listen_config.getPort();
-                    if (listen_config.isDefaultServer()) {
+                for (size_t listenIdx = 0; listenIdx < http->getServers()[i]->getListens().size(); ++listenIdx) {
+                    const config::Listen& listenConfig = http->getServers()[i]->getListens()[listenIdx];
+                    std::cout << listenConfig.getIp() << ":" << listenConfig.getPort();
+                    if (listenConfig.isDefaultServer()) {
                         std::cout << " (default)";
                     }
-                    if (listen_idx < http->getServers()[i]->getListens().size() - 1) {
+                    if (listenIdx < http->getServers()[i]->getListens().size() - 1) {
                         std::cout << ", ";
                     }
                 }

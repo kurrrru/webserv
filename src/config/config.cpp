@@ -39,8 +39,10 @@ void Config::loadConfig(const std::string& configFile) {
     if (!httpConfig) {
         throwConfigError("Failed to parse configuration file: " + configFile);
     }
-    instance._httpConfig = httpConfig;
     instance._tokenCount = parser.getTokenCount();
+    if (instance._tokenCount > 0) {
+        instance._httpConfig = httpConfig;
+    }
     toolbox::logger::StepMark::info("Configuration loaded successfully");
 }
 
