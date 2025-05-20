@@ -51,20 +51,20 @@ HttpStatus::EHttpStatus FieldValidator::validateHostExists(HTTPFields& fields) {
 
 HttpStatus::EHttpStatus FieldValidator::validateContentHeaders(
     HTTPFields& fields) {
-    HTTPFields::FieldMap::iterator content_length =
+    HTTPFields::FieldMap::iterator contentLength =
         fields.get().find(fields::CONTENT_LENGTH);
-    HTTPFields::FieldMap::iterator transfer_encoding =
+    HTTPFields::FieldMap::iterator transferEncoding =
         fields.get().find(fields::TRANSFER_ENCODING);
-    if (!content_length->second.empty()) {
-        if (!transfer_encoding->second.empty()) {
+    if (!contentLength->second.empty()) {
+        if (!transferEncoding->second.empty()) {
             toolbox::logger::StepMark::info(
                 "FieldValidator: content-length and transfer-encoding must not "
                 "coexist");
             return HttpStatus::BAD_REQUEST;
         }
-        return validateContentLength(content_length);
-    } else if (!transfer_encoding->second.empty()) {
-        return validateTransferEncoding(transfer_encoding);
+        return validateContentLength(contentLength);
+    } else if (!transferEncoding->second.empty()) {
+        return validateTransferEncoding(transferEncoding);
     }
     return HttpStatus::OK;
 }
