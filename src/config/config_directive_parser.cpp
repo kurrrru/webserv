@@ -16,7 +16,7 @@
 
 namespace config {
 
-bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, std::string directiveName) {
+bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, const std::string directiveName) {
     if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
         throwConfigError("invalid number of arguments in \"" + directiveName + "\" directive");
     }
