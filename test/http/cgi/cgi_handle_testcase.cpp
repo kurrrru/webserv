@@ -491,8 +491,8 @@ bool testEmptyCgiPass() {
 
 bool testNonExistentFile() {
     CgiHandleTest test;
-    test.name = "存在しないファイル";
-    test.scriptPath = "non_existent_file.py";
+    test.name = "拡張子のないパス";
+    test.scriptPath = "non_existent_file_without_extension";
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     std::vector<std::string> cgiExtension;
@@ -501,7 +501,7 @@ bool testNonExistentFile() {
     http::CgiHandler handler;
     bool result = handler.isCgiRequest(test.scriptPath, cgiExtension, cgiPass);
     if (result) {
-        toolbox::logger::StepMark::error(test.name + ": 存在しないファイルの場合はfalseを返すべき");
+        toolbox::logger::StepMark::error(test.name + ": 拡張子がないパスの場合はfalseを返すべき");
         return false;
     }
     toolbox::logger::StepMark::info(test.name + ": テスト成功");

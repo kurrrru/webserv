@@ -278,18 +278,12 @@ void CgiExecute::setupNullStdin() {
 }
 
 void CgiExecute::closeChildPipeEnds() {
-    if (_hasPostBody && _inputPipe[0] != -1) {
-        close(_inputPipe[0]);
+    if (_hasPostBody) {
+        wrapClose(_inputPipe[0]);
+        wrapClose(_inputPipe[1]);
     }
-    if (_hasPostBody && _inputPipe[1] != -1) {
-        close(_inputPipe[1]);
-    }
-    if (_outputPipe[0] != -1) {
-        close(_outputPipe[0]);
-    }
-    if (_outputPipe[1] != -1) {
-        close(_outputPipe[1]);
-    }
+    wrapClose(_outputPipe[0]);
+    wrapClose(_outputPipe[1]);
 }
 
 std::vector<char*> CgiExecute::prepareEnvironmentVariables() {
@@ -325,13 +319,9 @@ void CgiExecute::executeScript(const std::string& scriptPath,
 }
 
 void CgiExecute::closeUnusedPipeEnds() {
-    if (_outputPipe[1] != -1) {
-        close(_outputPipe[1]);
-        _outputPipe[1] = -1;
-    }
-    if (_hasPostBody && _inputPipe[0] != -1) {
-        close(_inputPipe[0]);
-        _inputPipe[0] = -1;
+    wrapClose(_outputPipe[1]);
+    if (_hasPostBody) {
+        wrapClose(_inputPipe[0]);
     }
 }
 
@@ -343,10 +333,7 @@ CgiExecute::ExecuteResult CgiExecute::processData(
             cleanupPipes();
             return EXECUTE_IO_ERROR;
         }
-        if (_inputPipe[1] != -1) {
-            close(_inputPipe[1]);
-            _inputPipe[1] = -1;
-        }
+        wrapClose(_inputPipe[1]);
     }
     if (!readChildOutput(output)) {
         terminateChildProcess();
@@ -524,21 +511,16 @@ void CgiExecute::terminateChildProcess() {
 }
 
 void CgiExecute::cleanupPipes() {
-    if (_inputPipe[0] != -1) {
-        close(_inputPipe[0]);
-        _inputPipe[0] = -1;
-    }
-    if (_inputPipe[1] != -1) {
-        close(_inputPipe[1]);
-        _inputPipe[1] = -1;
-    }
-    if (_outputPipe[0] != -1) {
-        close(_outputPipe[0]);
-        _outputPipe[0] = -1;
-    }
-    if (_outputPipe[1] != -1) {
-        close(_outputPipe[1]);
-        _outputPipe[1] = -1;
+    wrapClose(_inputPipe[0]);
+    wrapClose(_inputPipe[1]);
+    wrapClose(_outputPipe[0]);
+    wrapClose(_outputPipe[1]);
+}
+
+void CgiExecute::wrapClose(int& fd) {
+    if (fd != -1) {
+        close(fd);
+        fd = -1;
     }
 }
 

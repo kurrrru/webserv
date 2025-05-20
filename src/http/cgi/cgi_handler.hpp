@@ -39,12 +39,12 @@ class CgiHandler {
 
     bool isCgiRequest(const std::string& targetPath,
                       const std::vector<std::string>& cgiExtension,
-                      const std::string& cgiPass) const;
+                      const std::string& cgiPath) const;
     bool handleRequest(const HTTPRequest& request,
                        Response& Response,
                        const std::string& rootPath,
                        const std::vector<std::string>& cgiExtension,
-                       const std::string& cgiPass,
+                       const std::string& cgiPath,
                        const config::Config& config);
     void setRedirectCount(size_t count) { _redirectCount = count; }
 

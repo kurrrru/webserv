@@ -98,6 +98,7 @@ class CgiExecute {
     bool validateScriptPath(const std::string& scriptPath) const;
     void terminateChildProcess();
     void cleanupPipes();
+    void wrapClose(int& fd);
     bool hasTimedOut() const {
         return (time(NULL) - _startTime) > _timeoutSeconds;
     }

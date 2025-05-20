@@ -27,28 +27,26 @@ CgiHandler::~CgiHandler() {
  * should be handled as CGI:
  * 1. If the specified path (targetPath) actually exists
  * 2. If CGI extensions (cgiExtension) are configured
- * 3. If the CGI interpreter path (cgiPass) is configured
+ * 3. If the CGI interpreter path (cgiPath) is configured
  * 
  * Returns true only when all conditions are met.
  * 
  * @param targetPath The file path to verify
  * @param cgiExtension List of extensions to be processed as CGI
- * @param cgiPass Path to the CGI interpreter (e.g., "/usr/bin/python3")
+ * @param cgiPath Path to the CGI interpreter (e.g., "/usr/bin/python3")
  * @return bool true if the path can be processed as a CGI request, false otherwise
  */
 bool CgiHandler::isCgiRequest(const std::string& targetPath,
                             const std::vector<std::string>& cgiExtension,
-                            const std::string& cgiPass) const {
-    struct stat buffer;
-    if (stat(targetPath.c_str(), &buffer) != 0) {
-        toolbox::logger::StepMark::debug(
-            "isCgiRequest: stat failed");
+                            const std::string& cgiPath) const {
+    size_t lastDot = targetPath.find_last_of('.');
+    if (lastDot == std::string::npos) {
         return false;
     }
     if (cgiExtension.empty()) {
         return false;
     }
-    if (cgiPass.empty()) {
+    if (cgiPath.empty()) {
         return false;
     }
     return true;
@@ -73,7 +71,7 @@ bool CgiHandler::isCgiRequest(const std::string& targetPath,
  * @param response The HTTP response to populate
  * @param rootPath The root directory path for resolving scripts
  * @param cgiExtension List of file extensions to be processed as CGI
- * @param cgiPass Path to the CGI interpreter (e.g., "/usr/bin/python3")
+ * @param cgiPath Path to the CGI interpreter (e.g., "/usr/bin/python3")
  * @param config Server configuration object for additional settings
  * @return bool true if CGI processing was successful, false otherwise
  */
@@ -81,10 +79,10 @@ bool CgiHandler::handleRequest(const HTTPRequest& request,
                             Response& response,
                             const std::string& rootPath,
                             const std::vector<std::string>& cgiExtension,
-                            const std::string& cgiPass,
+                            const std::string& cgiPath,
                             const config::Config& config) {
     std::string scriptPath = getScriptPath(request, rootPath);
-    std::string interpreter = cgiPass;
+    std::string interpreter = cgiPath;
     if (!validateParameters(scriptPath,
                             interpreter,
                             cgiExtension,

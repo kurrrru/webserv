@@ -150,22 +150,23 @@ void Request::handleRequest(const config::Config& config) {
     std::vector<std::string> cgiExtension = _config->getCgiExtensions();
     std::string fullPath = rootDir + requestPath;
     const std::string& method = _request.get().method;
+
+    if (_cgiHandler.isCgiRequest(fullPath, cgiExtension, cgiPass)) {
+        _cgiHandler.setRedirectCount(_cgiRedirectCount);
+        bool success = _cgiHandler.handleRequest(_request.get(),
+                                _response, rootDir,
+                                cgiExtension,
+                                cgiPass,
+                                config);
+        if (!success) {
+            return;
+        }
+    } else {
+        _cgiRedirectCount = 0;
+    }
     if (method == "GET") {
         // runGet(fullPath, indexFile, isAutoindex,
         //                                    _config.getTypes(), _response);
-        if (_cgiHandler.isCgiRequest(fullPath, cgiExtension, cgiPass)) {
-            _cgiHandler.setRedirectCount(_cgiRedirectCount);
-            bool success = _cgiHandler.handleRequest(_request.get(),
-                                    _response, rootDir,
-                                    cgiExtension,
-                                    cgiPass,
-                                    config);
-            if (!success) {
-                return;
-            }
-        } else {
-            _cgiRedirectCount = 0;
-        }
     } else if (method == "HEAD") {
         // runHead();
     } else if (method == "POST") {
