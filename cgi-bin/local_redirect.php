@@ -1,6 +1,6 @@
 #!/usr/bin/env php
-
 <?php
-print "Location: /script.py\r\n";
+$var = __FILE__;
+print "Location: $var\r\n";
 print "\r\n";
-?> 
+?>
