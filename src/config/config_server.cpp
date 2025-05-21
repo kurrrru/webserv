@@ -12,8 +12,8 @@ namespace config {
 ServerConfig::ServerConfig() :
 ConfigBase(),
 _listens(),
-_server_names(),
-_return_value(),
+_serverNames(),
+_returnValue(),
 _locations(),
 _parent(NULL) {
 }
@@ -21,12 +21,12 @@ _parent(NULL) {
 ServerConfig::ServerConfig(const ServerConfig& other) :
 ConfigBase(other),
 _listens(other._listens),
-_server_names(other._server_names),
-_return_value(other._return_value),
+_serverNames(other._serverNames),
+_returnValue(other._returnValue),
 _parent(other._parent) {
     for (size_t i = 0; i < other._locations.size(); ++i) {
-        toolbox::SharedPtr<LocationConfig> new_location(new LocationConfig(*other._locations[i]));
-        _locations.push_back(new_location);
+        toolbox::SharedPtr<LocationConfig> newLocation(new LocationConfig(*other._locations[i]));
+        _locations.push_back(newLocation);
         _locations.back()->setServerParent(this);
     }
 }

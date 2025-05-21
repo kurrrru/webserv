@@ -25,18 +25,17 @@ int main(int argc, char* argv[]) {
         } else if (argc == 2) {
             config::Config::loadConfig(argv[1]);
         }
-        const config::Config& config = config::Config::getConfig();
-        toolbox::SharedPtr<config::HttpConfig> http_config = config.getHttpConfig();
-        toolbox::SharedPtr<config::ServerConfig> server_config1 = http_config->getServers()[0];
-        toolbox::SharedPtr<config::ServerConfig> server_config2 = http_config->getServers()[1];
+        toolbox::SharedPtr<config::HttpConfig> httpConfig = config::Config::getHttpConfig();
+        toolbox::SharedPtr<config::ServerConfig> serverConfig1 = httpConfig->getServers()[0];
+        toolbox::SharedPtr<config::ServerConfig> serverConfig2 = httpConfig->getServers()[1];
 
         Epoll epoll;
-        toolbox::SharedPtr<Server> server1(new Server(server_config1->getListens()[0].getPort()));
-        server1->setName(server_config1->getServerNames()[0].getName());
+        toolbox::SharedPtr<Server> server1(new Server(serverConfig1->getListens()[0].getPort()));
+        server1->setName(serverConfig1->getServerNames()[0].getName());
         epoll.addServer(server1->getFd(), server1);
 
-        toolbox::SharedPtr<Server> server2(new Server(server_config2->getListens()[0].getPort()));
-        server2->setName(server_config2->getServerNames()[0].getName());
+        toolbox::SharedPtr<Server> server2(new Server(serverConfig2->getListens()[0].getPort()));
+        server2->setName(serverConfig2->getServerNames()[0].getName());
         epoll.addServer(server2->getFd(), server2);
 
         int cnt = 0;  // for debug

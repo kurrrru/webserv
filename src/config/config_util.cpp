@@ -95,8 +95,8 @@ bool isContextToken(const std::string& token) {
         config::context::SERVER,
         config::context::LOCATION
     };
-    const size_t context_count = sizeof(contexts) / sizeof(contexts[0]);
-    return isInAllowedTokens(token, contexts, context_count);
+    const size_t contextCount = sizeof(contexts) / sizeof(contexts[0]);
+    return isInAllowedTokens(token, contexts, contextCount);
 }
 
 bool isDirectiveToken(const std::string& token) {
@@ -104,7 +104,7 @@ bool isDirectiveToken(const std::string& token) {
         config::directive::ALLOWED_METHODS,
         config::directive::AUTOINDEX,
         config::directive::CGI_EXTENSION,
-        config::directive::CGI_PASS,
+        config::directive::CGI_PATH,
         config::directive::CLIENT_MAX_BODY_SIZE,
         config::directive::ERROR_PAGE,
         config::directive::INDEX,
@@ -114,8 +114,8 @@ bool isDirectiveToken(const std::string& token) {
         config::directive::SERVER_NAME,
         config::directive::UPLOAD_STORE
     };
-    const size_t directive_count = sizeof(directives) / sizeof(directives[0]);
-    return isInAllowedTokens(token, directives, directive_count);
+    const size_t directiveCount = sizeof(directives) / sizeof(directives[0]);
+    return isInAllowedTokens(token, directives, directiveCount);
 }
 
 }  // namespace config

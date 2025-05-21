@@ -11,7 +11,7 @@ DIRECTIVE_DIR="../../conf/test/directives"
 ALLOWED_METHODS_DIR="$DIRECTIVE_DIR/allowed_methods"
 AUTOINDEX_DIR="$DIRECTIVE_DIR/autoindex"
 CGI_EXTENSION_DIR="$DIRECTIVE_DIR/cgi_extension"
-CGI_PASS_DIR="$DIRECTIVE_DIR/cgi_pass"
+CGI_PATH_DIR="$DIRECTIVE_DIR/cgi_path"
 CLIENT_MAX_BODY_SIZE_DIR="$DIRECTIVE_DIR/client_max_body_size"
 ERROR_PAGE_DIR="$DIRECTIVE_DIR/error_page"
 INDEX_DIR="$DIRECTIVE_DIR/index"
@@ -36,7 +36,7 @@ WHITESPACE_TEST_DIR="$SYNTAX_DIR/whitespace"
 DIRECTIVE_LOG="config_test_directive.log"
 SYNTAX_LOG="config_test_syntax.log"
 
-directives=("allowed_methods" "autoindex" "cgi_extension" "cgi_pass" "client_max_body_size" "error_page" "index" "listen" "return" "root" "server_name" "upload_store")
+directives=("allowed_methods" "autoindex" "cgi_extension" "cgi_path" "client_max_body_size" "error_page" "index" "listen" "return" "root" "server_name" "upload_store")
 
 echo -e "${YELLOW}config test starting...${NC}"
 
@@ -109,9 +109,9 @@ echo -e "\n${YELLOW}cgi_extension test:${NC}"
 run_tests_in_directory "$CGI_EXTENSION_DIR" "valid_" 0 "cgi_extension"
 run_tests_in_directory "$CGI_EXTENSION_DIR" "invalid_" 1 "cgi_extension"
 
-echo -e "\n${YELLOW}cgi_pass test:${NC}"
-run_tests_in_directory "$CGI_PASS_DIR" "valid_" 0 "cgi_pass"
-run_tests_in_directory "$CGI_PASS_DIR" "invalid_" 1 "cgi_pass"
+echo -e "\n${YELLOW}cgi_path test:${NC}"
+run_tests_in_directory "$CGI_PATH_DIR" "valid_" 0 "cgi_path"
+run_tests_in_directory "$CGI_PATH_DIR" "invalid_" 1 "cgi_path"
 
 echo -e "\n${YELLOW}client_max_body_size test:${NC}"
 run_tests_in_directory "$CLIENT_MAX_BODY_SIZE_DIR" "valid_" 0 "client_max_body_size"

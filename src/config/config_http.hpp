@@ -21,7 +21,7 @@ namespace config {
  * server that can listen on specific IP:port combinations.
  *
  * The HttpConfig class inherits all common configuration properties from ConfigBase
- * such as allowed methods, autoindex settings, client_max_body_size, etc., which
+ * such as allowed methods, autoindex settings, clientMaxBodySize, etc., which
  * serve as default values for all contained servers.
  *
  * Usage example:

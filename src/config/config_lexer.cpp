@@ -80,7 +80,7 @@ std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
     size_t pos = 0;
     std::vector<std::string> tokens;
     std::string token;
-    std::string pre_token;
+    std::string preToken;
     while (pos < input.length()) {
         skipWhitespace(input, &pos);
         if (pos >= input.length()) {
@@ -90,16 +90,16 @@ std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
             skipComment(input, &pos);
             continue;
         }
-        pre_token = token;
+        preToken = token;
         if (!readToken(input, &pos, &token)) {
             throwConfigError("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \"" + std::string(config::token::CLOSE_BRACE) + "\"");
         }
         if (token.size() + std::string(config::token::SEMICOLON).size() > config::CONF_BUFFER) {
             throwConfigError("too long parameter");
         }
-        if (pre_token == config::token::OPEN_BRACE ||
-            pre_token == config::token::CLOSE_BRACE ||
-            pre_token == config::token::SEMICOLON) {
+        if (preToken == config::token::OPEN_BRACE ||
+            preToken == config::token::CLOSE_BRACE ||
+            preToken == config::token::SEMICOLON) {
             if (token == config::token::OPEN_BRACE ||
                 token == config::token::SEMICOLON) {
                 throwConfigError("unexpected \"" + std::string(1, token[0]) + "\"");

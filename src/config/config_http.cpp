@@ -10,8 +10,8 @@ HttpConfig::HttpConfig() {
 
 HttpConfig::HttpConfig(const HttpConfig& other) : ConfigBase(other) {
     for (size_t i = 0; i < other._servers.size(); ++i) {
-        toolbox::SharedPtr<ServerConfig> new_server(new ServerConfig(*other._servers[i].get()));
-        _servers.push_back(new_server);
+        toolbox::SharedPtr<ServerConfig> newServer(new ServerConfig(*other._servers[i].get()));
+        _servers.push_back(newServer);
         _servers.back()->setHttpParent(this);
     }
 }

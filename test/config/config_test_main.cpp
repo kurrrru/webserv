@@ -12,22 +12,22 @@
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/stepmark.hpp"
 
-std::string g_filter_directive = "";
+std::string g_filterDirective = "";
 
-bool shouldPrintDirective(const std::string& directive_name) {
-    if (g_filter_directive.empty()) {
+bool shouldPrintDirective(const std::string& directiveName) {
+    if (g_filterDirective.empty()) {
         return true;
     }
-    return g_filter_directive == directive_name;
+    return g_filterDirective == directiveName;
 }
 
 void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("allowed_methods")) {
         std::cout << prefix << "allowed_methods: ";
-        const std::vector<std::string>& allowed_methods = conf.getAllowedMethods();
-        for (size_t i = 0; i < allowed_methods.size(); ++i) {
-            std::cout << allowed_methods[i];
-            if (i < allowed_methods.size() - 1) std::cout << ", ";
+        const std::vector<std::string>& allowedMethods = conf.getAllowedMethods();
+        for (size_t i = 0; i < allowedMethods.size(); ++i) {
+            std::cout << allowedMethods[i];
+            if (i < allowedMethods.size() - 1) std::cout << ", ";
         }
         std::cout << std::endl;
     }
@@ -36,30 +36,30 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     }
     if (shouldPrintDirective("cgi_extension")) {
         std::cout << prefix << "cgi_extension: ";
-        const std::vector<std::string>& cgi_extensions = conf.getCgiExtensions();
-        for (size_t i = 0; i < cgi_extensions.size(); ++i) {
-            std::cout << cgi_extensions[i];
-            if (i < cgi_extensions.size() - 1) std::cout << ", ";
+        const std::vector<std::string>& cgiExtensions = conf.getCgiExtensions();
+        for (size_t i = 0; i < cgiExtensions.size(); ++i) {
+            std::cout << cgiExtensions[i];
+            if (i < cgiExtensions.size() - 1) std::cout << ", ";
         }
         std::cout << std::endl;
     }
-    if (shouldPrintDirective("cgi_pass")) {
-        std::cout << prefix << "cgi_pass: " << conf.getCgiPass() << std::endl;
+    if (shouldPrintDirective("cgi_path")) {
+        std::cout << prefix << "cgi_path: " << conf.getCgiPath() << std::endl;
     }
     if (shouldPrintDirective("client_max_body_size")) {
         std::cout << prefix << "client_max_body_size: " << conf.getClientMaxBodySize() << std::endl;
     }
     if (shouldPrintDirective("error_page")) {
         std::cout << prefix << "error_page: ";
-        const std::vector<config::ErrorPage>& error_pages = conf.getErrorPages();
-        for (size_t i = 0; i < error_pages.size(); ++i) {
+        const std::vector<config::ErrorPage>& errorPages = conf.getErrorPages();
+        for (size_t i = 0; i < errorPages.size(); ++i) {
             std::cout << "[";
-            for (size_t j = 0; j < error_pages[i].getCodes().size(); ++j) {
-                std::cout << error_pages[i].getCodes()[j];
-                if (j < error_pages[i].getCodes().size() - 1) std::cout << ", ";
+            for (size_t j = 0; j < errorPages[i].getCodes().size(); ++j) {
+                std::cout << errorPages[i].getCodes()[j];
+                if (j < errorPages[i].getCodes().size() - 1) std::cout << ", ";
             }
-            std::cout << "] -> " << error_pages[i].getPath();
-            if (i < error_pages.size() - 1) std::cout << ", ";
+            std::cout << "] -> " << errorPages[i].getPath();
+            if (i < errorPages.size() - 1) std::cout << ", ";
         }
         std::cout << std::endl;
     }
@@ -78,7 +78,7 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("upload_store")) {
         std::cout << prefix << "upload_store: " << conf.getUploadStore() << std::endl;
     }
-    if (g_filter_directive.empty()) {
+    if (g_filterDirective.empty()) {
         std::cout << std::endl;
     }
 }
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     toolbox::logger::StepMark::setLogFile("config_test.log");
     toolbox::logger::StepMark::setLevel(toolbox::logger::DEBUG);
     if (argc >= 3) {
-        g_filter_directive = argv[2];
+        g_filterDirective = argv[2];
     }
     try {
         try {
@@ -131,13 +131,13 @@ int main(int argc, char* argv[]) {
             std::cout << "server #" << (i + 1) << std::endl;
             if (shouldPrintDirective("listen")) {
                 std::cout << "listen: ";
-                for (size_t listen_idx = 0; listen_idx < http->getServers()[i]->getListens().size(); ++listen_idx) {
-                    const config::Listen& listen_config = http->getServers()[i]->getListens()[listen_idx];
-                    std::cout << listen_config.getIp() << ":" << listen_config.getPort();
-                    if (listen_config.isDefaultServer()) {
+                for (size_t listenIdx = 0; listenIdx < http->getServers()[i]->getListens().size(); ++listenIdx) {
+                    const config::Listen& listenConfig = http->getServers()[i]->getListens()[listenIdx];
+                    std::cout << listenConfig.getIp() << ":" << listenConfig.getPort();
+                    if (listenConfig.isDefaultServer()) {
                         std::cout << " (default)";
                     }
-                    if (listen_idx < http->getServers()[i]->getListens().size() - 1) {
+                    if (listenIdx < http->getServers()[i]->getListens().size() - 1) {
                         std::cout << ", ";
                     }
                 }
@@ -146,13 +146,13 @@ int main(int argc, char* argv[]) {
             if (shouldPrintDirective("server_name")) {
                 std::cout << "server_name: ";
                 for (size_t j = 0; j < http->getServers()[i]->getServerNames().size(); ++j) {
-                    const config::ServerName& server_name = http->getServers()[i]->getServerNames()[j];
-                    if (server_name.getType() == config::ServerName::WILDCARD_START) {
-                        std::cout << "*" << server_name.getName();
-                    } else if (server_name.getType() == config::ServerName::WILDCARD_END) {
-                        std::cout << server_name.getName() << "*";
+                    const config::ServerName& serverName = http->getServers()[i]->getServerNames()[j];
+                    if (serverName.getType() == config::ServerName::WILDCARD_START) {
+                        std::cout << "*" << serverName.getName();
+                    } else if (serverName.getType() == config::ServerName::WILDCARD_END) {
+                        std::cout << serverName.getName() << "*";
                     } else {
-                        std::cout << server_name.getName();
+                        std::cout << serverName.getName();
                     }
                     if (j < http->getServers()[i]->getServerNames().size() - 1) {
                         std::cout << ", ";
@@ -163,7 +163,7 @@ int main(int argc, char* argv[]) {
             if (shouldPrintDirective("return") && http->getServers()[i]->getReturnValue().hasReturnValue()) {
                 std::cout << "return code: " << http->getServers()[i]->getReturnValue().getStatusCode() << std::endl;
                 if (http->getServers()[i]->getReturnValue().isTextOrUrlSetting()) {
-                    std::cout << "return text_or_url: " << http->getServers()[i]->getReturnValue().getTextOrUrl() << std::endl;
+                    std::cout << "return textOrUrl: " << http->getServers()[i]->getReturnValue().getTextOrUrl() << std::endl;
                 }
             }
             printSettings("", *http->getServers()[i]);

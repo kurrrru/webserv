@@ -4,8 +4,8 @@
 
 namespace config {
 
-ConfigInherit::ConfigInherit(HttpConfig* http_config) :
-_http_config(http_config) {
+ConfigInherit::ConfigInherit(HttpConfig* httpConfig) :
+_httpConfig(httpConfig) {
 }
 
 ConfigInherit::~ConfigInherit() {
@@ -26,18 +26,18 @@ void serverEmptyCheck(ServerConfig* server) {
         server->addListen(listen);
     }
     if (server->getServerNames().empty()) {
-        ServerName server_name;
-        server_name.setName(DEFAULT_SERVER_NAME);
-        server_name.setType(config::ServerName::EXACT);
-        server->addServerName(server_name);
+        ServerName serverName;
+        serverName.setName(DEFAULT_SERVER_NAME);
+        serverName.setType(config::ServerName::EXACT);
+        server->addServerName(serverName);
     }
 }
 
 void ConfigInherit::applyInheritance() {
-    indexEmptyCheck(_http_config);
-    for (size_t i = 0; i < _http_config->getServers().size(); ++i) {
-        ServerConfig* server = _http_config->getServers()[i].get();
-        config::ConfigInherit::inheritHttpToServer(_http_config, server);
+    indexEmptyCheck(_httpConfig);
+    for (size_t i = 0; i < _httpConfig->getServers().size(); ++i) {
+        ServerConfig* server = _httpConfig->getServers()[i].get();
+        config::ConfigInherit::inheritHttpToServer(_httpConfig, server);
         serverEmptyCheck(server);
         for (size_t j = 0; j < server->getLocations().size(); j++) {
             LocationConfig* location = server->getLocations()[j].get();
@@ -71,9 +71,9 @@ void ConfigInherit::inheritHttpToServer(const HttpConfig* http, ServerConfig* se
     if (server->getCgiExtensions().empty() && !http->getCgiExtensions().empty()) {
         server->setCgiExtensions(http->getCgiExtensions());
     }
-    if (server->getCgiPass() == DEFAULT_CGI_PATH &&
-        http->getCgiPass() != DEFAULT_CGI_PATH) {
-        server->setCgiPass(http->getCgiPass());
+    if (server->getCgiPath().empty() &&
+        !http->getCgiPath().empty()) {
+        server->setCgiPath(http->getCgiPath());
     }
     if (server->getClientMaxBodySize() == DEFAULT_CLIENT_MAX_BODY_SIZE &&
         http->getClientMaxBodySize() != DEFAULT_CLIENT_MAX_BODY_SIZE) {
@@ -111,9 +111,9 @@ void ConfigInherit::inheritServerToLocation(const ServerConfig* server, Location
     if (location->getCgiExtensions().empty() && !server->getCgiExtensions().empty()) {
         location->setCgiExtensions(server->getCgiExtensions());
     }
-    if (location->getCgiPass() == DEFAULT_CGI_PATH &&
-        server->getCgiPass() != DEFAULT_CGI_PATH) {
-        location->setCgiPass(server->getCgiPass());
+    if (location->getCgiPath().empty() &&
+        !server->getCgiPath().empty()) {
+        location->setCgiPath(server->getCgiPath());
     }
     if (location->getClientMaxBodySize() == DEFAULT_CLIENT_MAX_BODY_SIZE &&
         server->getClientMaxBodySize() != DEFAULT_CLIENT_MAX_BODY_SIZE) {
@@ -151,9 +151,9 @@ void ConfigInherit::inheritLocationToLocation(const LocationConfig* parent, Loca
     if (child->getCgiExtensions().empty() && !parent->getCgiExtensions().empty()) {
         child->setCgiExtensions(parent->getCgiExtensions());
     }
-    if (child->getCgiPass() == DEFAULT_CGI_PATH &&
-        parent->getCgiPass() != DEFAULT_CGI_PATH) {
-        child->setCgiPass(parent->getCgiPass());
+    if (child->getCgiPath().empty() &&
+        !parent->getCgiPath().empty()) {
+        child->setCgiPath(parent->getCgiPath());
     }
     if (child->getClientMaxBodySize() == DEFAULT_CLIENT_MAX_BODY_SIZE &&
         parent->getClientMaxBodySize() != DEFAULT_CLIENT_MAX_BODY_SIZE) {
