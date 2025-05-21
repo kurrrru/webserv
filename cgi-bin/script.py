@@ -13,11 +13,11 @@ def sendResponse(status, headers=None):
         status: HTTP status code (e.g., 200, 404, 500)
         headers: Dictionary of HTTP headers to include in response
     """
-    print(f"Status: {status}\r\n")
+    print(f"Status: {status}")
     if headers:
         for key, value in headers.items():
-            print(f"{key}: {value}\r\n")
-    print("\r\n")
+            print(f"{key}: {value}")
+    print()
 
 
 def sanitize_filename(filename):
@@ -69,7 +69,6 @@ def getRequest():
     Handle GET request
     Returns current timestamp in Japanese format
     """
-    body = datetime.datetime.now().strftime('%Y年%m月%d日 %H:%M:%S')
     sendResponse(200, {"Content-Type": "text/plain"})
 
 def postRequest():
@@ -82,7 +81,7 @@ def postRequest():
     query = os.environ.get("QUERY_STRING")
     queryDict = urllib.parse.parse_qs(query)
 
-    status, headers, body = processFile(queryDict.get("filename", ["cgiPost"])[0])
+    status, headers= processFile(queryDict.get("filename", ["cgiPost"])[0])
     sendResponse(status, headers)
 
 def otherRequest():

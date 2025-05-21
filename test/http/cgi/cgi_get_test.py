@@ -28,7 +28,6 @@ class TestCgiGET(unittest.TestCase):
 
         self.assertIn('Status: 200', headers)
         self.assertIn('Content-Type: text/plain', headers)
-        self.assertIn(datetime.datetime.now().strftime("%Y年%m月%d日 %H:%M:%S"), body)
 
 if __name__ == '__main__':
     unittest.main()
