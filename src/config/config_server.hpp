@@ -10,7 +10,35 @@
 #include "../../toolbox/shared.hpp"
 
 namespace config {
-
+/**
+ * @class ServerConfig
+ * @brief Class for managing server configuration settings
+ *
+ * This class extends ConfigBase to provide server-specific configuration capabilities.
+ * Each instance represents a virtual server that can listen on specific IP:port 
+ * combinations and respond to requests for specific server names (domains).
+ * 
+ * ServerConfig inherits common configuration properties from ConfigBase and can
+ * contain multiple location configurations for path-specific settings. It also
+ * maintains a reference to its parent HttpConfig to access global defaults.
+ *
+ * Usage example:
+ * @code
+ * ServerConfig server;
+ * 
+ * // Copy an existing location with modifications
+ * LocationConfig* copyOfLocation = new LocationConfig(*location);
+ * toolbox::SharedPtr<LocationConfig> newLocation(copyOfLocation);
+ * newLocation->setPath("/api/v2");
+ * newLocation->setRoot("/var/www/api/v2");
+ * server.addLocation(newLocation);
+ * 
+ * // Accessing the configured settings
+ * const std::vector<Listen>& listens = server.getListens();
+ * const std::vector<ServerName>& names = server.getServerNames();
+ * const std::vector<toolbox::SharedPtr<LocationConfig> >& locations = server.getLocations();
+ * @endcode
+ */
 class ServerConfig : public ConfigBase {
  public:
     ServerConfig();
@@ -23,12 +51,12 @@ class ServerConfig : public ConfigBase {
     void setListens(const std::vector<Listen>& listens) { _listens = listens; }
     void addListen(const Listen& listen) { _listens.push_back(listen); }
     bool hasListens() const { return !_listens.empty(); }
-    const std::vector<ServerName>& getServerNames() const { return _server_names; }
-    void setServerNames(const std::vector<ServerName>& server_names) { _server_names = server_names; }
-    void addServerName(const ServerName& server_name) { _server_names.push_back(server_name); }
-    bool hasServerNames() const { return !_server_names.empty(); }
-    const Return& getReturnValue() const { return _return_value; }
-    void setReturnValue(const Return& return_value) { _return_value = return_value; }
+    const std::vector<ServerName>& getServerNames() const { return _serverNames; }
+    void setServerNames(const std::vector<ServerName>& serverNames) { _serverNames = serverNames; }
+    void addServerName(const ServerName& serverName) { _serverNames.push_back(serverName); }
+    bool hasServerNames() const { return !_serverNames.empty(); }
+    const Return& getReturnValue() const { return _returnValue; }
+    void setReturnValue(const Return& returnValue) { _returnValue = returnValue; }
     const std::vector<toolbox::SharedPtr<LocationConfig> >& getLocations() const { return _locations; }
     void addLocation(const toolbox::SharedPtr<LocationConfig>& location) { _locations.push_back(location); }
     bool hasLocations() const { return !_locations.empty(); }
@@ -38,8 +66,8 @@ class ServerConfig : public ConfigBase {
     ServerConfig& operator=(const ServerConfig&);
 
     std::vector<Listen> _listens;
-    std::vector<ServerName> _server_names;
-    Return _return_value;
+    std::vector<ServerName> _serverNames;
+    Return _returnValue;
     std::vector<toolbox::SharedPtr<LocationConfig> > _locations;
     const HttpConfig* _parent;
 };

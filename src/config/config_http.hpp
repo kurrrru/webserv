@@ -11,7 +11,34 @@
 #include "../../toolbox/shared.hpp"
 
 namespace config {
-
+/**
+ * @class HttpConfig
+ * @brief Class for managing HTTP server configuration
+ *
+ * This class extends the ConfigBase class to provide HTTP-specific configuration
+ * capabilities. It serves as the top-level configuration container that holds
+ * multiple server configurations. Each server configuration represents a virtual
+ * server that can listen on specific IP:port combinations.
+ *
+ * The HttpConfig class inherits all common configuration properties from ConfigBase
+ * such as allowed methods, autoindex settings, clientMaxBodySize, etc., which
+ * serve as default values for all contained servers.
+ *
+ * Usage example:
+ * @code
+ * HttpConfig httpConfig;
+ * toolbox::SharedPtr<ServerConfig> server1(new ServerConfig());
+ * toolbox::SharedPtr<ServerConfig> server2(new ServerConfig());
+ * 
+ * // Add servers to HTTP config
+ * httpConfig.addServer(server1);
+ * httpConfig.addServer(server2);
+ * 
+ * // Accessing the configured settings
+ * const std::vector<toolbox::SharedPtr<ServerConfig> >& servers = httpConfig.getServers();
+ * size_t serverCount = servers.size();  // Returns 2
+ * @endcode
+ */
 class HttpConfig : public ConfigBase {
  public:
     HttpConfig();

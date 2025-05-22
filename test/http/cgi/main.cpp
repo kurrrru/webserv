@@ -4,7 +4,7 @@
 #include "cgi_execute_test.hpp"
 
 void requestLineTest();
-// void testCgiBufSize();
+void testCgiBufSize();
 void handleTest();
 void executeTest();
 
@@ -12,7 +12,7 @@ int main(void) {
     toolbox::logger::StepMark::setLogFile("cgi_test.log");
     toolbox::logger::StepMark::setLevel(toolbox::logger::DEBUG);
     requestLineTest();
-    // testCgiBufSize();
+    testCgiBufSize();
     handleTest();
     executeTest();
 

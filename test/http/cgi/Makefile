@@ -3,13 +3,16 @@ NAME = cgi_test.out
 SRC_DIRS = ../../../src
 TOOLBOX_DIR = ../../../toolbox
 
-TEST_SRCS = $(filter-out $(SRC_DIRS)/core/main.cpp, $(wildcard $(SRC_DIRS)/*/*.cpp)\
-			$(wildcard $(SRC_DIRS)/*/*/*.cpp) $(wildcard $(TOOLBOX_DIR)/*.cpp))\
+
+TEST_SRCS = $(wildcard $(SRC_DIRS)/http/*.cpp)\
+			$(wildcard $(SRC_DIRS)/http/request/*.cpp)\
+			$(wildcard $(SRC_DIRS)/http/parsing/*.cpp)\
+			$(wildcard $(SRC_DIRS)/http/cgi/*.cpp)\
+			../../../src/http/response/response.cpp\
+			$(wildcard $(TOOLBOX_DIR)/*.cpp)\
 			$(wildcard *.cpp) \
             $(wildcard http/*.cpp) \
-            $(wildcard http/request/*.cpp) \
-			$(wildcard http/cgi/*.cpp)\
-
+	
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -I..
 

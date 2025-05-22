@@ -23,61 +23,61 @@ void validateServerBlockStart(const std::vector<std::string>& tokens, size_t* po
     (*pos)++;
 }
 
-bool ConfigParser::parseServerBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config) {
+bool ConfigParser::parseServerBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig) {
     validateServerBlockStart(tokens, pos, config::context::SERVER);
-    if (!parseServerDirectives(tokens, pos, server_config)) {
+    if (!parseServerDirectives(tokens, pos, serverConfig)) {
         return false;
     }
     validateBlockEnd(tokens, pos);
-    server_config->setHttpParent(_config.get());
+    serverConfig->setHttpParent(_config.get());
     return true;
 }
 
-bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config) {
-    std::map<std::string, bool> processed_directives;
-    size_t location_counter = 0;
+bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig) {
+    std::map<std::string, bool> processedDirectives;
+    size_t locationCounter = 0;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
-        std::string directive_name = tokens[*pos];
+        std::string directiveName = tokens[*pos];
         (*pos)++;
-        if (directive_name == config::context::LOCATION) {
-            location_counter++;
-            toolbox::SharedPtr<config::LocationConfig> location_config(new config::LocationConfig());
+        if (directiveName == config::context::LOCATION) {
+            locationCounter++;
+            toolbox::SharedPtr<config::LocationConfig> locationConfig(new config::LocationConfig());
             (*pos)--;
-            if (!parseLocationBlock(tokens, pos, server_config, location_config.get())) {
+            if (!parseLocationBlock(tokens, pos, serverConfig, locationConfig.get())) {
                 return false;
             }
-            server_config->addLocation(location_config);
-        } else if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_SERVER)) {
-            if (processed_directives.find(directive_name) != processed_directives.end()) {
-                bool should_skip = false;
-                if (!_directiveParser.handleDuplicateDirective(directive_name, tokens, pos, &should_skip)) {
+            serverConfig->addLocation(locationConfig);
+        } else if (_directiveParser.isDirectiveAllowedInContext(directiveName, config::CONTEXT_SERVER)) {
+            if (processedDirectives.find(directiveName) != processedDirectives.end()) {
+                bool shouldSkip = false;
+                if (!_directiveParser.handleDuplicateDirective(directiveName, tokens, pos, &shouldSkip)) {
                     return false;
                 }
-                if (should_skip) {
+                if (shouldSkip) {
                     continue;
                 }
             }
-            processed_directives[directive_name] = true;
-            if (!_directiveParser.parseDirective(tokens, pos, directive_name, NULL, server_config, NULL)) {
+            processedDirectives[directiveName] = true;
+            if (!_directiveParser.parseDirective(tokens, pos, directiveName, NULL, serverConfig, NULL)) {
                 return false;
             }
         } else {
-            if (isContextToken(directive_name)) {
-                throwConfigError("\"" + directive_name + "\" directive is not allowed here");
+            if (isContextToken(directiveName)) {
+                throwConfigError("\"" + directiveName + "\" directive is not allowed here");
             } else {
-                throwConfigError("Unknown directive \"" + directive_name + "\"");
+                throwConfigError("Unknown directive \"" + directiveName + "\"");
             }
         }
     }
     // If not location path (/), add location path (/).
-    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = server_config->getLocations();
+    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = serverConfig->getLocations();
     for (size_t i = 0; i < locations.size(); ++i) {
         if (locations[i]->getPath() == config::DEFAULT_LOCATION_PATH) {
             return true;
         }
     }
-    toolbox::SharedPtr<config::LocationConfig> location_config(new config::LocationConfig());
-    server_config->addLocation(location_config);
+    toolbox::SharedPtr<config::LocationConfig> locationConfig(new config::LocationConfig());
+    serverConfig->addLocation(locationConfig);
     return true;
 }
 

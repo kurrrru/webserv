@@ -15,6 +15,7 @@ BaseParser::ParseStatus BaseParser::run(const std::string& buf) {
         return _parseStatus;
     }
     _buf += buf;
+    _parseStatus = P_IN_PROGRESS;
     try {
         while (_parseStatus == P_IN_PROGRESS) {
             switch (_validatePos) {
@@ -53,9 +54,9 @@ std::size_t BaseParser::findNewLinePos(std::string& buffer) {
 std::size_t BaseParser::getLineEndLen
 (std::string& line, std::size_t lineEndPos) {
     if (line.find(symbols::CRLF) == lineEndPos) {
-        return 2;
+        return symbols::CRLF_SIZE;
     }
-    return 1;
+    return symbols::LF_SIZE;
 }
 
 }  // namespace http

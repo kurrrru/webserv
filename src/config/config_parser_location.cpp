@@ -9,8 +9,8 @@
 
 namespace config {
 
-void locationPathDuplicateCheck(const std::string& path, const config::ServerConfig& server_config) {
-    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = server_config.getLocations();
+void locationPathDuplicateCheck(const std::string& path, const config::ServerConfig& serverConfig) {
+    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = serverConfig.getLocations();
     for (size_t i = 0; i < locations.size(); ++i) {
         if (path == locations[i]->getPath()) {
             throwConfigError("duplicate location \""  + path + "\"" );
@@ -18,8 +18,8 @@ void locationPathDuplicateCheck(const std::string& path, const config::ServerCon
     }
 }
 
-void nestLocationPathDuplicateCheck(const std::string& path, const config::LocationConfig& parent_config) {
-    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = parent_config.getLocations();
+void nestLocationPathDuplicateCheck(const std::string& path, const config::LocationConfig& parentConfig) {
+    const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = parentConfig.getLocations();
     for (size_t i = 0; i < locations.size(); ++i) {
         if (path == locations[i]->getPath()) {
             throwConfigError("duplicate location \""  + path + "\"");
@@ -27,7 +27,7 @@ void nestLocationPathDuplicateCheck(const std::string& path, const config::Locat
     }
 }
 
-void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config ,config::LocationConfig* location_config) {
+void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig ,config::LocationConfig* locationConfig) {
     if (*pos >= tokens.size() || tokens[*pos] != config::context::LOCATION) {
         if (isContextToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -39,8 +39,8 @@ void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, 
     if (*pos >= tokens.size() || tokens[*pos] == config::token::OPEN_BRACE) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::context::LOCATION) + "\" directive");
     }
-    location_config->setPath(tokens[*pos]);
-    locationPathDuplicateCheck(location_config->getPath(), *server_config);
+    locationConfig->setPath(tokens[*pos]);
+    locationPathDuplicateCheck(locationConfig->getPath(), *serverConfig);
     (*pos)++;
     if (*pos >= tokens.size() || tokens[*pos] != config::token::OPEN_BRACE) {
         throwConfigError("unexpected end of file, expecting \"" + std::string(config::token::SEMICOLON) + "\" or \""+ std::string(config::token::CLOSE_BRACE) + "\"");
@@ -48,7 +48,7 @@ void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, 
     (*pos)++;
 }
 
-void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parent_config, config::LocationConfig* child_config) {
+void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parentConfig, config::LocationConfig* childConfig) {
     if (*pos >= tokens.size() || tokens[*pos] != config::context::LOCATION) {
         if (isContextToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -60,10 +60,10 @@ void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& to
     if (*pos >= tokens.size() || tokens[*pos] == config::token::OPEN_BRACE) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::context::LOCATION) + "\" directive");
     }
-    child_config->setPath(tokens[*pos]);
-    nestLocationPathDuplicateCheck(child_config->getPath(), *parent_config);
-    if (pathCmp(parent_config->getPath(), child_config->getPath()) != 0) {
-        throwConfigError("location \"" + child_config->getPath() +  "\" is outside location \"" + parent_config->getPath() + "\"");
+    childConfig->setPath(tokens[*pos]);
+    nestLocationPathDuplicateCheck(childConfig->getPath(), *parentConfig);
+    if (pathCmp(parentConfig->getPath(), childConfig->getPath()) != 0) {
+        throwConfigError("location \"" + childConfig->getPath() +  "\" is outside location \"" + parentConfig->getPath() + "\"");
     }
     (*pos)++;
     if (*pos >= tokens.size() || tokens[*pos] != config::token::OPEN_BRACE) {
@@ -72,70 +72,70 @@ void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& to
     (*pos)++;
 }
 
-bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config, config::LocationConfig* location_config) {
-    validateAndParseLocationBlockStart(tokens, pos, server_config, location_config);
-    if (!parseLocationDirectives(tokens, pos, location_config)) {
+bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig, config::LocationConfig* locationConfig) {
+    validateAndParseLocationBlockStart(tokens, pos, serverConfig, locationConfig);
+    if (!parseLocationDirectives(tokens, pos, locationConfig)) {
         return false;
     }
     validateBlockEnd(tokens, pos);
-    location_config->setServerParent(server_config);
+    locationConfig->setServerParent(serverConfig);
     return true;
 }
 
-bool ConfigParser::parseNestedLocationBlock(const std::vector<std::string>& tokens,  size_t* pos,  config::LocationConfig* parent_config, config::LocationConfig* child_config) {
-    validateAndParseNestedLocationBlockStart(tokens, pos, parent_config, child_config);
-    if (!parseLocationDirectives(tokens, pos, child_config)) {
+bool ConfigParser::parseNestedLocationBlock(const std::vector<std::string>& tokens,  size_t* pos,  config::LocationConfig* parentConfig, config::LocationConfig* childConfig) {
+    validateAndParseNestedLocationBlockStart(tokens, pos, parentConfig, childConfig);
+    if (!parseLocationDirectives(tokens, pos, childConfig)) {
         return false;
     }
     validateBlockEnd(tokens, pos);
-    child_config->setLocationParent(parent_config);
+    childConfig->setLocationParent(parentConfig);
     return true;
 }
 
-bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* location_config) {
-    std::map<std::string, bool> processed_directives;
+bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* locationConfig) {
+    std::map<std::string, bool> processedDirectives;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
-        std::string directive_name = tokens[*pos];
+        std::string directiveName = tokens[*pos];
         (*pos)++;
-        if (directive_name == config::context::LOCATION) {
+        if (directiveName == config::context::LOCATION) {
             (*pos)--;
-            if (!handleNestedLocationBlock(tokens, pos, location_config)) {
+            if (!handleNestedLocationBlock(tokens, pos, locationConfig)) {
                 return false;
             }
             continue;
         }
-        if (_directiveParser.isDirectiveAllowedInContext(directive_name, config::CONTEXT_LOCATION)) {
-            if (processed_directives.find(directive_name) != processed_directives.end()) {
-                bool should_skip = false;
-                if (!_directiveParser.handleDuplicateDirective(directive_name, tokens, pos, &should_skip)) {
+        if (_directiveParser.isDirectiveAllowedInContext(directiveName, config::CONTEXT_LOCATION)) {
+            if (processedDirectives.find(directiveName) != processedDirectives.end()) {
+                bool shouldSkip = false;
+                if (!_directiveParser.handleDuplicateDirective(directiveName, tokens, pos, &shouldSkip)) {
                     return false;
                 }
-                if (should_skip) {
+                if (shouldSkip) {
                     continue;
                 }
             }
-            processed_directives[directive_name] = true;
-            if (!_directiveParser.parseDirective(tokens, pos, directive_name, NULL, NULL, location_config)) {
-                toolbox::logger::StepMark::error("Error parsing '" + directive_name + "' directive in location context.");
+            processedDirectives[directiveName] = true;
+            if (!_directiveParser.parseDirective(tokens, pos, directiveName, NULL, NULL, locationConfig)) {
+                toolbox::logger::StepMark::error("Error parsing '" + directiveName + "' directive in location context.");
                 return false;
             }
         } else {
-            if (isContextToken(directive_name)) {
-                throwConfigError("\"" + directive_name + "\" directive is not allowed here");
+            if (isContextToken(directiveName)) {
+                throwConfigError("\"" + directiveName + "\" directive is not allowed here");
             } else {
-                throwConfigError("Unknown directive \"" + directive_name + "\"");
+                throwConfigError("Unknown directive \"" + directiveName + "\"");
             }
         }
     }
     return true;
 }
 
-bool ConfigParser::handleNestedLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parent_location) {
-    toolbox::SharedPtr<config::LocationConfig> nested_location(new config::LocationConfig());
-    if (!parseNestedLocationBlock(tokens, pos, parent_location, nested_location.get())) {
+bool ConfigParser::handleNestedLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parentLocation) {
+    toolbox::SharedPtr<config::LocationConfig> nestedLocation(new config::LocationConfig());
+    if (!parseNestedLocationBlock(tokens, pos, parentLocation, nestedLocation.get())) {
         return false;
     }
-    parent_location->addLocation(nested_location);
+    parentLocation->addLocation(nestedLocation);
     return true;
 }
 

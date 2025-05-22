@@ -16,24 +16,26 @@ class LocationConfig;
 class HttpConfig;
 class ConfigParser {
  public:
-    static toolbox::SharedPtr<Config> parseFile(const std::string& filepath);
-
- private:
     ConfigParser();
     ~ConfigParser();
+    toolbox::SharedPtr<HttpConfig> parseFile(const std::string& filepath);
+    size_t getTokenCount() const { return _tokens.size(); }
+
+ private:
     ConfigParser(const ConfigParser&);
     ConfigParser& operator=(const ConfigParser&);
+
     bool readFile(const std::string& filepath);
     bool parse();
     bool parseHttpBlock(const std::vector<std::string>& tokens, size_t* pos);
-    bool parseHttpDirectives(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http_config);
-    bool parseServerBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config);
-    bool parseServerDirectives(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config);
-    bool parseServerDirectiveContent(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive_name);
-    bool parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* server_config ,config::LocationConfig* location_config);
-    bool parseLocationDirectives(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* location_config);
-    bool parseNestedLocationBlock(const std::vector<std::string>& tokens,  size_t* pos,  config::LocationConfig* parent_location, config::LocationConfig* location_config);
-    bool handleNestedLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parent_location);
+    bool parseHttpDirectives(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* httpConfig);
+    bool parseServerBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig);
+    bool parseServerDirectives(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig);
+    bool parseServerDirectiveContent(const std::vector<std::string>& tokens, size_t* pos, const std::string& directiveName);
+    bool parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig ,config::LocationConfig* locationConfig);
+    bool parseLocationDirectives(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* locationConfig);
+    bool parseNestedLocationBlock(const std::vector<std::string>& tokens,  size_t* pos,  config::LocationConfig* parentLocation, config::LocationConfig* locationConfig);
+    bool handleNestedLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parentLocation);
     void validateBlockEnd(const std::vector<std::string>& tokens, size_t* pos);
 
     std::string _input;
