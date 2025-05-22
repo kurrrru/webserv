@@ -64,6 +64,8 @@ extern const char* PERCENT;
 extern const char* COLON;
 extern const char* COMMA;
 extern const char* COMMASP;
+extern const std::size_t LF_SIZE;
+extern const std::size_t CRLF_SIZE;
 }  // namespace symbols
 
 }  // namespace http
