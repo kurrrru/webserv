@@ -11,7 +11,7 @@ int main() {
     toolbox::logger::StepMark::error("This is an error message.");
     toolbox::logger::StepMark::critical("This is a critical message.");
 
-    toolbox::logger::StepMark::setLogFile("no_permission");
+    toolbox::logger::StepMark::setLogFile("no_permission_to_write");
 
     return 0;
 }

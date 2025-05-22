@@ -1,4 +1,4 @@
-NAME = accesslog_test.out
+NAME = stepmark_test.out
 
 SRCS = main.cpp ../../../toolbox/stepmark.cpp
 OBJS = $(SRCS:.cpp=.o)
