@@ -1,5 +1,16 @@
 // Copyright 2025 Ideal Broccoli
 
+/*
+AccessLog class does not throw exceptions
+because the log is not critical to the program's execution and
+throwing exceptions would require additional error handling
+which is not needed in this case.
+The class is designed to be simple and lightweight,
+allowing for easy logging without the overhead of exception handling.
+The class uses a singleton pattern to ensure that only one instance of the logger exists.
+The class is not thread-safe, so it should not be used in a multi-threaded environment.
+*/
+
 #include "access.hpp"
 
 #include <iostream>
