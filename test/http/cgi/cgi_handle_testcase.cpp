@@ -40,15 +40,13 @@ bool runTest(CgiHandleTest& test) {
     }
     http::Response response;
     http::CgiHandler handler;
-    toolbox::SharedPtr<config::Config> config =
-                        config::ConfigParser::parseFile("conf/cgi.conf");
+    config::Config::loadConfig("conf/cgi.conf");
     bool result = handler.handleRequest(
         *(test.request),
         response,
         test.rootPath,
         test.cgiExtension,
-        test.cgiPass,
-        *config);
+        test.cgiPath);
     std::remove(test.scriptPath.c_str());
     if (result != test.shouldSucceed) {
         if (test.shouldSucceed) {
@@ -111,7 +109,7 @@ bool testBasicGetRequest() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -145,7 +143,7 @@ bool testPostRequest() {
     contentTypeValue.push_back("application/x-www-form-urlencoded");
     test.request->fields.getFieldValue("Content-Type") = contentTypeValue;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -215,7 +213,7 @@ bool testEnvironmentVariables() {
     customValue.push_back("TestValue");
     test.request->fields.getFieldValue("X-Custom-Header") = customValue;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -232,7 +230,7 @@ bool testNoExecutablePermission() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -258,7 +256,7 @@ bool testTimeout() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -280,7 +278,7 @@ bool testStatusCode200() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -302,7 +300,7 @@ bool testStatusCode201() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -324,7 +322,7 @@ bool testStatusCode404() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -346,7 +344,7 @@ bool testStatusCode500() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -372,7 +370,7 @@ bool testSetCookieHeader() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -398,7 +396,7 @@ bool testRedirectWithDocument() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -521,7 +519,7 @@ bool testInvalidExtension() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -542,7 +540,7 @@ bool testDirectoryAsScript() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -559,7 +557,6 @@ bool testDirectoryAsScript() {
     return true;
 }
 
-// 存在しない/実行権限のないインタープリタ
 bool testInvalidInterpreter() {
     CgiHandleTest test;
     test.name = "無効なインタープリタ";
@@ -573,7 +570,7 @@ bool testInvalidInterpreter() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/non_existent_interpreter";
+    test.cgiPath = "/non_existent_interpreter";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -599,7 +596,7 @@ bool testInvalidCgiResponse() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     bool result = runTest(test);
@@ -632,7 +629,7 @@ bool testLocalRedirect() {
     test.request->method = http::method::POST;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     bool result = runTest(test);
@@ -684,7 +681,7 @@ bool testMultiStepLocalRedirect() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -717,7 +714,7 @@ bool testInvalidLocationHeader() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateLocation = false;
@@ -747,7 +744,7 @@ bool testRedirectLoop() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -770,7 +767,7 @@ bool testClientRedirect() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -807,7 +804,7 @@ bool testClientRedirectWithBody() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     test.validateStatus = true;
@@ -842,7 +839,7 @@ bool testErrorStatusCodeConversion() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = false;
     test.validateStatus = true;
@@ -872,7 +869,7 @@ bool testMultipleHeaders() {
     test.request->method = http::method::GET;
     test.request->uri.path = test.scriptPath;
     test.cgiExtension.push_back(".py");
-    test.cgiPass = "/usr/bin/python3";
+    test.cgiPath = "/usr/bin/python3";
     test.rootPath = "";
     test.shouldSucceed = true;
     bool result = runTest(test);

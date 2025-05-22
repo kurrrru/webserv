@@ -72,15 +72,14 @@ bool CgiHandler::isCgiRequest(const std::string& targetPath,
  * @param rootPath The root directory path for resolving scripts
  * @param cgiExtension List of file extensions to be processed as CGI
  * @param cgiPath Path to the CGI interpreter (e.g., "/usr/bin/python3")
- * @param config Server configuration object for additional settings
+ * 
  * @return bool true if CGI processing was successful, false otherwise
  */
 bool CgiHandler::handleRequest(const HTTPRequest& request,
                             Response& response,
                             const std::string& rootPath,
                             const std::vector<std::string>& cgiExtension,
-                            const std::string& cgiPath,
-                            const config::Config& config) {
+                            const std::string& cgiPath) {
     std::string scriptPath = getScriptPath(request, rootPath);
     std::string interpreter = cgiPath;
     if (!validateParameters(scriptPath,
@@ -110,12 +109,11 @@ bool CgiHandler::handleRequest(const HTTPRequest& request,
             + toolbox::to_string(result) + ")");
         return false;
     }
-    return processCgiOutput(output, response, config);
+    return processCgiOutput(output, response);
 }
 
 bool CgiHandler::processCgiOutput(const std::string& output,
-                                Response& response,
-                                const config::Config& config) {
+                                Response& response) {
     CgiResponseParser parser;
     try {
         parser.run(output);
@@ -124,7 +122,7 @@ bool CgiHandler::processCgiOutput(const std::string& output,
             "CGI output: " + output);
         toolbox::logger::StepMark::debug(
             "CGI response type: " + toolbox::to_string(parser.get().cgiType));
-        return cgiTypeHandler(response, parser.get(), config);
+        return cgiTypeHandler(response, parser.get());
     } catch (const std::exception& e) {
         toolbox::logger::StepMark::error(
             std::string("CGI response processing exception: ") + e.what());
@@ -133,13 +131,12 @@ bool CgiHandler::processCgiOutput(const std::string& output,
 }
 
 bool CgiHandler::cgiTypeHandler(Response& response,
-                                const CgiResponse& cgiResponse,
-                                const config::Config& config) {
+                                const CgiResponse& cgiResponse) {
     switch (cgiResponse.cgiType) {
         case CgiResponse::DOCUMENT:
             return handleDocument(response, cgiResponse);
         case CgiResponse::LOCAL_REDIRECT:
-            return handleLocalRedirect(response, cgiResponse, config);
+            return handleLocalRedirect(response, cgiResponse);
         case CgiResponse::CLIENT_REDIRECT:
             return handleClientRedirect(response, cgiResponse);
         case CgiResponse::CLIENT_REDIRECT_DOCUMENT:
@@ -191,8 +188,7 @@ bool CgiHandler::handleClientRedirectDocument(Response& response,
 }
 
 bool CgiHandler::handleLocalRedirect(Response& response,
-                                    const CgiResponse& cgiResponse,
-                                    const config::Config& config) {
+                                    const CgiResponse& cgiResponse) {
     if (!validateRedirectRequest(response, cgiResponse)) {
         return false;
     }
@@ -201,8 +197,7 @@ bool CgiHandler::handleLocalRedirect(Response& response,
     Response redirectResponse = executeInternalRequest(
                                         redirectInfo.location,
                                         redirectInfo.host,
-                                        newRedirectCount,
-                                        config);
+                                        newRedirectCount);
     if (redirectResponse.getStatus() == HttpStatus::INTERNAL_SERVER_ERROR) {
         response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
         return false;
@@ -246,13 +241,12 @@ CgiHandler::extractRedirectInfo(const CgiResponse& cgiResponse) {
 Response CgiHandler::executeInternalRequest(
                             const std::string& location,
                             const std::string& host,
-                            size_t redirectCount,
-                            const config::Config& config) {
+                            size_t redirectCount) {
     request::Request request;
     request.setCgiRedirectCount(redirectCount);
     request.initializeRequest(http::method::GET, location, host);
-    request.fetchConfig(config);
-    request.handleRequest(config);
+    request.fetchConfig();
+    request.handleRequest();
     return request.getResponse();
 }
 

@@ -16,7 +16,7 @@ struct CgiHandleTest {
     bool isExecutable;
 
     std::vector<std::string> cgiExtension;
-    std::string cgiPass;
+    std::string cgiPath;
     std::string rootPath;
     bool validateStatus;
     int expectedStatus;

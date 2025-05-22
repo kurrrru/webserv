@@ -17,8 +17,8 @@ class Request {
     ~Request();
 
     void parseRawRequest(const std::string& rawRequest);
-    void fetchConfig(const config::Config& config);
-    void handleRequest(const config::Config& config);
+    void fetchConfig();
+    void handleRequest();
     void sendRequest(const int client_fd) const;
     void initializeRequest(const std::string& method,
                         const std::string& path,

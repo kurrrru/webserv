@@ -51,12 +51,12 @@ bool Request::processReturn(const config::Return& returnValue) {
     return false;
 }
 
-void Request::fetchConfig(const config::Config& config) {
+void Request::fetchConfig() {
     if (_request.get().httpStatus.get() != HttpStatus::OK) {
         return;
     }
     const toolbox::SharedPtr<config::HttpConfig>& httpConfig =
-                                                config.getHttpConfig();
+                                                config::Config::getHttpConfig();
     if (!httpConfig) {
         _response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
         return;
@@ -136,7 +136,7 @@ void Request::fetchConfig(const config::Config& config) {
     }
 }
 
-void Request::handleRequest(const config::Config& config) {
+void Request::handleRequest() {
     if (_request.get().httpStatus.get() != HttpStatus::OK) {
         return;
     }
@@ -146,18 +146,17 @@ void Request::handleRequest(const config::Config& config) {
     std::string requestPath = _request.get().uri.path;
     std::string rootDir = _config->getRoot();
     std::vector<std::string> indexFile = _config->getIndices();
-    std::string cgiPass = _config->getCgiPass();
+    std::string cgiPath = _config->getCgiPath();
     std::vector<std::string> cgiExtension = _config->getCgiExtensions();
     std::string fullPath = rootDir + requestPath;
     const std::string& method = _request.get().method;
 
-    if (_cgiHandler.isCgiRequest(fullPath, cgiExtension, cgiPass)) {
+    if (_cgiHandler.isCgiRequest(fullPath, cgiExtension, cgiPath)) {
         _cgiHandler.setRedirectCount(_cgiRedirectCount);
         bool success = _cgiHandler.handleRequest(_request.get(),
                                 _response, rootDir,
                                 cgiExtension,
-                                cgiPass,
-                                config);
+                                cgiPath);
         if (!success) {
             return;
         }

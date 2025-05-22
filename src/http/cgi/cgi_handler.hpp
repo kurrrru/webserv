@@ -44,8 +44,7 @@ class CgiHandler {
                        Response& Response,
                        const std::string& rootPath,
                        const std::vector<std::string>& cgiExtension,
-                       const std::string& cgiPath,
-                       const config::Config& config);
+                       const std::string& cgiPath);
     void setRedirectCount(size_t count) { _redirectCount = count; }
 
  private:
@@ -63,10 +62,10 @@ class CgiHandler {
                             const std::string& interpreter,
                             const std::vector<std::string>& cgiExtension,
                             Response& Response) const;
-    bool processCgiOutput(const std::string& output, Response& response, const config::Config& config);
-    bool cgiTypeHandler(Response& response, const CgiResponse& cgiResponse, const config::Config& config);
+    bool processCgiOutput(const std::string& output, Response& response);
+    bool cgiTypeHandler(Response& response, const CgiResponse& cgiResponse);
     bool handleDocument(Response& response, const CgiResponse& cgiResponse);
-    bool handleLocalRedirect(Response& response, const CgiResponse& cgiResponse, const config::Config& config);
+    bool handleLocalRedirect(Response& response, const CgiResponse& cgiResponse);
     bool handleClientRedirect(Response& response, const CgiResponse& cgiResponse);
     bool handleClientRedirectDocument(Response& response, const CgiResponse& cgiResponse);
     bool validateRedirectRequest(Response& response, const CgiResponse& cgiResponse);
@@ -74,8 +73,7 @@ class CgiHandler {
     Response executeInternalRequest(
                      const std::string& location,
                      const std::string& host,
-                     size_t redirectCount,
-                     const config::Config& config);
+                     size_t redirectCount);
     void copyRedirectResponse(const Response& redirectResponse,
                         Response& response);
     CgiExecute _execute;
