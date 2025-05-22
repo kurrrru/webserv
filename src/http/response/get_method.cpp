@@ -21,6 +21,7 @@
 #include "get_method.hpp"
 
 namespace http {
+namespace {
 std::string readFile(const std::string& path) {
     std::ifstream file(path.c_str(), std::ios::binary);
     if (!file.is_open()) {
@@ -99,11 +100,8 @@ std::string processAutoindex(const std::string& path) {
     return ss.str();
 }
 
-HttpStatus::EHttpStatus handleDirectory(const std::string& path,
-                                        const std::string& indexPath,
-                                        Response& response,
-                                        ExtensionMap& extensionMap,
-                                        bool isAutoindex) {
+void handleDirectory(const std::string& path, const std::string& indexPath,
+                     Response& response, bool isAutoindex) {
     HttpStatus::EHttpStatus status;
 
     if (!indexPath.empty()) {
@@ -113,55 +111,48 @@ HttpStatus::EHttpStatus handleDirectory(const std::string& path,
         if (status != HttpStatus::OK) {
             toolbox::logger::StepMark::error("runGet: checkFileAccess fail "
                 + fullPath + " " + toolbox::to_string(status));
-            return status;
+            throw status;
         }
         response.setBody(readFile(fullPath));
-        response.setHeader(fields::CONTENT_TYPE, getContentType(fullPath, extensionMap));
+        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(fullPath));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
         response.setBody(processAutoindex(path));
         response.setHeader(fields::CONTENT_TYPE, "text/html");
     }
-    return HttpStatus::OK;
 }
 
-HttpStatus::EHttpStatus handleFile(const std::string& path,
-                                   Response& response,
-                                   ExtensionMap& extensionMap) {
+void handleFile(const std::string& path, Response& response) {
     response.setBody(readFile(path));
-    response.setHeader(fields::CONTENT_TYPE,getContentType(path, extensionMap));
-    return HttpStatus::OK;
+    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(path));
 }
+}  // namespace
 
-HttpStatus::EHttpStatus runGet(const std::string& path,
-                               const std::string& indexPath,
-                               bool isAutoindex,
-                               ExtensionMap& extensionMap,
-                               Response& response) {
+void runGet(const std::string& path, const std::string& indexPath,
+            bool isAutoindex, Response& response) {
     struct stat st;
 
-    HttpStatus::EHttpStatus status = checkFileAccess(path, st);
-    if (status != HttpStatus::OK) {
-        toolbox::logger::StepMark::error("runGet: checkFileAccess fail " + path
-            + " " + toolbox::to_string(status));
-        return status;
-    }
-
     try {
-        if (isDirectory(st)) {
-            return handleDirectory(path, indexPath, response,
-                extensionMap, isAutoindex);
-        } else if (isRegularFile(st)) {
-            return handleFile(path, response, extensionMap);
-        } else {
-            status = HttpStatus::INTERNAL_SERVER_ERROR;
+        HttpStatus::EHttpStatus status = checkFileAccess(path, st);
+        if (status != HttpStatus::OK) {
+            toolbox::logger::StepMark::error("runGet: checkFileAccess fail " + path
+                + " " + toolbox::to_string(status));
+            throw status;
         }
-    } catch (const std::exception& e) {
-        status = HttpStatus::INTERNAL_SERVER_ERROR;
-        toolbox::logger::StepMark::error("runGet: exception "
-            + std::string(e.what()) + " " + toolbox::to_string(status));
+
+        if (isDirectory(st)) {
+            handleDirectory(path, indexPath, response, isAutoindex);
+        } else if (isRegularFile(st)) {
+            handleFile(path, response);
+        } else {
+            throw HttpStatus::INTERNAL_SERVER_ERROR;
+        }
+        response.setStatus(HttpStatus::OK);
+    } catch (const HttpStatus::EHttpStatus& e) {
+        toolbox::logger::StepMark::error("runGet: set status "
+            + toolbox::to_string(e));
+        response.setStatus(e);
     }
-    return status;
 }
 
 }  // namespace http

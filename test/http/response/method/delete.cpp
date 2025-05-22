@@ -47,32 +47,22 @@ static void cleanupTestEnvironment() {
 }
 
 static void runTests() {
-    http::ExtensionMap extensionMap;
-    http::initExtensionMap(extensionMap);
     http::Response response;
 
     std::string path = "./test_dir/test.html";
-    toolbox::logger::StepMark::info("===== delete normal file =====");
-    toolbox::logger::StepMark::info("except status: " +
-        toolbox::to_string(http::HttpStatus::NO_CONTENT));
+    toolbox::logger::StepMark::info("==== [DELETE] SUCCESS:204 normal file ====");
     http::runDelete(path, response);
 
     path = "./test_dir/nonexistent.html";
-    toolbox::logger::StepMark::info("===== delete nonexistent file =====");
-    toolbox::logger::StepMark::info("except status: " +
-        toolbox::to_string(http::HttpStatus::NOT_FOUND));
+    toolbox::logger::StepMark::info("==== [DELETE] FAIL:404 nonexistent file ====");
     http::runDelete(path, response);
 
     path = "./test_dir/no_permission.html";
-    toolbox::logger::StepMark::info("===== delete no_permission file =====");
-    toolbox::logger::StepMark::info("except status: " +
-        toolbox::to_string(http::HttpStatus::FORBIDDEN));
+    toolbox::logger::StepMark::info("==== [DELETE] FAIL:403 no permission file ====");
     http::runDelete(path, response);
 
     path = "./test_dir";
-    toolbox::logger::StepMark::info("===== delete dir =====");
-    toolbox::logger::StepMark::info("except status: " +
-        toolbox::to_string(http::HttpStatus::FORBIDDEN));
+    toolbox::logger::StepMark::info("==== [DELETE] FAIL:403 dir ====");
     http::runDelete(path, response);
 }
 

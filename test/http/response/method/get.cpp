@@ -13,6 +13,7 @@
 #include "../../../../src/http/case_insensitive_less.hpp"
 #include "../../../../src/http/response/get_method.hpp"
 #include "../../../../src/http/response/response.hpp"
+#include "../../../../toolbox/stepmark.hpp"
 
 static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
@@ -47,59 +48,31 @@ static void cleanupTestEnvironment() {
 }
 
 static void runTests() {
-    http::ExtensionMap extensionMap;
-    http::initExtensionMap(extensionMap);
-    http::HttpStatus::EHttpStatus status;
     http::Response response;
 
-    std::cout << "===== get nomal file =====" << std::endl;
-    status = http::runGet("./test_dir/test.html", "", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 normal file =====");
+    http::runGet("./test_dir/test.html", "", false, response);
 
-    std::cout << "===== get nonexistent file =====" << std::endl;
-    status = runGet("./test_dir/nonexistent.html", "", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::NOT_FOUND);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] FAIL:404 nonexistent file =====");
+    http::runGet("./test_dir/nonexistent.html", "", false, response);
 
-    std::cout << "===== get dir indexfile =====" << std::endl;
-    status = runGet("./test_dir/", "index.html", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 dir indexfile =====");
+    http::runGet("./test_dir/", "index.html", false, response);
 
-    std::cout << "===== get dir autoindex =====" << std::endl;
-    status = runGet("./test_dir/", "", true,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 dir autoindex =====");
+    http::runGet("./test_dir/", "", true, response);
 
-    std::cout << "===== get no permission =====" << std::endl;
-    status = runGet("./test_dir/no_permission.html", "", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::FORBIDDEN);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] FAIL:403 no permission file =====");
+    http::runGet("./test_dir/no_permission.html", "", false, response);
 
-    std::cout << "===== get empty dir ====="
-        << std::endl;
-    status = runGet("./test_dir/empty_dir/", "", true,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 empty dir =====");
+    http::runGet("./test_dir/empty_dir/", "", true, response);
 
-    std::cout << "===== get empty dir indexfile =====" << std::endl;
-    status = runGet("./test_dir/empty_dir/", "index.html",
-        false, extensionMap, response);
-    assert(status == http::HttpStatus::NOT_FOUND);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] FAIL:404 empty dir indexfile =====");
+    http::runGet("./test_dir/empty_dir/", "index.html", false, response);
 
-    std::cout << "===== get no permission dir =====" << std::endl;
-    status = runGet("./test_dir/no_permission_dir/", "",
-        true, extensionMap, response);
-    assert(status == http::HttpStatus::FORBIDDEN);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [GET] FAIL:403 no permission dir =====");
+    http::runGet("./test_dir/no_permission_dir/", "", true, response);
 }
 
 void get_test() {

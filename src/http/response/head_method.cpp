@@ -6,11 +6,9 @@
 #include "method_utils.hpp"
 
 namespace http {
-HttpStatus::EHttpStatus handleDirectory(const std::string& path,
-                                        const std::string& indexPath,
-                                        bool isAutoindex,
-                                        ExtensionMap& extensionMap,
-                                        Response& response) {
+namespace {
+void handleDirectory(const std::string& path, const std::string& indexPath,
+                    bool isAutoindex, Response& response) {
     HttpStatus::EHttpStatus status;
 
     if (!indexPath.empty()) {
@@ -18,63 +16,54 @@ HttpStatus::EHttpStatus handleDirectory(const std::string& path,
         std::string fullPath = joinPath(path, indexPath);
         status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runHead: checkFileAccess fail "
-                + fullPath + " " + toolbox::to_string(status));
-            return status;
+            toolbox::logger::StepMark::error("runHead: handleDirectory: checkFileAccess fail " + fullPath + " " + toolbox::to_string(status));
+            throw status;
         }
-        response.setHeader(fields::CONTENT_TYPE, getContentType(fullPath, extensionMap));
+        response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(fullPath));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
     }  else if (isAutoindex) {
         response.setHeader(fields::CONTENT_TYPE, "text/html");
     }
-    return HttpStatus::OK;
 }
 
-HttpStatus::EHttpStatus handleFile(const std::string& path,
-                                    ExtensionMap& extensionMap,
-                                    Response& response) {
+void handleFile(const std::string& path, Response& response) {
     struct stat st;
 
     HttpStatus::EHttpStatus status = checkFileAccess(path, st);
     if (status != HttpStatus::OK) {
-        toolbox::logger::StepMark::error("runHead: checkFileAccess fail "
+        toolbox::logger::StepMark::error("runHead: handleFile: checkFileAccess fail "
             + path + " " + toolbox::to_string(status));
-        return status;
+        throw status;
     }
-    response.setHeader(fields::CONTENT_TYPE, getContentType(path, extensionMap));
+    response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(path));
     response.setHeader(fields::LAST_MODIFIED, getModifiedTime(st));
-    return HttpStatus::OK;
 }
+}  // namespace
 
-HttpStatus::EHttpStatus runHead(const std::string& path,
-                               const std::string& indexPath,
-                               bool isAutoindex,
-                               ExtensionMap& extensionMap,
-                               Response& response) {
+void runHead(const std::string& path, const std::string& indexPath,
+            bool isAutoindex, Response& response) {
     struct stat st;
-
-    HttpStatus::EHttpStatus status = checkFileAccess(path, st);
-    if (status != HttpStatus::OK) {
-        toolbox::logger::StepMark::error("runHead: checkFileAccess fail "
-            + path + " " + toolbox::to_string(status));
-        return status;
-    }
 
     try {
-        if (isDirectory(st)) {
-            status = handleDirectory(path, indexPath, isAutoindex,
-                extensionMap, response);
-        } else if (isRegularFile(st)) {
-            status = handleFile(path, extensionMap, response);
-        } else {
-            status = HttpStatus::INTERNAL_SERVER_ERROR;
+        HttpStatus::EHttpStatus status = checkFileAccess(path, st);
+        if (status != HttpStatus::OK) {
+            toolbox::logger::StepMark::error("runHead: checkFileAccess fail " + path + " " + toolbox::to_string(status));
+            throw status;
         }
-    } catch (const std::exception& e) {
-        status = HttpStatus::INTERNAL_SERVER_ERROR;
-        toolbox::logger::StepMark::error("runHead: exception "
-            + std::string(e.what()) + " " + toolbox::to_string(status));
+
+        if (isDirectory(st)) {
+            handleDirectory(path, indexPath, isAutoindex, response);
+        } else if (isRegularFile(st)) {
+            handleFile(path, response);
+        } else {
+            throw HttpStatus::INTERNAL_SERVER_ERROR;
+        }
+        response.setStatus(HttpStatus::OK);
+    } catch (const HttpStatus::EHttpStatus& e) {
+        toolbox::logger::StepMark::error("runHead: set status "
+            + toolbox::to_string(e));
+        response.setStatus(e);
     }
-    return status;
 }
 
 }  // namespace http
