@@ -18,12 +18,16 @@ Client::Client(int fd, const struct sockaddr_in& client_addr,
             _client_addr_len(client_addr_len) {
 }
 
-Client::Client(const Client& other): _socket_fd(other._socket_fd) {
+Client::Client(const Client& other): _socket_fd(other._socket_fd),
+    _client_addr(other._client_addr),
+    _client_addr_len(other._client_addr_len) {
 }
 
 Client& Client::operator=(const Client& other) {
     if (this != &other) {
         _socket_fd = other._socket_fd;
+        _client_addr = other._client_addr;
+        _client_addr_len = other._client_addr_len;
     }
     return *this;
 }
