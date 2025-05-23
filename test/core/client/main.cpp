@@ -1,3 +1,5 @@
+// this is a simple version of src/core/main.cpp
+
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <fcntl.h>
@@ -23,7 +25,7 @@ int main(void) {
         server1->setName("server1");
         epoll.addServer(server1->getFd(), server1);
 
-        int cnt = 0;  // for debug
+        int cnt = 0;
         struct epoll_event events[1000];
         while (1) {
             try {
@@ -42,12 +44,11 @@ int main(void) {
                             socklen_t addr_len = sizeof(client_addr);
                             int client_sock = accept(server->getFd(), (struct sockaddr*)&client_addr, &addr_len);
                             if (client_sock == -1) {
-                                //continue?
                                 throw std::runtime_error("accept failed");
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
-                            epoll.addClient(client_sock, client); // this func will throw exception
+                            epoll.addClient(client_sock, client);
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -81,7 +82,6 @@ int main(void) {
                             std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\r\n\r\n" + responseBody;
                             if (send(client_sock, response.c_str(), response.size(), 0) == -1) {
                                 throw std::runtime_error("send failed");
-                                // Send exit status to client
                             }
                             epoll.del(client_sock);
                         } catch (std::exception& e) {
