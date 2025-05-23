@@ -3,7 +3,7 @@
 #include "request_parser.hpp"
 #include "../response/response.hpp"
 #include "../../config/config.hpp"
-#include "../../socket/client.hpp"
+#include "../../core/client.hpp"
 #include "../../../toolbox/shared.hpp"
 
 namespace http {
