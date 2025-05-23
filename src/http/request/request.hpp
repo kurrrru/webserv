@@ -10,11 +10,36 @@ namespace http {
 
 class Request {
  public:
+    /**
+     * @brief Constructs a Request object with the given client.
+     * @param client A shared pointer to the Client object associated with this request.
+     */
     Request(toolbox::SharedPtr<Client> client);
+    
+    /**
+     * @brief Destructor for the Request object.
+     */
     ~Request();
+    
+    /**
+     * @brief Parses the raw HTTP request string.
+     * @param rawRequest The raw HTTP request as a string.
+     */
     void parseRawRequest(const std::string& rawRequest);
+    
+    /**
+     * @brief Fetches the configuration for the current request.
+     */
     void fetchConfig();
+    
+    /**
+     * @brief Handles the HTTP request and prepares a response.
+     */
     void handleRequest();
+    
+    /**
+     * @brief Sends the prepared HTTP response to the client.
+     */
     void sendResponse() const;
 
  private:
