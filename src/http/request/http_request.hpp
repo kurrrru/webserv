@@ -35,6 +35,7 @@ class HTTPRequest {
     ~HTTPRequest() {}
 
     HttpStatus httpStatus;
+    std::string originalRequestLine;
     std::string method;
     URI uri;
     std::string version;

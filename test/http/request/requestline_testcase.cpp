@@ -146,9 +146,9 @@ void makeMethodTests(TestVector& t) {
     r._request = " / HTTP/1.1\r\nHost: sample\r\n\r\n";
     r._httpStatus.set(http::HttpStatus::BAD_REQUEST);  // Bad Request
     r._isSuccessTest = false;
-    r._exceptRequest.method = "";
-    r._exceptRequest.path = "/";
-    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.method = "/";
+    r._exceptRequest.path = "HTTP/1.1";
+    r._exceptRequest.version = "";
     t.push_back(r);
     clearUri(r);
 }
@@ -590,7 +590,7 @@ void makeRequestStructureTests(TestVector& t) {
     r._isSuccessTest = false;
     r._exceptRequest.method = "GET";
     r._exceptRequest.path = "/";
-    r._exceptRequest.version = "HTTP/1.1";
+    r._exceptRequest.version = "HTTP/1.1 extra";
     t.push_back(r);
     clearUri(r);
 }
