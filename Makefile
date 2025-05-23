@@ -1,7 +1,7 @@
 NAME = webserv
 
 # sources
-SRCS = $(wildcard toolbox/*.cpp) $(wildcard src/*/*.cpp)
+SRCS = $(wildcard toolbox/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*/*/*.cpp)
 
 OBJS = $(SRCS:.cpp=.o)
 
