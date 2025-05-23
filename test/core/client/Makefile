@@ -1,8 +1,8 @@
 NAME = client_test.out
 
 SRCS = main.cpp \
-		../../../src/socket/server.cpp \
-		../../../src/socket/client.cpp \
+		../../../src/core/server.cpp \
+		../../../src/core/client.cpp \
 		../../../src/event/epoll.cpp \
 		../../../toolbox/string.cpp 
 OBJS = $(SRCS:.cpp=.o)

@@ -9,10 +9,10 @@
 #include <cstdio>
 #include <sstream>
 
+#include "server.hpp"
+#include "client.hpp"
 #include "../config/config_namespace.hpp"
 #include "../config/config_parser.hpp"
-#include "../socket/server.hpp"
-#include "../socket/client.hpp"
 #include "../event/epoll.hpp"
 #include "../event/tagged_epoll_event.hpp"
 #include "../../toolbox/string.hpp"

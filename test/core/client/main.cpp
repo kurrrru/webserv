@@ -11,8 +11,8 @@
 #include <cstdio>
 #include <sstream>
 
-#include "../../../src/socket/server.hpp"
-#include "../../../src/socket/client.hpp"
+#include "../../../src/core/server.hpp"
+#include "../../../src/core/client.hpp"
 #include "../../../src/event/epoll.hpp"
 #include "../../../src/event/tagged_epoll_event.hpp"
 #include "../../../toolbox/string.hpp"
