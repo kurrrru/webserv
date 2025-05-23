@@ -46,7 +46,7 @@ int Client::getFd() const {
 }
 
 std::string Client::getIp() const {
-    uint32_t ip = _client_addr.sin_addr.s_addr;
+    uint32_t ip = ntohl(_client_addr.sin_addr.s_addr);
     std::string ip_str = toolbox::to_string((ip >> 24) & 0xFF) + "." +
         toolbox::to_string((ip >> 16) & 0xFF) + "." +
         toolbox::to_string((ip >> 8) & 0xFF) + "." +
