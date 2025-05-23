@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
                                 throw std::runtime_error("accept failed");
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
-                            toolbox::SharedPtr<Client> client(new Client(client_sock));
+                            toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
                             epoll.addClient(client_sock, client); // this func will throw exception
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;

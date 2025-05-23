@@ -5,11 +5,17 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <iostream>
+#include <string>
+
+#include "../../toolbox/string.hpp"
 
 Client::Client() : _socket_fd(-1) {
 }
 
-Client::Client(int fd): _socket_fd(fd) {
+Client::Client(int fd, const struct sockaddr_in& client_addr,
+            socklen_t client_addr_len) :
+            _socket_fd(fd), _client_addr(client_addr),
+            _client_addr_len(client_addr_len) {
 }
 
 Client::Client(const Client& other): _socket_fd(other._socket_fd) {
@@ -37,4 +43,13 @@ const char* Client::ClientException::what() const throw() {
 
 int Client::getFd() const {
     return _socket_fd;
+}
+
+std::string Client::getIp() const {
+    uint32_t ip = _client_addr.sin_addr.s_addr;
+    std::string ip_str = toolbox::to_string((ip >> 24) & 0xFF) + "." +
+        toolbox::to_string((ip >> 16) & 0xFF) + "." +
+        toolbox::to_string((ip >> 8) & 0xFF) + "." +
+        toolbox::to_string(ip & 0xFF);
+    return ip_str;
 }
