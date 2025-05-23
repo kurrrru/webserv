@@ -6,8 +6,8 @@
 #include <exception>
 #include <map>
 
-#include "../socket/server.hpp"
-#include "../socket/client.hpp"
+#include "../core/server.hpp"
+#include "../core/client.hpp"
 #include "../../toolbox/shared.hpp"
 
 class Epoll {
