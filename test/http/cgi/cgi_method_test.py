@@ -130,7 +130,7 @@ class TestCgiAdditional(unittest.TestCase):
 
         stdout, _ = process.communicate(self.randomString.encode('utf-8'))
         response = stdout.decode('utf-8')
-        headers, body = response.split('\n\n', 1)
+        headers, _ = response.split('\n\n', 1)
 
         self.assertIn('Status: 201', headers)
         self.assertIn('Location: /uploads/uploaded_file', headers)
@@ -291,7 +291,7 @@ class TestCgiAdditional(unittest.TestCase):
 
         stdout, _ = process.communicate(self.randomString.encode('utf-8'))
         response = stdout.decode('utf-8')
-        headers, body = response.split('\n\n', 1)
+        headers, _ = response.split('\n\n', 1)
 
         self.assertIn('Status: 201', headers)
         self.assertIn('Location: /uploads/テスト.txt', headers)
@@ -318,7 +318,7 @@ class TestCgiAdditional(unittest.TestCase):
 
         stdout, _ = process.communicate(binary_data)
         response = stdout.decode('utf-8')
-        headers, body = response.split('\n\n', 1)
+        headers, _ = response.split('\n\n', 1)
 
         self.assertIn('Status: 201', headers)
         self.assertIn('Location: /uploads/binary.bin', headers)
@@ -344,7 +344,7 @@ class TestCgiAdditional(unittest.TestCase):
             stderr=subprocess.PIPE
         )
 
-        stdout, stderr = process.communicate()
+        stdout, _ = process.communicate()
         response = stdout.decode('utf-8')
         headers, body = response.split('\n\n', 1)
 
