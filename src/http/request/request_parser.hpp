@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <sstream>
 
 #include "../parsing/base_parser.hpp"
 #include "../parsing/field_validator.hpp"
