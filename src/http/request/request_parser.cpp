@@ -52,6 +52,8 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
 
         std::string line = toolbox::trim(getBuf(), symbols::CRLF);
         if (!FieldValidator::validateFieldLine(line)) {
+            toolbox::logger::StepMark::error(
+                "RequestParser: invalid character in field line");
             _request.httpStatus.set(HttpStatus::BAD_REQUEST);
             continue;
         }
@@ -85,6 +87,8 @@ BaseParser::ParseStatus RequestParser::processRequestLine() {
 void RequestParser::parseRequestLine() {
     std::string line = toolbox::trim(getBuf(), symbols::CRLF);
     if (line.find(symbols::SP) == std::string::npos) {
+        toolbox::logger::StepMark::error(
+            "RequestParser: request line has no space");
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
         return;
     }
@@ -99,7 +103,6 @@ void RequestParser::parseRequestLine() {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
         toolbox::logger::StepMark::error(
             "RequestParser: invalid request line");
-        return;
     }
 }
 
@@ -153,10 +156,14 @@ bool RequestParser::isValidFormat() {
 void RequestParser::validateMethod() {
     if (_request.method.empty()) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        toolbox::logger::StepMark::error(
+            "RequestParser: method not found");
         return;
     }
     if (!utils::isUpperStr(_request.method)) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        toolbox::logger::StepMark::error(
+            "RequestParser: method is not uppercase");
         return;
     }
 }
@@ -301,6 +308,8 @@ void RequestParser::verifySafePath() {
     for (std::size_t i = 0; i < _request.uri.splitPath.size(); ++i) {
         if (_request.uri.splitPath[i] == "/..") {
             if (pathDeque.empty()) {
+                toolbox::logger::StepMark::error(
+                    "RequestParser: invalid path, try parent directory");
                 _request.httpStatus.set(HttpStatus::BAD_REQUEST);
                 return;
             } else {
