@@ -130,7 +130,7 @@ class TestCgiGET(unittest.TestCase):
         headers, _ = response.split('\n\n', 1)
 
         self.assertIn('Status: 201', headers)
-        self.assertIn('Location: /uploads/test____.txt', headers)
+        self.assertIn('Location: /uploads/test@#$%.txt', headers)
 
     def testSpecialCharsInBody(self):
         special_chars = "!@#$%^&*()_+{}|:<>?~`-=[]\\;',./"
