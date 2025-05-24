@@ -35,6 +35,11 @@ class Request {
         const std::string& path, const std::string& host)
 
     /**
+    * @brief Fetches the configuration for the current request.
+    */
+    void fetchConfig();
+
+    /**
      * @brief Handles the HTTP request and prepares a response.
      */
     void handleRequest();
@@ -55,10 +60,6 @@ class Request {
     Request(const Request& other);
     Request& operator=(const Request& other);
 
-    /**
-     * @brief Fetches the configuration for the current request.
-     */
-    void fetchConfig();
 };
 
 }
