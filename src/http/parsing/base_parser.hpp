@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <limits>
 
 #include "../http_namespace.hpp"
 #include "../http_status.hpp"
@@ -29,7 +28,7 @@ class BaseParser {
         P_ERROR = 3
     };
 
-    BaseParser() : _parseStatus(P_IN_PROGRESS), _clientMaxBodySize(std::numeric_limits<std::size_t>::max()) {}
+    BaseParser() : _parseStatus(P_IN_PROGRESS) {}
     virtual ~BaseParser() {}
 
     BaseParser::ParseStatus run(const std::string& buf);
@@ -52,7 +51,6 @@ class BaseParser {
     ValidatePos _validatePos;
     ParseStatus _parseStatus;
     std::string _buf;
-    std::size_t _clientMaxBodySize;
 };
 
 }  // namespace http
