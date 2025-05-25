@@ -15,7 +15,7 @@ class Request {
      * @param client A shared pointer to the Client object
      * associated with this request.
      */
-    Request(toolbox::SharedPtr<Client> client, std::size_t requestDepth = 0);
+    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
 
     /**
      * @brief Destructor for the Request object.
