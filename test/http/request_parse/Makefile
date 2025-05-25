@@ -4,7 +4,9 @@ SRC_DIRS = ../../../src
 TOOLBOX_DIR = ../../../toolbox
 
 TEST_SRCS = $(wildcard $(SRC_DIRS)/http/*.cpp)\
-			$(wildcard $(SRC_DIRS)/http/request/*.cpp)\
+			../../../src/http/request/http_fields.cpp\
+			../../../src/http/request/request_field_parser.cpp\
+			../../../src/http/request/request_parser.cpp\
 			$(wildcard $(SRC_DIRS)/http/parsing/*.cpp)\
 			$(wildcard $(TOOLBOX_DIR)/*.cpp)\
 			$(wildcard *.cpp) \

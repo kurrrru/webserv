@@ -32,7 +32,7 @@ class Request {
     bool recvRequest();
 
     void setLocalRedirectInfo(const std::string& method, 
-        const std::string& path, const std::string& host)
+        const std::string& path, const std::string& host);
 
     /**
     * @brief Fetches the configuration for the current request.

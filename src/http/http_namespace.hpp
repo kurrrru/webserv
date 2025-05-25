@@ -47,7 +47,6 @@ extern const char* LAST_MODIFIED;
 extern const char* FIELDS[];
 extern const std::size_t FIELD_SIZE;
 extern const std::size_t MAX_FIELDLINE_SIZE;
-extern const std::size_t MAX_BODY_SIZE;
 }  // namespace fields
 
 namespace symbols {

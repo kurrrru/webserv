@@ -31,6 +31,22 @@ std::string removeConsecutiveSpaces(const std::string& str) {
     return result;
 }
 
+bool hasLastChunk(const std::string* buf) {
+    std::stringstream ss(*buf);
+    std::string line;
+    bool prevLineSizeZero = false;
+    while (std::getline(ss, line)) {
+        if (line == "0") {
+            prevLineSizeZero = true;
+        } else if (prevLineSizeZero && line.empty()) {
+            return true;  // Found the last chunk
+        } else {
+            prevLineSizeZero = false;  // Reset if we find a non-empty line
+        }
+    }
+    return false;
+}
+
 }  // namespace
 
 BaseParser::ParseStatus RequestParser::processFieldLine() {
@@ -328,9 +344,15 @@ void RequestParser::verifySafePath() {
 }
 
 BaseParser::ParseStatus RequestParser::processBody() {
-    if (_request.body.isChunked || isChunkedEncoding()) {
-        parseChunkedEncoding();
-        return P_COMPLETED;
+    if (isChunkedEncoding()) {
+        _request.body.content += *getBuf();
+        if (hasLastChunk(getBuf())) {
+            parseChunkedEncoding();
+            return P_COMPLETED;
+        }
+        _request.body.recvedLength += getBuf()->size();
+        getBuf()->clear();
+        return P_NEED_MORE_DATA;
     }
     if (!_request.body.contentLength) {
         std::vector<std::string>& contentLen =
@@ -389,12 +411,6 @@ void RequestParser::parseChunkedEncoding() {
             return;
         }
         std::string chunkData = getBuf()->substr(0, chunkSize);
-        if (_request.body.recvedLength + chunkSize > fields::MAX_BODY_SIZE) {
-            _request.httpStatus.set(HttpStatus::PAYLOAD_TOO_LARGE);
-            toolbox::logger::StepMark::error(
-                "RequestParser: body size too large");
-            throw ParseException("");
-        }
         _request.body.content.append(chunkData);
         _request.body.recvedLength += chunkSize;
         setBuf(getBuf()->substr(chunkSize + parser::HEX_DIGIT_LENGTH));
