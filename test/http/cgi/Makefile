@@ -8,6 +8,7 @@ TEST_SRCS = $(wildcard $(SRC_DIRS)/http/*.cpp)\
 			$(wildcard $(SRC_DIRS)/http/request/*.cpp)\
 			$(wildcard $(SRC_DIRS)/http/parsing/*.cpp)\
 			$(wildcard $(SRC_DIRS)/http/cgi/*.cpp)\
+			$(wildcard $(SRC_DIRS)/config/*.cpp)\
 			../../../src/http/response/response.cpp\
 			$(wildcard $(TOOLBOX_DIR)/*.cpp)\
 			$(wildcard *.cpp) \

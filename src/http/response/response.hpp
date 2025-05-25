@@ -35,6 +35,11 @@ class Response {
     void sendResponse(int client_fd) const;
     static std::string getStatusMessage(int code);
 
+    int getStatus() const { return _status; }
+    const std::string& getBody() const { return _body; }
+    const std::map<FieldName, HeaderField>&
+                getHeaders() const { return _headers; }
+
  private:
     int _status;
     std::map<FieldName, HeaderField> _headers;
