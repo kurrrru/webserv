@@ -368,7 +368,7 @@ BaseParser::ParseStatus RequestParser::processBody() {
         std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
 
         _request.body.content += getBuf()->substr(0, remainLen);
-        _request.body.receivedLength += _request.body.content.size();
+        _request.body.receivedLength = _request.body.content.size();
     }
     if (_request.body.contentLength <= _request.body.receivedLength) {
         setValidatePos(V_COMPLETED);
