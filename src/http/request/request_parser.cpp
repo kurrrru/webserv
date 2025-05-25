@@ -346,11 +346,11 @@ void RequestParser::verifySafePath() {
 BaseParser::ParseStatus RequestParser::processBody() {
     if (isChunkedEncoding()) {
         _request.body.content += *getBuf();
+        _request.body.receivedLength += getBuf()->size();
         if (hasLastChunk(getBuf())) {
             parseChunkedEncoding();
             return P_COMPLETED;
         }
-        _request.body.receivedLength += getBuf()->size();
         getBuf()->clear();
         return P_NEED_MORE_DATA;
     }
