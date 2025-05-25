@@ -33,9 +33,7 @@ bool Request::recvRequest() {
         return false;
     }
 
-    buffer[bytesReceived] = '\0';
-
-    _parsedRequest.run(static_cast<std::string>(buffer));
+    _parsedRequest.run(std::string(buffer, bytesReceived));
 
     std::size_t clientMaxBodySize = 0;
 
