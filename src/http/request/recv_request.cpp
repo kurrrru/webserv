@@ -7,13 +7,18 @@
 
 namespace http {
 
+namespace {
+const std::size_t BUFFER_SIZE = 2048;
+}
+
 bool Request::recvRequest() {
-    char buffer[2048];
+    char buffer[BUFFER_SIZE];
     int bytesReceived = 0;
 
     bytesReceived = recv(_client->getFd(), buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived == 0) {
-        toolbox::logger::StepMark::info("Request: recvRequest: client disconnected " + _client->getFd());
+        toolbox::logger::StepMark::info("Request: recvRequest: client "
+            "disconnected " + toolbox::to_string(_client->getFd()));
         if (_parsedRequest.getValidatePos() == BaseParser::V_COMPLETED) {
             _response.setStatus(HttpStatus::OK);
             return true;
@@ -22,35 +27,43 @@ bool Request::recvRequest() {
             return false;
         }
     } else if (bytesReceived == -1) {
-        toolbox::logger::StepMark::error("Request: recvRequest: recv failed in recv from " + _client->getFd());
+        toolbox::logger::StepMark::error("Request: recvRequest: recv failed "
+            "in recv from " + toolbox::to_string(_client->getFd()));
         _response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
         return false;
     }
 
     buffer[bytesReceived] = '\0';
-    
+
     _parsedRequest.run(static_cast<std::string>(buffer));
 
     std::size_t clientMaxBodySize = 0;
 
-    if (_parsedRequest.getValidatePos() == BaseParser::V_BODY ||
-        _parsedRequest.getValidatePos() == BaseParser::V_COMPLETED) {
+    BaseParser::ValidatePos validatePos = _parsedRequest.getValidatePos();
+    if (validatePos == BaseParser::V_BODY ||
+        validatePos == BaseParser::V_COMPLETED ||
+        _parsedRequest.get().body.contentLength != std::size_t(-1)) {
         if (_config.getPath().empty()) {  // If path is empty, fetch the config
             fetchConfig();
-
-            std::size_t contentLength = _parsedRequest.get().body.contentLength;
-            clientMaxBodySize = _config.getClientMaxBodySize();
-            if (contentLength > clientMaxBodySize) {
-                toolbox::logger::StepMark::info("Request: recvRequest: content length exceeds client max body size");
-                _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
-                return false;
-            }
         }
 
-        std::size_t recievedLength = _parsedRequest.get().body.recvedLength;
+        // Get client max body size once and reuse
         clientMaxBodySize = _config.getClientMaxBodySize();
-        if (recievedLength > clientMaxBodySize) {
-            toolbox::logger::StepMark::info("Request: recvRequest: recievedLength exceeds client max body size");
+
+        std::size_t contentLength = _parsedRequest.get().body.contentLength;
+        if (contentLength > clientMaxBodySize) {
+            toolbox::logger::StepMark::info(
+                "Request: recvRequest: content length exceeds "
+                "client max body size");
+            _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
+            return false;
+        }
+
+        std::size_t receivedLength = _parsedRequest.get().body.receivedLength;
+        if (receivedLength > clientMaxBodySize) {
+            toolbox::logger::StepMark::info(
+                "Request: recvRequest: receivedLength exceeds "
+                "client max body size");
             _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
             return false;
         }

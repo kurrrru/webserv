@@ -14,14 +14,14 @@ class HTTPRequest {
         Body() :
             isChunked(false),
             lastChunk(false),
-            contentLength(0),
-            recvedLength(0) {
+            contentLength(std::size_t(-1)),
+            receivedLength(0) {
             }
         bool isChunked;
         bool lastChunk;
         std::string content;
         std::size_t contentLength;
-        std::size_t recvedLength;
+        std::size_t receivedLength;
     };
     struct URI {
         std::string fullUri;

@@ -350,7 +350,7 @@ BaseParser::ParseStatus RequestParser::processBody() {
             parseChunkedEncoding();
             return P_COMPLETED;
         }
-        _request.body.recvedLength += getBuf()->size();
+        _request.body.receivedLength += getBuf()->size();
         getBuf()->clear();
         return P_NEED_MORE_DATA;
     }
@@ -363,13 +363,13 @@ BaseParser::ParseStatus RequestParser::processBody() {
             _request.body.contentLength = std::atoi(contentLen.front().c_str());
         }
     }
-    if (_request.body.contentLength > _request.body.recvedLength) {
-        std::size_t remainLen = _request.body.contentLength - _request.body.recvedLength;
+    if (_request.body.contentLength > _request.body.receivedLength) {
+        std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
 
         _request.body.content += getBuf()->substr(0, remainLen);
-        _request.body.recvedLength += _request.body.content.size();
+        _request.body.receivedLength += _request.body.content.size();
     }
-    if (_request.body.contentLength <= _request.body.recvedLength) {
+    if (_request.body.contentLength <= _request.body.receivedLength) {
         setValidatePos(V_COMPLETED);
         return P_COMPLETED;
     }
@@ -412,7 +412,7 @@ void RequestParser::parseChunkedEncoding() {
         }
         std::string chunkData = getBuf()->substr(0, chunkSize);
         _request.body.content.append(chunkData);
-        _request.body.recvedLength += chunkSize;
+        _request.body.receivedLength += chunkSize;
         setBuf(getBuf()->substr(chunkSize + parser::HEX_DIGIT_LENGTH));
     }
 }
