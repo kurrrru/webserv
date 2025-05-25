@@ -29,7 +29,7 @@ class BaseParser {
         P_ERROR = 3
     };
 
-    BaseParser() : _parseStatus(P_IN_PROGRESS), _clientMaxBodySize(-1) {}
+    BaseParser() : _parseStatus(P_IN_PROGRESS), _clientMaxBodySize(std::numeric_limits<std::size_t>::max()) {}
     virtual ~BaseParser() {}
 
     BaseParser::ParseStatus run(const std::string& buf);

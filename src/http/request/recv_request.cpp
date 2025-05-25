@@ -1,4 +1,5 @@
 #include <string>
+#include <limits>
 
 #include "../../../toolbox/stepmark.hpp"
 #include "../../core/client.hpp"
@@ -13,9 +14,8 @@ const std::size_t BUFFER_SIZE = 2048;
 
 bool Request::recvRequest() {
     char buffer[BUFFER_SIZE];
-    int bytesReceived = 0;
 
-    bytesReceived = recv(_client->getFd(), buffer, sizeof(buffer) - 1, 0);
+    int bytesReceived = recv(_client->getFd(), buffer, sizeof(buffer) - 1, 0);
     if (bytesReceived == 0) {
         toolbox::logger::StepMark::info("Request: recvRequest: client "
             "disconnected " + toolbox::to_string(_client->getFd()));
@@ -40,14 +40,15 @@ bool Request::recvRequest() {
     std::size_t clientMaxBodySize = 0;
 
     BaseParser::ValidatePos validatePos = _parsedRequest.getValidatePos();
-    if (validatePos == BaseParser::V_BODY ||
-        validatePos == BaseParser::V_COMPLETED ||
-        _parsedRequest.get().body.contentLength != std::size_t(-1)) {
+    bool hasContentLength = _parsedRequest.get().body.contentLength != 
+                           std::numeric_limits<std::size_t>::max();
+
+    if ((validatePos == BaseParser::V_BODY ||
+        validatePos == BaseParser::V_COMPLETED) && hasContentLength) {
         if (_config.getPath().empty()) {  // If path is empty, fetch the config
             fetchConfig();
         }
 
-        // Get client max body size once and reuse
         clientMaxBodySize = _config.getClientMaxBodySize();
 
         std::size_t contentLength = _parsedRequest.get().body.contentLength;

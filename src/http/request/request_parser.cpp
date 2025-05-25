@@ -3,6 +3,7 @@
 #include <deque>
 #include <numeric>
 #include <cstdlib>
+#include <limits>
 
 #include "request_parser.hpp"
 
@@ -354,7 +355,7 @@ BaseParser::ParseStatus RequestParser::processBody() {
         getBuf()->clear();
         return P_NEED_MORE_DATA;
     }
-    if (!_request.body.contentLength) {
+    if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
         std::vector<std::string>& contentLen =
             _request.fields.getFieldValue(fields::CONTENT_LENGTH);
         if (contentLen.empty()) {

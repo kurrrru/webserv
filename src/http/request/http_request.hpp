@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <limits>
 
 #include "http_fields.hpp"
 #include "../http_status.hpp"
@@ -14,7 +15,7 @@ class HTTPRequest {
         Body() :
             isChunked(false),
             lastChunk(false),
-            contentLength(std::size_t(-1)),
+            contentLength(std::numeric_limits<std::size_t>::max()),
             receivedLength(0) {
             }
         bool isChunked;
