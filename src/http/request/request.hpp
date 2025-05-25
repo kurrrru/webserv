@@ -13,6 +13,7 @@ class Request {
     /**
      * @brief Constructs a Request object with the given client.
      * @param client A shared pointer to the Client object
+     * @param requestDepth The depth of the request, used to track local redirects
      * associated with this request.
      */
     Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
