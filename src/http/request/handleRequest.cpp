@@ -8,7 +8,6 @@
 
 namespace http {
 void Request::handleRequest(const Client& client) {
-    // location allowed method check
     std::vector<std::string> allowedMethods = _config.getAllowedMethods();
     if (std::find(allowedMethods.begin(), allowedMethods.end(),
                   _parsedRequest.get().method) == allowedMethods.end()) {
@@ -23,11 +22,8 @@ void Request::handleRequest(const Client& client) {
     const std::string& cgiPath = _config.getCgiPath();
 
     if (cgiHandler.isCgiRequest(targetPath, cgiExtensionVector, cgiPath)) {
-        if (!cgiHandler.handleRequest(_parsedRequest.get(), _response,
-                                      _config.getRoot(), cgiExtensionVector,
-                                      cgiPath)) {
-            _response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
-        }
+        cgiHandler.handleRequest(_parsedRequest.get(), _response,
+            _config.getRoot(), cgiExtensionVector, cgiPath);
     } else {
         serverMethod::serverMethodHandler(
             _parsedRequest, _config, _parsedRequest.get().fields, _response);
