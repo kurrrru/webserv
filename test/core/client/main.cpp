@@ -24,6 +24,9 @@ int main(void) {
         toolbox::SharedPtr<Server> server1(new Server(3000));
         server1->setName("server1");
         epoll.addServer(server1->getFd(), server1);
+        toolbox::SharedPtr<Server> server2(new Server(5000));
+        server2->setName("server2");
+        epoll.addServer(server2->getFd(), server2);
 
         int cnt = 0;
         struct epoll_event events[1000];
@@ -59,6 +62,8 @@ int main(void) {
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
                             std::cout << "client ip: " << client->getIp() << std::endl;
+                            std::cout << "server ip: " << client->getServerIp() << std::endl;
+                            std::cout << "server port: " << client->getServerPort() << std::endl;
 
                             char buf[1024];
                             int len = 0;
