@@ -42,7 +42,7 @@ class Request {
     /**
      * @brief Handles the HTTP request and prepares a response.
      */
-    void handleRequest(const Client& client);
+    void handleRequest();
 
     /**
      * @brief Sends the prepared HTTP response to the client.
