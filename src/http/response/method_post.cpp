@@ -6,10 +6,15 @@
 #include <sys/stat.h>
 
 #include "../string_utils.hpp"
-#include "post_method.hpp"
+// #include "post_method.hpp"
+#include "server_method_handler.hpp"
 
 namespace http {
 namespace {
+struct FormDataField {
+    std::string filename;
+    std::string content;
+};
 
 const char* MULTIPART_FORM_DATA = "multipart/form-data";
 const char* URL_ENCODED = "application/x-www-form-urlencoded";
@@ -245,7 +250,9 @@ void handleUrlEncoded(const std::string& uploadPath, std::string& recvBody, HTTP
 
 }  // namespace
 
-void runPost(const std::string& uploadPath, std::string& recvBody, HTTPFields& fields, Response& response) {
+namespace serverMethod {
+void runPost(const std::string& uploadPath, std::string& recvBody,
+    HTTPFields& fields, Response& response) {
     try {
         if (uploadPath.empty()) {
             toolbox::logger::StepMark::error("runPost: uploadPath is empty");
@@ -262,9 +269,11 @@ void runPost(const std::string& uploadPath, std::string& recvBody, HTTPFields& f
         }
         response.setStatus(HttpStatus::CREATED);
     } catch (const HttpStatus::EHttpStatus& e) {
-        toolbox::logger::StepMark::error("runPost: setStatus " + toolbox::to_string(static_cast<int>(e)));
+        toolbox::logger::StepMark::error("runPost: setStatus "
+            + toolbox::to_string(static_cast<int>(e)));
         response.setStatus(e);
     }
 }
 
+}  // namespace serverMethod
 }  // namespace http

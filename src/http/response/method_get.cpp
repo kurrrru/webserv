@@ -5,6 +5,7 @@
 #include <limits.h>
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -18,7 +19,7 @@
 #include "../http_status.hpp"
 #include "../http_namespace.hpp"
 #include "method_utils.hpp"
-#include "get_method.hpp"
+#include "server_method_handler.hpp"
 
 namespace http {
 namespace {
@@ -100,13 +101,13 @@ std::string processAutoindex(const std::string& path) {
     return ss.str();
 }
 
-void handleDirectory(const std::string& path, const std::string& indexPath,
+void handleDirectory(const std::string& path, std::vector<std::string> indices,
                      Response& response, bool isAutoindex) {
     HttpStatus::EHttpStatus status;
 
-    if (!indexPath.empty()) {
+    if (!indices.empty()) {
         struct stat indexSt;
-        std::string fullPath = joinPath(path, indexPath);
+        std::string fullPath = findFirstExistingIndex(path, indices);
         status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
             toolbox::logger::StepMark::error("runGet: checkFileAccess fail "
@@ -128,20 +129,21 @@ void handleFile(const std::string& path, Response& response) {
 }
 }  // namespace
 
-void runGet(const std::string& path, const std::string& indexPath,
-            bool isAutoindex, Response& response) {
+namespace serverMethod {
+void runGet(const std::string& path, std::vector<std::string> indices,
+        bool isAutoindex, Response& response) {
     struct stat st;
 
     try {
         HttpStatus::EHttpStatus status = checkFileAccess(path, st);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runGet: checkFileAccess fail " + path
-                + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runGet: checkFileAccess fail "
+                + path + " " + toolbox::to_string(status));
             throw status;
         }
 
         if (isDirectory(st)) {
-            handleDirectory(path, indexPath, response, isAutoindex);
+            handleDirectory(path, indices, response, isAutoindex);
         } else if (isRegularFile(st)) {
             handleFile(path, response);
         } else {
@@ -155,4 +157,5 @@ void runGet(const std::string& path, const std::string& indexPath,
     }
 }
 
+}  // namespace serverMethod
 }  // namespace http

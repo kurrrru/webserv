@@ -14,9 +14,10 @@
 #include "../../../../src/http/case_insensitive_less.hpp"
 #include "../../../../src/http/request/http_fields.hpp"
 #include "../../../../src/http/response/method_utils.hpp"
-#include "../../../../src/http/response/post_method.hpp"
 #include "../../../../src/http/response/response.hpp"
 #include "../../../../src/http/http_namespace.hpp"
+#include "../../../../src/http/response/server_method_handler.hpp"
+
 
 void setupTestEnvironment() {
     mkdir("./uploads", 0755);
@@ -31,7 +32,7 @@ void testSimplePost() {
 
     std::string content = "normal post test";
     fields.get()["Content-Length"].push_back(toolbox::to_string(content.length()));
-    http::runPost("./uploads", content, fields, response);
+    http::serverMethod::runPost("./uploads", content, fields, response);
 }
 
 void test_normal_post() {
@@ -44,7 +45,7 @@ void test_normal_post() {
     lengthStr << successBody.length();
 
     fields.get()["Content-Length"].push_back(lengthStr.str());
-    http::runPost("./uploads", successBody, fields, response);
+    http::serverMethod::runPost("./uploads", successBody, fields, response);
 }
 
 void testUrlEncodedForm() {
@@ -57,7 +58,7 @@ void testUrlEncodedForm() {
     fields.get()["Content-Type"].push_back("application/x-www-form-urlencoded");
     fields.get()["Content-Length"].push_back(toolbox::to_string(formData.length()));
 
-    http::runPost("./uploads", formData, fields, response);
+    http::serverMethod::runPost("./uploads", formData, fields, response);
 }
 
 void test_urlencoded() {
@@ -71,7 +72,7 @@ void test_urlencoded() {
 
     fields.get()["Content-Length"].push_back(lengthStr1.str());
     fields.get()["Content-Type"].push_back("application/x-www-form-urlencoded");
-    http::runPost("./uploads", successBody, fields, response);
+    http::serverMethod::runPost("./uploads", successBody, fields, response);
 }
 
 void test_urlencoded_failure() {
@@ -85,7 +86,7 @@ void test_urlencoded_failure() {
 
     fields.get()["Content-Length"].push_back(lengthStr2.str());
     fields.get()["Content-Type"].push_back("application/x-www-form-urlencoded");
-    http::runPost("./uploads", failureBody, fields, response);
+    http::serverMethod::runPost("./uploads", failureBody, fields, response);
 }
 
 void testMultipartFormData() {
@@ -108,7 +109,7 @@ void testMultipartFormData() {
 
     fields.get()["Content-Type"].push_back("multipart/form-data; boundary=" + boundary);
     fields.get()["Content-Length"].push_back(toolbox::to_string(formData.length()));
-    http::runPost("./uploads", formData, fields, response);
+    http::serverMethod::runPost("./uploads", formData, fields, response);
 }
 
 void test_multipart_form_data() {
@@ -134,7 +135,7 @@ void test_multipart_form_data() {
 
     fields.get()["Content-Length"].push_back(lengthStr3.str());
     fields.get()["Content-Type"].push_back("multipart/form-data; boundary=boundary");
-    http::runPost("./uploads", successBody, fields, response);
+    http::serverMethod::runPost("./uploads", successBody, fields, response);
 }
 
 void test_multipart_form_data_failure() {
@@ -151,7 +152,7 @@ void test_multipart_form_data_failure() {
     lengthStr4 << failureBody.length();
     fields.get()["Content-Length"].push_back(lengthStr4.str());
     fields.get()["Content-Type"].push_back("multipart/form-data; boundary=boundary");
-    http::runPost("./uploads", failureBody, fields, response);
+    http::serverMethod::runPost("./uploads", failureBody, fields, response);
 }
 
 void test_image_upload() {
@@ -175,7 +176,7 @@ void test_image_upload() {
 
     fields.get()["Content-Length"].push_back(lengthStr.str());
     fields.get()["Content-Type"].push_back("image/png");
-    http::runPost("./uploads", imageBody, fields, response);
+    http::serverMethod::runPost("./uploads", imageBody, fields, response);
 }
 
 void test_multipart_image_upload() {
@@ -214,7 +215,7 @@ void test_multipart_image_upload() {
 
     fields.get()["Content-Length"].push_back(lengthStr.str());
     fields.get()["Content-Type"].push_back("multipart/form-data; boundary=" + boundary);
-    http::runPost("./uploads", successBody, fields, response);
+    http::serverMethod::runPost("./uploads", successBody, fields, response);
 }
 
 void testErrorCase() {
@@ -224,7 +225,7 @@ void testErrorCase() {
 
     std::string content = "no permission directory";
     fields.get()["Content-Length"].push_back(toolbox::to_string(content.length()));
-    http::runPost("./uploads/no_permission", content, fields, response);
+    http::serverMethod::runPost("./uploads/no_permission", content, fields, response);
 }
 
 static void runTests() {
