@@ -251,10 +251,8 @@ void handleUrlEncoded(const std::string& uploadPath, std::string& recvBody, HTTP
 }  // namespace
 
 namespace serverMethod {
-void runPost(const std::string& uploadPath,
-                                  std::string& recvBody,
-                                  HTTPFields& fields,
-                                  Response& response) {
+void runPost(const std::string& uploadPath, std::string& recvBody,
+    HTTPFields& fields, Response& response) {
     try {
         if (uploadPath.empty()) {
             toolbox::logger::StepMark::error("runPost: uploadPath is empty");
@@ -271,7 +269,8 @@ void runPost(const std::string& uploadPath,
         }
         response.setStatus(HttpStatus::CREATED);
     } catch (const HttpStatus::EHttpStatus& e) {
-        toolbox::logger::StepMark::error("runPost: setStatus " + toolbox::to_string(static_cast<int>(e)));
+        toolbox::logger::StepMark::error("runPost: setStatus "
+            + toolbox::to_string(static_cast<int>(e)));
         response.setStatus(e);
     }
 }

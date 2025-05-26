@@ -42,16 +42,15 @@ void handleFile(const std::string& path, Response& response) {
 }  // namespace
 
 namespace serverMethod {
-void runHead(const std::string& path,
-                                  std::vector<std::string> indices,
-                                  bool isAutoindex,
-                                  Response& response) {
+void runHead(const std::string& path, std::vector<std::string> indices,
+    bool isAutoindex, Response& response) {
     struct stat st;
 
     try {
         HttpStatus::EHttpStatus status = checkFileAccess(path, st);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runHead: checkFileAccess fail " + path + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runHead: checkFileAccess fail "
+                + path + " " + toolbox::to_string(status));
             throw status;
         }
 
