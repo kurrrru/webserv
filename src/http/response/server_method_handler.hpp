@@ -4,7 +4,6 @@
 #include <vector>
 #include <map>
 
-#include "../../config/config_location.hpp"
 #include "../request/http_fields.hpp"
 #include "../case_insensitive_less.hpp"
 #include "../http_status.hpp"
@@ -13,10 +12,16 @@
 #include "method_utils.hpp"
 #include "response.hpp"
 
+namespace config {
+class LocationConfig;  // Forward declaration
+}
+
 namespace http {
 namespace serverMethod {
 void serverMethodHandler(RequestParser& parsedRequest,
-    const config::LocationConfig &config, HTTPFields fields, Response& response);
+                         const config::LocationConfig& config,
+                         HTTPFields fields,
+                         Response& response);
 
 void runGet(const std::string& targetPath, std::vector<std::string> indices,
     bool isAutoindex, Response& response);

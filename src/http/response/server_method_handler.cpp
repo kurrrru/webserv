@@ -6,9 +6,9 @@
 namespace http {
 namespace serverMethod {
 void serverMethodHandler(RequestParser& parsedRequest,
-                                        const config::LocationConfig &config,
-                                        HTTPFields fields,
-                                        Response& response) {
+                         const config::LocationConfig &config,
+                         HTTPFields fields,
+                         Response& response) {
     std::string method = parsedRequest.get().method;
     std::string targetPath = parsedRequest.get().uri.path;
     std::vector<std::string> indices = config.getIndices();

@@ -1,9 +1,9 @@
 NAME = method_test
 SRCS = main.cpp get.cpp head.cpp delete.cpp post.cpp \
-../../../../src/http/response/get_method.cpp \
-../../../../src/http/response/head_method.cpp \
-../../../../src/http/response/post_method.cpp \
-../../../../src/http/response/delete_method.cpp \
+../../../../src/http/response/method_get.cpp \
+../../../../src/http/response/method_head.cpp \
+../../../../src/http/response/method_post.cpp \
+../../../../src/http/response/method_delete.cpp \
 ../../../../src/http/response/method_utils.cpp \
 ../../../../toolbox/stepmark.cpp \
 ../../../../toolbox/string.cpp \
@@ -11,7 +11,7 @@ SRCS = main.cpp get.cpp head.cpp delete.cpp post.cpp \
 ../../../../src/http/http_namespace.cpp \
 ../../../../src/http/response/response.cpp \
 ../../../../src/http/string_utils.cpp \
-../../../../src/http/response/content_type_manager.cpp
+../../../../src/http/response/content_type_manager.cpp \
 
 OBJS = $(SRCS:.cpp=.o)
 

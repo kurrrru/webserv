@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 
 #include <string>
+#include <vector>
 #include <map>
 
 #include "../case_insensitive_less.hpp"

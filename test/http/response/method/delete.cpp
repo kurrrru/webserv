@@ -13,9 +13,10 @@
 #include "../../../../src/http/case_insensitive_less.hpp"
 #include "../../../../src/http/request/http_fields.hpp"
 #include "../../../../src/http/response/method_utils.hpp"
-#include "../../../../src/http/response/delete_method.hpp"
 #include "../../../../src/http/response/response.hpp"
 #include "../../../../src/http/http_namespace.hpp"
+#include "../../../../src/http/response/server_method_handler.hpp"
+
 
 
 static void setupTestEnvironment() {
@@ -51,19 +52,19 @@ static void runTests() {
 
     std::string path = "./test_dir/test.html";
     toolbox::logger::StepMark::info("==== [DELETE] SUCCESS:204 normal file ====");
-    http::runDelete(path, response);
+    http::serverMethod::runDelete(path, response);
 
     path = "./test_dir/nonexistent.html";
     toolbox::logger::StepMark::info("==== [DELETE] FAIL:404 nonexistent file ====");
-    http::runDelete(path, response);
+    http::serverMethod::runDelete(path, response);
 
     path = "./test_dir/no_permission.html";
     toolbox::logger::StepMark::info("==== [DELETE] FAIL:403 no permission file ====");
-    http::runDelete(path, response);
+    http::serverMethod::runDelete(path, response);
 
     path = "./test_dir";
     toolbox::logger::StepMark::info("==== [DELETE] FAIL:403 dir ====");
-    http::runDelete(path, response);
+    http::serverMethod::runDelete(path, response);
 }
 
 void delete_test() {
