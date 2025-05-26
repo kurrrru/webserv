@@ -51,9 +51,36 @@ int Client::getFd() const {
 
 std::string Client::getIp() const {
     uint32_t ip = ntohl(_client_addr.sin_addr.s_addr);
-    std::string ip_str = toolbox::to_string((ip >> 24) & 0xFF) + "." +
-        toolbox::to_string((ip >> 16) & 0xFF) + "." +
-        toolbox::to_string((ip >> 8) & 0xFF) + "." +
-        toolbox::to_string(ip & 0xFF);
-    return ip_str;
+    return convertIpToString(ip);
+}
+
+std::string Client::getServerIp() const {
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+
+    if (getsockname(_socket_fd,
+                    (struct sockaddr*)&addr,
+                    &addr_len) == 0) {
+        uint32_t ip = ntohl(addr.sin_addr.s_addr);
+        return convertIpToString(ip);
+    }
+    return "";
+}
+
+size_t Client::getServerPort() const {
+    struct sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+    if (getsockname(_socket_fd,
+                    (struct sockaddr*)&addr,
+                    &addr_len) == 0) {
+        return ntohs(addr.sin_port);
+    }
+    return 0;
+}
+
+std::string Client::convertIpToString(uint32_t ip) const {
+    return toolbox::to_string((ip >> 24) & 0xFF) + "." +
+            toolbox::to_string((ip >> 16) & 0xFF) + "." +
+            toolbox::to_string((ip >> 8) & 0xFF) + "." +
+            toolbox::to_string(ip & 0xFF);
 }
