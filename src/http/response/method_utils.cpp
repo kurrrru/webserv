@@ -33,6 +33,17 @@ HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
     return HttpStatus::OK;
 }
 
+std::string findFirstExistingIndex(const std::string& path, const std::vector<std::string>& indices) {
+    for (std::vector<std::string>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
+        std::string fullPath = joinPath(path, *it);
+        struct stat st;
+        if (stat(fullPath.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
+            return fullPath;
+        }
+    }
+    return "";
+}
+
 std::string getModifiedTime(const struct stat& st) {
     char timeStr[26];
     ctime_r(&st.st_mtime, timeStr);

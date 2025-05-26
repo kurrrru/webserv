@@ -28,4 +28,5 @@ inline bool isRegularFile(const struct stat& st) { return S_ISREG(st.st_mode); }
 std::string joinPath(const std::string& base, const std::string& path);
 HttpStatus::EHttpStatus checkFileAccess(const std::string& path, struct stat& st);
 std::string getModifiedTime(const struct stat& st);
+std::string findFirstExistingIndex(const std::string& path, const std::vector<std::string>& indices);
 }  // namespace http

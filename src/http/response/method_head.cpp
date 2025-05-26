@@ -2,18 +2,19 @@
 #include <iostream>
 
 #include "../request/http_fields.hpp"
-#include "head_method.hpp"
+#include "server_method_handler.hpp"
+// #include "head_method.hpp"
 #include "method_utils.hpp"
 
 namespace http {
 namespace {
-void handleDirectory(const std::string& path, const std::string& indexPath,
+void handleDirectory(const std::string& path, std::vector<std::string> indices,
                     bool isAutoindex, Response& response) {
     HttpStatus::EHttpStatus status;
 
-    if (!indexPath.empty()) {
+    if (!indices.empty()) {
         struct stat indexSt;
-        std::string fullPath = joinPath(path, indexPath);
+        std::string fullPath = findFirstExistingIndex(path, indices);
         status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
             toolbox::logger::StepMark::error("runHead: handleDirectory: checkFileAccess fail " + fullPath + " " + toolbox::to_string(status));
@@ -40,8 +41,11 @@ void handleFile(const std::string& path, Response& response) {
 }
 }  // namespace
 
-void runHead(const std::string& path, const std::string& indexPath,
-            bool isAutoindex, Response& response) {
+namespace serverMethod {
+void runHead(const std::string& path,
+                                  std::vector<std::string> indices,
+                                  bool isAutoindex,
+                                  Response& response) {
     struct stat st;
 
     try {
@@ -52,7 +56,7 @@ void runHead(const std::string& path, const std::string& indexPath,
         }
 
         if (isDirectory(st)) {
-            handleDirectory(path, indexPath, isAutoindex, response);
+            handleDirectory(path, indices, isAutoindex, response);
         } else if (isRegularFile(st)) {
             handleFile(path, response);
         } else {
@@ -66,4 +70,5 @@ void runHead(const std::string& path, const std::string& indexPath,
     }
 }
 
+}  // namespace serverMethod
 }  // namespace http
