@@ -20,7 +20,7 @@ namespace http {
 namespace serverMethod {
 void serverMethodHandler(RequestParser& parsedRequest,
                          const config::LocationConfig& config,
-                         HTTPFields fields,
+                         HTTPFields& fields,
                          Response& response);
 
 void runGet(const std::string& targetPath, std::vector<std::string> indices,

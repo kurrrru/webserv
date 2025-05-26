@@ -1,13 +1,14 @@
 #include <string>
 #include <vector>
 
+#include "../../config/config_location.hpp"
 #include "server_method_handler.hpp"
 
 namespace http {
 namespace serverMethod {
 void serverMethodHandler(RequestParser& parsedRequest,
                          const config::LocationConfig &config,
-                         HTTPFields fields,
+                         HTTPFields& fields,
                          Response& response) {
     std::string method = parsedRequest.get().method;
     std::string targetPath = parsedRequest.get().uri.path;
