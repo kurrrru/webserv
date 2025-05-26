@@ -8,6 +8,7 @@
 #include <string>
 
 #include "../../toolbox/string.hpp"
+#include "../../toolbox/stepmark.hpp"
 
 Client::Client() : _socket_fd(-1) {
 }
@@ -64,6 +65,7 @@ std::string Client::getServerIp() const {
         uint32_t ip = ntohl(addr.sin_addr.s_addr);
         return convertIpToString(ip);
     }
+    toolbox::logger::StepMark::error("Failed to get server IP address");
     return "";
 }
 
@@ -75,6 +77,7 @@ size_t Client::getServerPort() const {
                     &addr_len) == 0) {
         return ntohs(addr.sin_port);
     }
+    toolbox::logger::StepMark::error("Failed to get server port");
     return 0;
 }
 
