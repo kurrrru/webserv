@@ -39,6 +39,7 @@ class LocationConfig : public ConfigBase {
  public:
     LocationConfig();
     LocationConfig(const LocationConfig&);
+    LocationConfig& operator=(const LocationConfig&);
     virtual ~LocationConfig();
 
     void setServerParent(const ServerConfig* configServer) { _parentServer = configServer; }
@@ -55,8 +56,6 @@ class LocationConfig : public ConfigBase {
     size_t getLocationsCount() const { return _locations.size(); }
 
  private:
-    LocationConfig& operator=(const LocationConfig&);
-
     std::string _path;
     Return _returnValue;
     std::vector<toolbox::SharedPtr<LocationConfig> > _locations;

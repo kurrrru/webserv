@@ -213,6 +213,7 @@ class ConfigBase {
  public:
     ConfigBase();
     ConfigBase(const ConfigBase&);
+    ConfigBase& operator=(const ConfigBase&);
     virtual ~ConfigBase();
 
     const std::vector<std::string>& getAllowedMethods() const { return _allowedMethods; }
@@ -240,8 +241,6 @@ class ConfigBase {
     void setUploadStore(const std::string& path) { _uploadStore = path; }
 
  private:
-    ConfigBase& operator=(const ConfigBase&);
-
     std::vector<std::string> _allowedMethods;
     bool _autoindex;
     std::vector<std::string> _cgiExtensions;
