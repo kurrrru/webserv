@@ -66,6 +66,8 @@ int main() {
     }
     std::cout << "Client connected" << std::endl;
     response.sendResponse(client_fd);
+    std::cout << "status: " << response.getStatus() << std::endl;
+    std::cout << "Content-Length: " << response.getContentLength() << std::endl;
     std::cout << "Response sent to client" << std::endl;
     close(client_fd);
     close(server_fd);
