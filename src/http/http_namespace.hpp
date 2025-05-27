@@ -65,6 +65,7 @@ extern const char* SLASH;
 extern const char* QUESTION;
 extern const char* PERCENT;
 extern const char* COLON;
+extern const char* SEMICOLON;
 extern const char* COMMA;
 extern const char* COMMASP;
 extern const std::size_t LF_SIZE;

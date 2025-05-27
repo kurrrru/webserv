@@ -83,12 +83,6 @@ HttpStatus::EHttpStatus FieldValidator::validateContentLength(
             return HttpStatus::BAD_REQUEST;
         }
     }
-    std::size_t size = std::strtol(contentLength->second[0].c_str(), NULL, 10);
-    if (size > fields::MAX_BODY_SIZE) {
-        toolbox::logger::StepMark::info
-            ("FieldValidator: content-length too large");
-        return HttpStatus::PAYLOAD_TOO_LARGE;
-    }
     return HttpStatus::OK;
 }
 

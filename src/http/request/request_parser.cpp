@@ -3,19 +3,52 @@
 #include <deque>
 #include <numeric>
 #include <cstdlib>
-#include <iostream>
+#include <limits>
 
 #include "request_parser.hpp"
 
 namespace http {
-static std::size_t addLength(std::size_t sum, const std::string& s) {
+namespace {
+std::size_t addLength(std::size_t sum, const std::string& s) {
     return sum + s.size();
 }
 
-static std::size_t calcTotalLength(const std::deque<std::string>& deq) {
+std::size_t calcTotalLength(const std::deque<std::string>& deq) {
     return std::accumulate(deq.begin(), deq.end(),
         static_cast<std::size_t>(0), addLength);
 }
+
+std::string removeConsecutiveSpaces(const std::string& str) {
+    std::stringstream ss(str);
+
+    std::string word;
+    std::string result;
+    while (ss >> word) {
+        if (!result.empty()) {
+            result += " ";
+        }
+        result += word;
+    }
+    return result;
+}
+
+bool hasLastChunk(const std::string* buf) {
+    std::stringstream ss(*buf);
+    std::string line;
+    bool prevLineSizeZero = false;
+    while (std::getline(ss, line)) {
+        if (line == "0") {
+            prevLineSizeZero = true;
+        } else if (prevLineSizeZero && line.empty()) {
+            return true;  // Found the last chunk
+        } else {
+            prevLineSizeZero = false;  // Reset if we find a non-empty line
+        }
+    }
+    return false;
+}
+
+}  // namespace
 
 BaseParser::ParseStatus RequestParser::processFieldLine() {
     while (true) {
@@ -25,6 +58,8 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
         }
         if (lineEndPos == 0) {
             if (!FieldValidator::validateRequestHeaders(_request.fields, _request.httpStatus)) {
+                toolbox::logger::StepMark::error(
+                    "RequestParser: invalid request headers");
                 throw ParseException("");
             }
             setValidatePos(V_BODY);
@@ -34,12 +69,15 @@ BaseParser::ParseStatus RequestParser::processFieldLine() {
 
         std::string line = toolbox::trim(getBuf(), symbols::CRLF);
         if (!FieldValidator::validateFieldLine(line)) {
+            toolbox::logger::StepMark::error(
+                "RequestParser: invalid character in field line");
             _request.httpStatus.set(HttpStatus::BAD_REQUEST);
             continue;
         }
         HTTPFields::FieldPair pair = RequestFieldParser::splitFieldLine(&line);
         if (!_fieldParser.parseFieldLine(pair, _request.fields.get(),
                                         _request.httpStatus)) {
+            toolbox::logger::StepMark::error("RequestParser: invalid field line");
             throw ParseException("");
         }
     }
@@ -55,6 +93,8 @@ BaseParser::ParseStatus RequestParser::processRequestLine() {
     validateMethod();
     processURI();
     if (_request.httpStatus.get() != HttpStatus::OK) {
+        toolbox::logger::StepMark::error(
+            "RequestParser: invalid request line");
         throw ParseException("");
     }
     setValidatePos(V_FIELD);
@@ -64,34 +104,40 @@ BaseParser::ParseStatus RequestParser::processRequestLine() {
 void RequestParser::parseRequestLine() {
     std::string line = toolbox::trim(getBuf(), symbols::CRLF);
     if (line.find(symbols::SP) == std::string::npos) {
+        toolbox::logger::StepMark::error(
+            "RequestParser: request line has no space");
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
         return;
     }
-    _request.method = toolbox::trim(&line, symbols::SP);
-    utils::skipSpace(&line);
-    _request.uri.fullUri = toolbox::trim(&line, symbols::SP);
-    utils::skipSpace(&line);
-    _request.version = toolbox::trim(&line, symbols::SP);
-    if (!line.empty()) {
+    _request.originalRequestLine = removeConsecutiveSpaces(line);
+    std::stringstream ss(_request.originalRequestLine);
+
+    std::getline(ss, _request.method, *symbols::SP);
+    std::getline(ss, _request.uri.fullUri, *symbols::SP);
+    std::getline(ss, _request.version);
+
+    if (_request.version.find(symbols::SP) != std::string::npos) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        toolbox::logger::StepMark::error(
+            "RequestParser: invalid request line");
     }
 }
 
 void RequestParser::validateVersion() {
     if (_request.version.empty()) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-        toolbox::logger::StepMark::info(
+        toolbox::logger::StepMark::error(
             "RequestParser: version not found");
         return;
     }
     if (utils::hasCtlChar(_request.version)) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-        toolbox::logger::StepMark::info(
+        toolbox::logger::StepMark::error(
             "RequestParser: version has control character");
         return;
     }
     if (!isValidFormat()) {
-        toolbox::logger::StepMark::info(
+        toolbox::logger::StepMark::error(
             "RequestParser: invalid version format");
         return;
     }
@@ -127,10 +173,14 @@ bool RequestParser::isValidFormat() {
 void RequestParser::validateMethod() {
     if (_request.method.empty()) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        toolbox::logger::StepMark::error(
+            "RequestParser: method not found");
         return;
     }
     if (!utils::isUpperStr(_request.method)) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+        toolbox::logger::StepMark::error(
+            "RequestParser: method is not uppercase");
         return;
     }
 }
@@ -163,13 +213,13 @@ void RequestParser::parseURI() {
 void RequestParser::validatePath() {
     if (_request.uri.fullUri.empty()) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-        toolbox::logger::StepMark::info(
+        toolbox::logger::StepMark::error(
             "RequestParser: uri not found");
         return;
     }
     if (_request.uri.path.size() > http::uri::MAX_URI_SIZE) {
         _request.httpStatus.set(HttpStatus::URI_TOO_LONG);
-        toolbox::logger::StepMark::info(
+        toolbox::logger::StepMark::error(
             "RequestParser: uri too large");
     }
 }
@@ -199,7 +249,7 @@ void RequestParser::percentDecode(std::string& line) {
                 if (line[0] == '/' ||
                     i + parser::HEX_DIGIT_LENGTH < line.size()) {  // is path
                     _request.httpStatus.set(HttpStatus::BAD_REQUEST);
-                    toolbox::logger::StepMark::info
+                    toolbox::logger::StepMark::error
                         ("RequestParser: path has invalid hexdecimal");
                     return;
                 }
@@ -275,6 +325,8 @@ void RequestParser::verifySafePath() {
     for (std::size_t i = 0; i < _request.uri.splitPath.size(); ++i) {
         if (_request.uri.splitPath[i] == "/..") {
             if (pathDeque.empty()) {
+                toolbox::logger::StepMark::error(
+                    "RequestParser: invalid path, try parent directory");
                 _request.httpStatus.set(HttpStatus::BAD_REQUEST);
                 return;
             } else {
@@ -293,11 +345,17 @@ void RequestParser::verifySafePath() {
 }
 
 BaseParser::ParseStatus RequestParser::processBody() {
-    if (_request.body.isChunked || isChunkedEncoding()) {
-        parseChunkedEncoding();
-        return P_COMPLETED;
+    if (isChunkedEncoding()) {
+        _request.body.content += *getBuf();
+        _request.body.receivedLength += getBuf()->size();
+        if (hasLastChunk(getBuf())) {
+            parseChunkedEncoding();
+            return P_COMPLETED;
+        }
+        getBuf()->clear();
+        return P_NEED_MORE_DATA;
     }
-    if (!_request.body.contentLength) {
+    if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
         std::vector<std::string>& contentLen =
             _request.fields.getFieldValue(fields::CONTENT_LENGTH);
         if (contentLen.empty()) {
@@ -306,13 +364,13 @@ BaseParser::ParseStatus RequestParser::processBody() {
             _request.body.contentLength = std::atoi(contentLen.front().c_str());
         }
     }
-    if (_request.body.contentLength > _request.body.recvedLength) {
-        std::size_t remainLen = _request.body.contentLength - _request.body.recvedLength;
+    if (_request.body.contentLength > _request.body.receivedLength) {
+        std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
 
         _request.body.content += getBuf()->substr(0, remainLen);
-        _request.body.recvedLength += _request.body.content.size();
+        _request.body.receivedLength = _request.body.content.size();
     }
-    if (_request.body.contentLength <= _request.body.recvedLength) {
+    if (_request.body.contentLength <= _request.body.receivedLength) {
         setValidatePos(V_COMPLETED);
         return P_COMPLETED;
     }
@@ -341,6 +399,7 @@ void RequestParser::parseChunkedEncoding() {
         char* endPtr;
         chunkSize = strtol(hexStr.c_str(), &endPtr, 16);
         if (*endPtr != *http::symbols::CR) {
+            toolbox::logger::StepMark::error("RequestParser: invalid chunk size");
             throw ParseException("");
         }
         if (chunkSize == 0) {
@@ -353,12 +412,8 @@ void RequestParser::parseChunkedEncoding() {
             return;
         }
         std::string chunkData = getBuf()->substr(0, chunkSize);
-        if (_request.body.recvedLength + chunkSize > fields::MAX_BODY_SIZE) {
-            _request.httpStatus.set(HttpStatus::PAYLOAD_TOO_LARGE);
-            throw ParseException("");
-        }
         _request.body.content.append(chunkData);
-        _request.body.recvedLength += chunkSize;
+        _request.body.receivedLength += chunkSize;
         setBuf(getBuf()->substr(chunkSize + parser::HEX_DIGIT_LENGTH));
     }
 }

@@ -35,6 +35,7 @@ class StepMark {
     std::ofstream _logFile;
 
     static StepMark& getInstance();
+    void openLogFile();
 
     StepMark();
     ~StepMark();

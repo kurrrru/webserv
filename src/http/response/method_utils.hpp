@@ -22,13 +22,10 @@ struct FileInfo {
     size_t size;
 };
 
-bool isDirectory(const struct stat& st);
-bool isRegularFile(const struct stat& st);
+inline bool isDirectory(const struct stat& st) { return S_ISDIR(st.st_mode); }
+inline bool isRegularFile(const struct stat& st) { return S_ISREG(st.st_mode); }
+
 std::string joinPath(const std::string& base, const std::string& path);
-std::string getContentType(const std::string& filename,
-                           const ExtensionMap& extensionMap);
-void initExtensionMap(ExtensionMap& extensionMap);
-HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
-                                        struct stat& st);
+HttpStatus::EHttpStatus checkFileAccess(const std::string& path, struct stat& st);
 std::string getModifiedTime(const struct stat& st);
 }  // namespace http

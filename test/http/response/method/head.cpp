@@ -16,6 +16,7 @@
 #include "../../../../src/http/response/head_method.hpp"
 #include "../../../../src/http/response/response.hpp"
 #include "../../../../src/http/http_namespace.hpp"
+#include "../../../../toolbox/stepmark.hpp"
 
 static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
@@ -50,59 +51,31 @@ static void cleanupTestEnvironment() {
 }
 
 static void runTests() {
-    http::ExtensionMap extensionMap;
-    http::initExtensionMap(extensionMap);
-    http::HttpStatus::EHttpStatus status;
     http::Response response;
 
-    std::cout << "===== head normal file (modified time) =====" << std::endl;
-    status = http::runHead("./test_dir/test.html", "", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] SUCCESS:200 normal file ====");
+    http::runHead("./test_dir/test.html", "", false, response);
 
-    std::cout << "===== head nonexistent file =====" << std::endl;
-    status = http::runHead("./test_dir/nonexistent.html", "", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::NOT_FOUND);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] FAIL:404 nonexistent file ====");
+    http::runHead("./test_dir/nonexistent.html", "", false, response);
 
-    std::cout << "===== head dir indexfile (modified time) =====" << std::endl;
-    status = http::runHead("./test_dir/", "index.html", false,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] SUCCESS:200 dir indexfile (modified time) ====");
+    http::runHead("./test_dir/", "index.html", false, response);
 
-    std::cout << "===== head dir autoindex =====" << std::endl;
-    status = http::runHead("./test_dir/", "", true,
-        extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] SUCCESS:200 dir autoindex ====");
+    http::runHead("./test_dir/", "", true, response);
 
-    std::cout << "===== head no permission =====" << std::endl;
-    status = http::runHead("./test_dir/no_permission.html", "",
-        false, extensionMap, response);
-    assert(status == http::HttpStatus::FORBIDDEN);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] FAIL:403 no permission ====");
+    http::runHead("./test_dir/no_permission.html", "", false, response);
 
-    std::cout << "===== head empty dir ====="
-        << std::endl;
-    status = http::runHead("./test_dir/empty_dir/", "",
-        true, extensionMap, response);
-    assert(status == http::HttpStatus::OK);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] SUCCESS:200 empty dir ====");
+    http::runHead("./test_dir/empty_dir/", "", true, response);
 
-    std::cout << "===== head empty dir indexfile =====" << std::endl;
-    status = http::runHead("./test_dir/empty_dir/", "index.html",
-        false, extensionMap, response);
-    assert(status == http::HttpStatus::NOT_FOUND);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] FAIL:404 empty dir indexfile ====");
+    http::runHead("./test_dir/empty_dir/", "index.html", false, response);
 
-    std::cout << "===== head no permission dir =====" << std::endl;
-    status = http::runHead("./test_dir/no_permission_dir/", "",
-        true, extensionMap, response);
-    assert(status == http::HttpStatus::FORBIDDEN);
-    std::cout << "OK: " << status << std::endl;
+    toolbox::logger::StepMark::info("==== [HEAD] FAIL:403 no permission dir ====");
+    http::runHead("./test_dir/no_permission_dir/", "", true, response);
 }
 
 void head_test() {

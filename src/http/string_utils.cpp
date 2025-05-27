@@ -55,5 +55,52 @@ bool isEqualCaseInsensitive(const std::string& str1, const std::string& str2) {
     return !less(str1, str2) && !less(str2, str1);
 }
 
+std::string decodeHex(const std::string& hexStr) {
+    if (hexStr.size() != 2 || !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
+        return "";
+    }
+
+    char* endptr = NULL;
+    std::size_t hex = strtoul(hexStr.c_str(), &endptr, 16);
+    if (*endptr != '\0' || hex > 255) {
+        return "";
+    }
+    return std::string(1, static_cast<char>(hex));
+}
+
+bool percentDecode(std::string& str, std::string* buf) {
+    if (buf == NULL) {
+        return false;
+    }
+    std::size_t pos = str.find(symbols::PERCENT);
+    if (pos == std::string::npos) {
+        *buf += str;
+        return true;
+    }
+
+    std::size_t start = 0;
+    while (pos != std::string::npos) {
+        *buf += str.substr(start, pos - start);
+
+        if (pos + 2 >= str.length()) {  // 2 hex digits
+            return false;
+        }
+
+        std::string hexStr = str.substr(pos + 1, 2);
+        std::string decodedStr = decodeHex(hexStr);
+        if (decodedStr.empty()) {
+            return false;
+        }
+        *buf += decodedStr;
+
+        start = pos + 3;  // % + 2 hex digits
+        pos = str.find(symbols::PERCENT, start);
+    }
+    if (start < str.length()) {
+        *buf += str.substr(start);
+    }
+    return true;
+}
+
 }  // namespace utils
 }  // namespace http
