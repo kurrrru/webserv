@@ -37,6 +37,8 @@ class Response {
 
     int getStatus() const;
 
+    int getContentLength() const;
+
  private:
     int _status;
     std::map<FieldName, HeaderField> _headers;

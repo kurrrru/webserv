@@ -150,4 +150,8 @@ int Response::getStatus() const {
     return _status;
 }
 
+int Response::getContentLength() const {
+    return static_cast<int>(_body.size());
+}
+
 }  // namespace http
