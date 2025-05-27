@@ -48,7 +48,7 @@ class Request {
     /**
      * @brief Sends the prepared HTTP response to the client.
      */
-    void sendResponse() const;
+    void sendResponse();
 
  private:
     http::RequestParser _parsedRequest;
