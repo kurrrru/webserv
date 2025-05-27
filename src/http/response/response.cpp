@@ -150,8 +150,8 @@ int Response::getStatus() const {
     return _status;
 }
 
-int Response::getContentLength() const {
-    return static_cast<int>(_body.size());
+std::size_t Response::getContentLength() const {
+    return _body.size();
 }
 
 }  // namespace http
