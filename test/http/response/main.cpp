@@ -68,6 +68,9 @@ int main() {
     response.sendResponse(client_fd);
     std::cout << "status: " << response.getStatus() << std::endl;
     std::cout << "Content-Length: " << response.getContentLength() << std::endl;
+    std::cout << "=== Response Body ===" << std::endl;
+    std::cout << response.getBody() << std::endl;
+    std::cout << "======================" << std::endl;
     std::cout << "Response sent to client" << std::endl;
     close(client_fd);
     close(server_fd);
