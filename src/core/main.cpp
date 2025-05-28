@@ -25,19 +25,23 @@ int main(int argc, char* argv[]) {
         } else if (argc == 2) {
             config::Config::loadConfig(argv[1]);
         }
-        toolbox::SharedPtr<config::HttpConfig> httpConfig = config::Config::getHttpConfig();
-        toolbox::SharedPtr<config::ServerConfig> serverConfig1 = httpConfig->getServers()[0];
-        toolbox::SharedPtr<config::ServerConfig> serverConfig2 = httpConfig->getServers()[1];
-
+        toolbox::SharedPtr<config::HttpConfig> httpConfig =
+                                        config::Config::getHttpConfig();
         Epoll epoll;
-        toolbox::SharedPtr<Server> server1(new Server(serverConfig1->getListens()[0].getPort()));
-        server1->setName(serverConfig1->getServerNames()[0].getName());
-        epoll.addServer(server1->getFd(), server1);
-
-        toolbox::SharedPtr<Server> server2(new Server(serverConfig2->getListens()[0].getPort()));
-        server2->setName(serverConfig2->getServerNames()[0].getName());
-        epoll.addServer(server2->getFd(), server2);
-
+        std::vector<toolbox::SharedPtr<Server> > servers;
+        for (size_t i = 0; i < httpConfig->getServers().size(); ++i) {
+            toolbox::SharedPtr<config::ServerConfig> serverConfig =
+                                                    httpConfig->getServers()[i];
+            for (size_t j = 0; j < serverConfig->getListens().size(); ++j) {
+                int port = serverConfig->getListens()[j].getPort();
+                std::string ip = serverConfig->getListens()[j].getIp();
+                    toolbox::SharedPtr<Server> server(new Server(port, ip));
+                    server->setName(
+                        serverConfig->getServerNames()[0].getName());
+                    epoll.addServer(server->getFd(), server);
+                    servers.push_back(server);
+            }
+        }
         int cnt = 0;  // for debug
         struct epoll_event events[1000];
         while (1) {
@@ -126,8 +130,9 @@ int main(int argc, char* argv[]) {
                 std::cerr << e.what() << std::endl;
             }
         }
-        epoll.del(server1->getFd());
-        epoll.del(server2->getFd());
+        for (size_t i = 0; i < servers.size(); ++i) {
+            epoll.del(servers[i]->getFd());
+        }
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
