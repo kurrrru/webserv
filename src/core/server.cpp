@@ -1,7 +1,5 @@
 // Copyright 2025 Ideal Broccoli
 
-#include "server.hpp"
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -11,25 +9,45 @@
 #include <cstdio>
 #include <iostream>
 
+#include "server.hpp"
+#include "../../toolbox/stepmark.hpp"
+#include "../../toolbox/string.hpp"
+
+namespace server {
+const int DEFAULT_PORT = 8080;
+const char* DEFAULT_IP = "0.0.0.0";
+}
+
 Server::Server() {
-    _port = default_port;
+    _port = server::DEFAULT_PORT;
     _name = "server";
+    _ip = server::DEFAULT_IP;
     createServerSocket();
 }
 
 Server::Server(int port) {
     _port = port;
     _name = "server";
+    _ip = server::DEFAULT_IP;
+    createServerSocket();
+}
+
+Server::Server(int port, const std::string& ip) {
+    _port = port;
+    _name = "server";
+    _ip = ip;
     createServerSocket();
 }
 
 Server::Server(const Server& other) {
     _port = other._port;
+    _ip = other._ip;
 }
 
 Server& Server::operator=(const Server& other) {
     if (this != &other) {
         _port = other._port;
+        _ip = other._ip;
     }
     return *this;
 }
@@ -39,14 +57,16 @@ Server::~Server() {
 }
 
 Server::ServerException::ServerException(const char* message) :
-                            _message(message) {}
+_message(message) {}
 
-const char* Server::ServerException::what() const throw() {
-    return _message;
+Server::ServerException::ServerException(const std::string& message) :
+_message(message) {}
+
+Server::ServerException::~ServerException() throw() {
 }
 
-int Server::getFd() const {
-    return _server_sock;
+const char* Server::ServerException::what() const throw() {
+    return _message.c_str();
 }
 
 void Server::createServerSocket() {
@@ -54,32 +74,52 @@ void Server::createServerSocket() {
     if (_server_sock == -1) {
         throw ServerException("socket failed");
     }
-
     int opt = 1;
     if (setsockopt(_server_sock, SOL_SOCKET, SO_REUSEADDR,
                     &opt, sizeof(opt)) == -1) {
         throw ServerException("setsockopt failed");
     }
-
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = parseIpAddress(_ip);
     server_addr.sin_port = htons(_port);
-
     if (bind(_server_sock, (struct sockaddr*)&server_addr,
                 sizeof(server_addr)) == -1) {
-        throw ServerException("bind failed");
+        std::string errorMsg = "bind() to " + _ip + ":"
+                                + toolbox::to_string(_port) + " failed";
+        toolbox::logger::StepMark::error(errorMsg);
+        throw ServerException(errorMsg);
     }
-
     if (listen(_server_sock, SOMAXCONN) == -1) {
         throw ServerException("listen failed");
     }
 }
 
-void Server::setName(const std::string& name) {
-    _name = name;
-}
-
-std::string Server::getName() const {
-    return _name;
+uint32_t Server::parseIpAddress(const std::string& ip) const {
+    if (ip == "0.0.0.0") {
+        return INADDR_ANY;
+    }
+    size_t pos1 = ip.find('.');
+    size_t pos2 = ip.find('.', pos1 + 1);
+    size_t pos3 = ip.find('.', pos2 + 1);
+    if (pos1 == std::string::npos ||
+        pos2 == std::string::npos ||
+        pos3 == std::string::npos) {
+        std::string errorMsg = "invalid IP address format: " + ip;
+        toolbox::logger::StepMark::error(errorMsg);
+        throw ServerException(errorMsg);
+    }
+    int a = std::atoi(ip.substr(0, pos1).c_str());
+    int b = std::atoi(ip.substr(pos1 + 1, pos2 - pos1 - 1).c_str());
+    int c = std::atoi(ip.substr(pos2 + 1, pos3 - pos2 - 1).c_str());
+    int d = std::atoi(ip.substr(pos3 + 1).c_str());
+    int octets[4] = {a, b, c, d};
+    for (int i = 0; i < 4; ++i) {
+        if (octets[i] < 0 || octets[i] > 255) {
+            std::string errorMsg = "invalid IP address range: " + ip;
+            toolbox::logger::StepMark::error(errorMsg);
+            throw ServerException(errorMsg);
+        }
+    }
+    return htonl((a << 24) | (b << 16) | (c << 8) | d);
 }
