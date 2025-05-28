@@ -40,21 +40,6 @@ Server::Server(int port, const std::string& ip) {
     createServerSocket();
 }
 
-Server::Server(const Server& other) {
-    _port = other._port;
-    _ip = other._ip;
-    _name = other._name;
-}
-
-Server& Server::operator=(const Server& other) {
-    if (this != &other) {
-        _port = other._port;
-        _ip = other._ip;
-        _name = other._name;
-    }
-    return *this;
-}
-
 Server::~Server() {
     close(_server_sock);
 }

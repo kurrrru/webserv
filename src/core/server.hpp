@@ -26,8 +26,6 @@ class Server {
     Server();
     explicit Server(int port);
     Server(int port, const std::string& ip);
-    Server(const Server& other);
-    Server& operator=(const Server& other);
     virtual ~Server();
 
     int getFd() const { return _server_sock; }
@@ -35,6 +33,9 @@ class Server {
     std::string getName() const { return _name; }
 
  private:
+    Server(const Server& other);
+    Server& operator=(const Server& other);
+
     int _port;
     std::string _ip;
     std::string _name;
