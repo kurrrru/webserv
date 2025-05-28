@@ -8,6 +8,7 @@
 
 namespace server {
 extern const int DEFAULT_PORT;
+extern const char* DEFAULT_NAME;
 extern const char* DEFAULT_IP;
 }  // namespace server
 
@@ -35,9 +36,9 @@ class Server {
 
  private:
     int _port;
-    int _server_sock;
-    std::string _name;
     std::string _ip;
+    std::string _name;
+    int _server_sock;
     void createServerSocket();
     uint32_t parseIpAddress(const std::string& ip) const;
 };

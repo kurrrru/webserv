@@ -15,39 +15,42 @@
 
 namespace server {
 const int DEFAULT_PORT = 8080;
+const char* DEFAULT_NAME = "server";
 const char* DEFAULT_IP = "0.0.0.0";
 }
 
 Server::Server() {
     _port = server::DEFAULT_PORT;
-    _name = "server";
     _ip = server::DEFAULT_IP;
+    _name = server::DEFAULT_NAME;
     createServerSocket();
 }
 
 Server::Server(int port) {
     _port = port;
-    _name = "server";
     _ip = server::DEFAULT_IP;
+    _name = server::DEFAULT_NAME;
     createServerSocket();
 }
 
 Server::Server(int port, const std::string& ip) {
     _port = port;
-    _name = "server";
     _ip = ip;
+    _name = server::DEFAULT_NAME;
     createServerSocket();
 }
 
 Server::Server(const Server& other) {
     _port = other._port;
     _ip = other._ip;
+    _name = other._name;
 }
 
 Server& Server::operator=(const Server& other) {
     if (this != &other) {
         _port = other._port;
         _ip = other._ip;
+        _name = other._name;
     }
     return *this;
 }
