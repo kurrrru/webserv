@@ -39,7 +39,7 @@ class Response {
 
     std::size_t getContentLength() const;
 
-    std::string getBody() const;
+    const std::string& getBody() const;
 
  private:
     int _status;

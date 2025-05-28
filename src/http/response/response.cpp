@@ -154,7 +154,7 @@ std::size_t Response::getContentLength() const {
     return _body.size();
 }
 
-std::string Response::getBody() const {
+const std::string& Response::getBody() const {
     return _body;
 }
 
