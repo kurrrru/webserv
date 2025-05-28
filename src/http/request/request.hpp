@@ -31,9 +31,6 @@ class Request {
      * false otherwise.
      */
     bool recvRequest();
-    bool performRecv(std::string& recievedData);
-    bool loadConfig();
-    bool validateBodySize();
 
     void setLocalRedirectInfo(const std::string& method, 
         const std::string& path, const std::string& host);
@@ -64,6 +61,10 @@ class Request {
     Request(const Request& other);
     Request& operator=(const Request& other);
 
+    // recvRequest helper methods
+    bool performRecv(std::string& receivedData);
+    bool loadConfig();
+    bool validateBodySize();
 };
 
 }
