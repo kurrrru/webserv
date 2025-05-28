@@ -146,4 +146,8 @@ std::string Response::getStatusMessage(int code) {
     }
 }
 
+int Response::getStatus() const {
+    return _status;
+}
+
 }  // namespace http
