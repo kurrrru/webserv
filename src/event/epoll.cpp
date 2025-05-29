@@ -10,7 +10,7 @@
 #include "tagged_epoll_event.hpp"
 
 namespace toolbox {
-    static void setNonBlocking(int fd);
+static void setNonBlocking(int fd);
 }
 
 Epoll::Epoll() {
@@ -51,7 +51,7 @@ void Epoll::addServer(int fd, toolbox::SharedPtr<Server> server) {
 void Epoll::addClient(int fd, toolbox::SharedPtr<Client> client) {
     Epoll& epollInstance = getInstance();
     struct epoll_event* ev = new struct epoll_event;
-    ev->events = EPOLLIN | EPOLLET;
+    ev->events = EPOLLIN;
     taggedEventData* tagged = new taggedEventData;
     tagged->client = client;
     ev->data.ptr = static_cast<void*>(tagged);
