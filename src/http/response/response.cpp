@@ -8,6 +8,7 @@
 #include <vector>
 #include <utility>
 
+#include "../../core/constant.hpp"
 #include "../../../toolbox/stepmark.hpp"
 
 namespace http {
@@ -62,7 +63,7 @@ void Response::sendResponse(int client_fd) const {
 
     while (total_sent < to_send) {
         ssize_t sent = send(client_fd, data + total_sent,
-            to_send - total_sent, 0);
+            to_send - total_sent, 0); // TODO: change to non-blocking send later
         if (sent <= 0) {
             std::ostringstream oss;
             oss << "Failed to send response:\n";

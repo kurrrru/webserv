@@ -3,19 +3,16 @@
 
 #include "../../../toolbox/stepmark.hpp"
 #include "../../core/client.hpp"
+#include "../../core/constant.hpp"
 #include "request_parser.hpp"
 #include "request.hpp"
 
 namespace http {
 
-namespace {
-const std::size_t BUFFER_SIZE = 2048;
-}
-
 bool Request::recvRequest() {
-    char buffer[BUFFER_SIZE];
+    char buffer[core::IO_BUFFER_SIZE];
 
-    int bytesReceived = recv(_client->getFd(), buffer, sizeof(buffer) - 1, 0);
+    int bytesReceived = recv(_client->getFd(), buffer, core::IO_BUFFER_SIZE, 0);
     if (bytesReceived == 0) {
         toolbox::logger::StepMark::info("Request: recvRequest: client "
             "disconnected " + toolbox::to_string(_client->getFd()));
