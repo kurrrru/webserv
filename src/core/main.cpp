@@ -29,20 +29,19 @@ int main(int argc, char* argv[]) {
         toolbox::SharedPtr<config::ServerConfig> serverConfig1 = httpConfig->getServers()[0];
         toolbox::SharedPtr<config::ServerConfig> serverConfig2 = httpConfig->getServers()[1];
 
-        Epoll epoll;
         toolbox::SharedPtr<Server> server1(new Server(serverConfig1->getListens()[0].getPort()));
         server1->setName(serverConfig1->getServerNames()[0].getName());
-        epoll.addServer(server1->getFd(), server1);
+        Epoll::addServer(server1->getFd(), server1);
 
         toolbox::SharedPtr<Server> server2(new Server(serverConfig2->getListens()[0].getPort()));
         server2->setName(serverConfig2->getServerNames()[0].getName());
-        epoll.addServer(server2->getFd(), server2);
+        Epoll::addServer(server2->getFd(), server2);
 
         int cnt = 0;  // for debug
         struct epoll_event events[1000];
         while (1) {
             try {
-                int nfds = epoll.wait(events, 1000, -1);
+                int nfds = Epoll::wait(events, 1000, -1);
                 if (nfds == -1) {
                     throw std::runtime_error("epoll_wait failed");
                 }
@@ -62,7 +61,7 @@ int main(int argc, char* argv[]) {
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
-                            epoll.addClient(client_sock, client); // this func will throw exception
+                            Epoll::addClient(client_sock, client); // this func will throw exception
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -116,7 +115,7 @@ int main(int argc, char* argv[]) {
                                 throw std::runtime_error("send failed");
                                 // Send exit status to client
                             }
-                            epoll.del(client_sock);
+                            Epoll::del(client_sock);
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -126,8 +125,8 @@ int main(int argc, char* argv[]) {
                 std::cerr << e.what() << std::endl;
             }
         }
-        epoll.del(server1->getFd());
-        epoll.del(server2->getFd());
+        Epoll::del(server1->getFd());
+        Epoll::del(server2->getFd());
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
