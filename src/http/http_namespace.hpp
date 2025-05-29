@@ -38,6 +38,7 @@ extern const char* ACCEPT_ENCODING;
 extern const char* AUTHORIZATION;
 extern const char* USER_AGENT;
 extern const char* COOKIE;
+extern const char* REFERER;
 // response fields
 extern const char* SERVER;
 extern const char* SET_COOKIE;

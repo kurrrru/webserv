@@ -35,6 +35,7 @@ const char* ACCEPT_ENCODING = "Accept-Encoding";
 const char* AUTHORIZATION = "Authorization";
 const char* USER_AGENT = "User-Agent";
 const char* COOKIE = "Cookie";
+const char* REFERER = "Referer";
 // response fields
 const char* SERVER = "Server";
 const char* SET_COOKIE = "Set-Cookie";
@@ -45,8 +46,9 @@ const char* FIELDS[] = {
 DATE,          CACHE_CONTROL,    CONNECTION,       CONTENT_LENGTH,
 CONTENT_TYPE,  CONTENT_ENCODING, CONTENT_LANGUAGE, TRANSFER_ENCODING,
 HOST,          ACCEPT,           ACCEPT_ENCODING,  ACCEPT_LANGUAGE,
-AUTHORIZATION, USER_AGENT,       COOKIE,           SERVER,
-SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE, LAST_MODIFIED
+AUTHORIZATION, USER_AGENT,       COOKIE,           REFERER,
+SERVER,        SET_COOKIE,       LOCATION,         WWW_AUTHENTICATE,
+LAST_MODIFIED
 };
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 const std::size_t MAX_FIELDLINE_SIZE = 8192;
