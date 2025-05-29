@@ -146,4 +146,16 @@ std::string Response::getStatusMessage(int code) {
     }
 }
 
+int Response::getStatus() const {
+    return _status;
+}
+
+std::size_t Response::getContentLength() const {
+    return _body.size();
+}
+
+const std::string& Response::getBody() const {
+    return _body;
+}
+
 }  // namespace http
