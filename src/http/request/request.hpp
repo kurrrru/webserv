@@ -64,6 +64,11 @@ class Request {
     Request(const Request& other);
     Request& operator=(const Request& other);
 
+    // recvRequest helper methods
+    bool performRecv(std::string& receivedData);
+    bool loadConfig();
+    bool validateBodySize();
+    // fetchConfig helper methods
     toolbox::SharedPtr<config::ServerConfig> selectServer();
     bool extractCandidateServers(
         const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
@@ -92,4 +97,4 @@ class Request {
         const std::string& path);
 };
 
-}
+}  // namespace http
