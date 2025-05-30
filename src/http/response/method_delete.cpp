@@ -1,6 +1,7 @@
 #include <string>
 
-#include "delete_method.hpp"
+#include "server_method_handler.hpp"
+
 namespace http {
 
 namespace {
@@ -15,6 +16,7 @@ void handleFile(const std::string& path) {
 }
 }  // namespace
 
+namespace serverMethod {
 void runDelete(const std::string& path, Response& response) {
     struct stat st;
 
@@ -45,4 +47,5 @@ void runDelete(const std::string& path, Response& response) {
     }
 }
 
+}  // namespace serverMethod
 }  // namespace http

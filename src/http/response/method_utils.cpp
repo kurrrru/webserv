@@ -1,6 +1,7 @@
 #include <unistd.h>
 
 #include <string>
+#include <vector>
 
 #include "method_utils.hpp"
 
@@ -21,7 +22,7 @@ std::string joinPath(const std::string& base, const std::string& path) {
 
 HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
                                         struct stat& st) {
-    if (access(path.c_str(), F_OK) != 0) {
+    if (path.empty() || access(path.c_str(), F_OK) != 0) {
         return HttpStatus::NOT_FOUND;
     }
     if (stat(path.c_str(), &st) != 0) {
@@ -31,6 +32,18 @@ HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
         return HttpStatus::FORBIDDEN;
     }
     return HttpStatus::OK;
+}
+
+std::string findFirstExistingIndex(const std::string& path,
+    const std::vector<std::string>& indices) {
+    for (std::size_t i = 0; i != indices.size(); ++i) {
+        std::string fullPath = joinPath(path, indices[i]);
+        struct stat st;
+        if (stat(fullPath.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
+            return fullPath;
+        }
+    }
+    return "";
 }
 
 std::string getModifiedTime(const struct stat& st) {

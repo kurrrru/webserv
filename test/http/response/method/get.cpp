@@ -11,9 +11,9 @@
 
 #include "../../../../src/http/http_status.hpp"
 #include "../../../../src/http/case_insensitive_less.hpp"
-#include "../../../../src/http/response/get_method.hpp"
 #include "../../../../src/http/response/response.hpp"
 #include "../../../../toolbox/stepmark.hpp"
+#include "../../../../src/http/response/server_method_handler.hpp"
 
 static void setupTestEnvironment() {
     mkdir("./test_dir", 0755);
@@ -49,30 +49,33 @@ static void cleanupTestEnvironment() {
 
 static void runTests() {
     http::Response response;
+    std::vector<std::string> indices;
+    indices.push_back("index.html");
+    std::vector<std::string> emptyIndices;
 
     toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 normal file =====");
-    http::runGet("./test_dir/test.html", "", false, response);
+    http::serverMethod::runGet("./test_dir/test.html", emptyIndices, false, response);
 
     toolbox::logger::StepMark::info("==== [GET] FAIL:404 nonexistent file =====");
-    http::runGet("./test_dir/nonexistent.html", "", false, response);
+    http::serverMethod::runGet("./test_dir/nonexistent.html", emptyIndices, false, response);
 
     toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 dir indexfile =====");
-    http::runGet("./test_dir/", "index.html", false, response);
+    http::serverMethod::runGet("./test_dir/", indices, false, response);
 
     toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 dir autoindex =====");
-    http::runGet("./test_dir/", "", true, response);
+    http::serverMethod::runGet("./test_dir/", emptyIndices, true, response);
 
     toolbox::logger::StepMark::info("==== [GET] FAIL:403 no permission file =====");
-    http::runGet("./test_dir/no_permission.html", "", false, response);
+    http::serverMethod::runGet("./test_dir/no_permission.html", emptyIndices, false, response);
 
     toolbox::logger::StepMark::info("==== [GET] SUCCESS:200 empty dir =====");
-    http::runGet("./test_dir/empty_dir/", "", true, response);
+    http::serverMethod::runGet("./test_dir/empty_dir/", emptyIndices, true, response);
 
     toolbox::logger::StepMark::info("==== [GET] FAIL:404 empty dir indexfile =====");
-    http::runGet("./test_dir/empty_dir/", "index.html", false, response);
+    http::serverMethod::runGet("./test_dir/empty_dir/", indices, false, response);
 
     toolbox::logger::StepMark::info("==== [GET] FAIL:403 no permission dir =====");
-    http::runGet("./test_dir/no_permission_dir/", "", true, response);
+    http::serverMethod::runGet("./test_dir/no_permission_dir/", emptyIndices, true, response);
 }
 
 void get_test() {

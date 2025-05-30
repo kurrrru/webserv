@@ -16,7 +16,7 @@ class ContentTypeManager {
         return instance;
     }
     std::string getContentType(const std::string& filename);
-    std::string getExtension(const std::string& filename);
+    std::string getExtension(const std::string& content_type);
 
  private:
     static ContentTypeMap _contentTypeMap;
