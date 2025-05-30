@@ -21,12 +21,18 @@ class Client {
     Client(const Client& other);
     Client& operator=(const Client& other);
     virtual ~Client();
+
     int getFd() const;
     std::string getIp() const;
+    std::string getServerIp() const;
+    size_t getServerPort() const;
+
  private:
     Client();
 
     int _socket_fd;
     struct sockaddr_in _client_addr;
     socklen_t _client_addr_len;
+
+    std::string convertIpToString(uint32_t ip) const;
 };

@@ -4,7 +4,8 @@ SRCS = main.cpp \
 		../../../src/core/server.cpp \
 		../../../src/core/client.cpp \
 		../../../src/event/epoll.cpp \
-		../../../toolbox/string.cpp 
+		../../../toolbox/string.cpp \
+		../../../toolbox/stepmark.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 CXX = c++

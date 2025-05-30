@@ -3,6 +3,7 @@
 #include <deque>
 #include <numeric>
 #include <cstdlib>
+#include <limits>
 
 #include "request_parser.hpp"
 
@@ -29,6 +30,22 @@ std::string removeConsecutiveSpaces(const std::string& str) {
         result += word;
     }
     return result;
+}
+
+bool hasLastChunk(const std::string* buf) {
+    std::stringstream ss(*buf);
+    std::string line;
+    bool prevLineSizeZero = false;
+    while (std::getline(ss, line)) {
+        if (line == "0") {
+            prevLineSizeZero = true;
+        } else if (prevLineSizeZero && line.empty()) {
+            return true;  // Found the last chunk
+        } else {
+            prevLineSizeZero = false;  // Reset if we find a non-empty line
+        }
+    }
+    return false;
 }
 
 }  // namespace
@@ -328,11 +345,17 @@ void RequestParser::verifySafePath() {
 }
 
 BaseParser::ParseStatus RequestParser::processBody() {
-    if (_request.body.isChunked || isChunkedEncoding()) {
-        parseChunkedEncoding();
-        return P_COMPLETED;
+    if (isChunkedEncoding()) {
+        _request.body.content += *getBuf();
+        _request.body.receivedLength += getBuf()->size();
+        if (hasLastChunk(getBuf())) {
+            parseChunkedEncoding();
+            return P_COMPLETED;
+        }
+        getBuf()->clear();
+        return P_NEED_MORE_DATA;
     }
-    if (!_request.body.contentLength) {
+    if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
         std::vector<std::string>& contentLen =
             _request.fields.getFieldValue(fields::CONTENT_LENGTH);
         if (contentLen.empty()) {
@@ -341,13 +364,13 @@ BaseParser::ParseStatus RequestParser::processBody() {
             _request.body.contentLength = std::atoi(contentLen.front().c_str());
         }
     }
-    if (_request.body.contentLength > _request.body.recvedLength) {
-        std::size_t remainLen = _request.body.contentLength - _request.body.recvedLength;
+    if (_request.body.contentLength > _request.body.receivedLength) {
+        std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
 
         _request.body.content += getBuf()->substr(0, remainLen);
-        _request.body.recvedLength += _request.body.content.size();
+        _request.body.receivedLength = _request.body.content.size();
     }
-    if (_request.body.contentLength <= _request.body.recvedLength) {
+    if (_request.body.contentLength <= _request.body.receivedLength) {
         setValidatePos(V_COMPLETED);
         return P_COMPLETED;
     }
@@ -389,14 +412,8 @@ void RequestParser::parseChunkedEncoding() {
             return;
         }
         std::string chunkData = getBuf()->substr(0, chunkSize);
-        if (_request.body.recvedLength + chunkSize > fields::MAX_BODY_SIZE) {
-            _request.httpStatus.set(HttpStatus::PAYLOAD_TOO_LARGE);
-            toolbox::logger::StepMark::error(
-                "RequestParser: body size too large");
-            throw ParseException("");
-        }
         _request.body.content.append(chunkData);
-        _request.body.recvedLength += chunkSize;
+        _request.body.receivedLength += chunkSize;
         setBuf(getBuf()->substr(chunkSize + parser::HEX_DIGIT_LENGTH));
     }
 }

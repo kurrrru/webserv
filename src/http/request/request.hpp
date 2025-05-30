@@ -13,9 +13,10 @@ class Request {
     /**
      * @brief Constructs a Request object with the given client.
      * @param client A shared pointer to the Client object
+     * @param requestDepth The depth of the request, used to track local redirects
      * associated with this request.
      */
-    Request(toolbox::SharedPtr<Client> client, std::size_t requestDepth = 0);
+    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
 
     /**
      * @brief Destructor for the Request object.
@@ -60,6 +61,10 @@ class Request {
     Request(const Request& other);
     Request& operator=(const Request& other);
 
+    // recvRequest helper methods
+    bool performRecv(std::string& receivedData);
+    bool loadConfig();
+    bool validateBodySize();
 };
 
 }
