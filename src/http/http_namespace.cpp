@@ -50,6 +50,10 @@ SET_COOKIE,    LOCATION,         WWW_AUTHENTICATE, LAST_MODIFIED
 };
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 const std::size_t MAX_FIELDLINE_SIZE = 8192;
+const std::size_t MAX_BODY_SIZE = 1048576;
+namespace cgi {
+const char* STATUS = "Status";
+}
 }  // namespace fields
 
 namespace symbols {
@@ -71,4 +75,32 @@ const std::size_t LF_SIZE = 1;
 const std::size_t CRLF_SIZE = 2;
 }  // namespace symbols
 
+namespace cgi {
+const size_t MAX_REDIRECTS = 10;
+const size_t TIMEOUT = 30;
+const size_t READ_BUFFER_SIZE = 4096;
+const size_t READ_TIMEOUT_SEC = 1;
+const char* GATEWAY_INTERFACE = "CGI/1.1";
+const char* SERVER_SOFTWARE = "WebServ/1.0";
+const char* ENV_PREFIX = "HTTP_";
+namespace meta {
+const char* AUTH_TYPE = "AUTH_TYPE";
+const char* CONTENT_LENGTH = "CONTENT_LENGTH";
+const char* CONTENT_TYPE = "CONTENT_TYPE";
+const char* GATEWAY_INTERFACE = "GATEWAY_INTERFACE";
+const char* PATH_INFO = "PATH_INFO";
+const char* PATH_TRANSLATED = "PATH_TRANSLATED";
+const char* QUERY_STRING = "QUERY_STRING";
+const char* REMOTE_ADDR = "REMOTE_ADDR";
+const char* REMOTE_HOST = "REMOTE_HOST";
+const char* REMOTE_IDENT = "REMOTE_IDENT";
+const char* REMOTE_USER = "REMOTE_USER";
+const char* REQUEST_METHOD = "REQUEST_METHOD";
+const char* SCRIPT_NAME = "SCRIPT_NAME";
+const char* SERVER_NAME = "SERVER_NAME";
+const char* SERVER_PORT = "SERVER_PORT";
+const char* SERVER_PROTOCOL = "SERVER_PROTOCOL";
+const char* SERVER_SOFTWARE = "SERVER_SOFTWARE";
+}  // namespace meta
+}  // namespace cgi
 }  // namespace http

@@ -8,63 +8,112 @@
 #include "request.hpp"
 
 namespace http {
+namespace {
 
-bool Request::recvRequest() {
+int handleRecvResult(int receivedSize,
+                      BaseParser::ValidatePos validatePos,
+                      const toolbox::SharedPtr<Client>& client) {
+    int statusCode = 200;
+    if (receivedSize == 0) {
+        toolbox::logger::StepMark::info("Request: recvRequest: client "
+            "disconnected " + toolbox::to_string(client->getFd()));
+        if (validatePos != BaseParser::V_COMPLETED) {
+            statusCode = 400;
+        }
+    } else if (receivedSize == -1) {
+        toolbox::logger::StepMark::error("Request: recvRequest: recv failed "
+            "in recv from " + toolbox::to_string(client->getFd()));
+        statusCode = 500;
+    }
+    return statusCode;
+}
+
+bool isValidContentLength(std::size_t contentLength,
+                          std::size_t clientMaxBodySize) {
+    if (contentLength > clientMaxBodySize) {
+        toolbox::logger::StepMark::info( "Request: recvRequest: content length"
+            " exceeds client max body size");
+        return false;
+    }
+    return true;
+}
+
+bool isValidReceivedLength(std::size_t receivedLength,
+                           std::size_t clientMaxBodySize) {
+    if (receivedLength > clientMaxBodySize) {
+        toolbox::logger::StepMark::info("Request: recvRequest: received length"
+            " exceeds client max body size");
+        return false;
+    }
+    return true;
+}
+
+}  // namespace
+
+bool Request::performRecv(std::string& receivedData) {
     char buffer[core::IO_BUFFER_SIZE];
 
-    int bytesReceived = recv(_client->getFd(), buffer, core::IO_BUFFER_SIZE, 0);
-    if (bytesReceived == 0) {
-        toolbox::logger::StepMark::info("Request: recvRequest: client "
-            "disconnected " + toolbox::to_string(_client->getFd()));
-        if (_parsedRequest.getValidatePos() == BaseParser::V_COMPLETED) {
-            _response.setStatus(HttpStatus::OK);
-            return true;
-        } else {
-            _response.setStatus(HttpStatus::BAD_REQUEST);
-            return false;
-        }
-    } else if (bytesReceived == -1) {
-        toolbox::logger::StepMark::error("Request: recvRequest: recv failed "
-            "in recv from " + toolbox::to_string(_client->getFd()));
-        _response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+    int receivedSize = recv(_client->getFd(), buffer, core::IO_BUFFER_SIZE, 0);
+    int statusCode = handleRecvResult(receivedSize, 
+                                  _parsedRequest.getValidatePos(), _client);
+
+    if (statusCode != 200) {
+        _response.setStatus(statusCode);
         return false;
     }
 
-    _parsedRequest.run(std::string(buffer, bytesReceived));
+    receivedData = std::string(buffer, receivedSize);
+    return true;
+}
 
-    std::size_t clientMaxBodySize = 0;
-
-    BaseParser::ValidatePos validatePos = _parsedRequest.getValidatePos();
-    bool hasContentLength = _parsedRequest.get().body.contentLength != 
-                           std::numeric_limits<std::size_t>::max();
-
-    if ((validatePos == BaseParser::V_BODY ||
-        validatePos == BaseParser::V_COMPLETED) && hasContentLength) {
-        if (_config.getPath().empty()) {  // If path is empty, fetch the config
-            fetchConfig();
-        }
-
-        clientMaxBodySize = _config.getClientMaxBodySize();
-
-        std::size_t contentLength = _parsedRequest.get().body.contentLength;
-        if (contentLength > clientMaxBodySize) {
+bool Request::loadConfig() {
+    if (_config.getPath().empty()) {
+        fetchConfig();
+        if (_response.getStatus() != HttpStatus::OK) {
             toolbox::logger::StepMark::info(
-                "Request: recvRequest: content length exceeds "
-                "client max body size");
-            _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
-            return false;
-        }
-
-        std::size_t receivedLength = _parsedRequest.get().body.receivedLength;
-        if (receivedLength > clientMaxBodySize) {
-            toolbox::logger::StepMark::info(
-                "Request: recvRequest: receivedLength exceeds "
-                "client max body size");
-            _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
+                "Request: loadConfig: fetchConfig failed");
             return false;
         }
     }
     return true;
+}
+
+bool Request::validateBodySize() {
+    const BaseParser::ValidatePos validatePos = _parsedRequest.getValidatePos();
+    if (validatePos != BaseParser::V_BODY &&
+        validatePos != BaseParser::V_COMPLETED) {
+        return true;
+    }
+
+    if (!loadConfig()) {
+        return false;
+    }
+
+    const std::size_t clientMaxBodySize = _config.getClientMaxBodySize();
+    const std::size_t contentLength = _parsedRequest.get().body.contentLength;
+    const std::size_t receivedLength = _parsedRequest.get().body.receivedLength;
+
+    if (!isValidContentLength(contentLength, clientMaxBodySize) ||
+        !isValidReceivedLength(receivedLength, clientMaxBodySize)) {
+        _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
+        return false;
+    }
+    return true;
+}
+
+bool Request::recvRequest() {
+    std::string receivedData;
+
+    if (!performRecv(receivedData)) {
+        return false;
+    }
+
+    if (_parsedRequest.run(receivedData) == BaseParser::P_ERROR) {
+        _response.setStatus(_parsedRequest.get().httpStatus.get());
+        return false;
+    }
+
+    return validateBodySize();
 }
 
 }  // namespace http

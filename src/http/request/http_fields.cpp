@@ -30,4 +30,14 @@ HTTPFields::FieldValue& HTTPFields::getFieldValue(const std::string& key) {
     return emptyVector;
 }
 
+const HTTPFields::FieldValue& HTTPFields::getFieldValue(
+                                    const std::string& key) const {
+    static HTTPFields::FieldValue emptyVector;
+    FieldMap::const_iterator it = _fieldsMap.find(key);
+    if (it != _fieldsMap.end()) {
+        return it->second;
+    }
+    return emptyVector;
+}
+
 }  // namespace http
