@@ -268,7 +268,7 @@ void runPost(const std::string& uploadPath, std::string& recvBody,
         }
         response.setStatus(HttpStatus::CREATED);
     } catch (const HttpStatus::EHttpStatus& e) {
-        toolbox::logger::StepMark::error("runPost: failed setStatus "
+        toolbox::logger::StepMark::error("runPost: failed, setStatus "
             + toolbox::to_string(static_cast<int>(e)));
         response.setStatus(e);
     }

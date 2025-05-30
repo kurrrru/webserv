@@ -22,7 +22,7 @@ std::string joinPath(const std::string& base, const std::string& path) {
 
 HttpStatus::EHttpStatus checkFileAccess(const std::string& path,
                                         struct stat& st) {
-    if (access(path.c_str(), F_OK) != 0) {
+    if (path.empty() || access(path.c_str(), F_OK) != 0) {
         return HttpStatus::NOT_FOUND;
     }
     if (stat(path.c_str(), &st) != 0) {

@@ -22,7 +22,7 @@ void Request::handleRequest() {
 
     CgiHandler cgiHandler;
 
-    const std::string& targetPath = httpRequest.uri.path;
+    const std::string& targetPath = http::joinPath(_config.getRoot(), httpRequest.uri.path);
     const std::string& cgiPath = _config.getCgiPath();
     const std::vector<std::string>& cgiExtensionVector = _config.getCgiExtensions();
 
