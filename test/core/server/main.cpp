@@ -1,3 +1,5 @@
+// this is a simple version of src/core/main.cpp
+
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <fcntl.h>
@@ -9,44 +11,42 @@
 #include <cstdio>
 #include <sstream>
 
-#include "server.hpp"
-#include "client.hpp"
-#include "../config/config_namespace.hpp"
-#include "../config/config_parser.hpp"
-#include "../event/epoll.hpp"
-#include "../event/tagged_epoll_event.hpp"
-#include "../../toolbox/string.hpp"
-#include "../../toolbox/shared.hpp"
+#include "../../../src/core/server.hpp"
+#include "../../../src/core/client.hpp"
+#include "../../../src/event/epoll.hpp"
+#include "../../../src/event/tagged_epoll_event.hpp"
+#include "../../../toolbox/string.hpp"
+#include "../../../toolbox/shared.hpp"
 
-int main(int argc, char* argv[]) {
+int main(void) {
     try {
-        if (argc == 1) {
-            config::Config::loadConfig(config::DEFAULT_FILE);
-        } else if (argc == 2) {
-            config::Config::loadConfig(argv[1]);
-        }
-        toolbox::SharedPtr<config::HttpConfig> httpConfig =
-                                        config::Config::getHttpConfig();
         Epoll epoll;
-        std::vector<toolbox::SharedPtr<Server> > servers;
-        for (size_t i = 0; i < httpConfig->getServers().size(); ++i) {
-            toolbox::SharedPtr<config::ServerConfig> serverConfig =
-                                                    httpConfig->getServers()[i];
-            for (size_t j = 0; j < serverConfig->getListens().size(); ++j) {
-                int port = serverConfig->getListens()[j].getPort();
-                std::string ip = serverConfig->getListens()[j].getIp();
-                    toolbox::SharedPtr<Server> server(new Server(port, ip));
-                    server->setName(
-                        serverConfig->getServerNames()[0].getName());
-                    epoll.addServer(server->getFd(), server);
-                    servers.push_back(server);
-            }
+        toolbox::SharedPtr<Server> server1(new Server(3000, "127.1.1.1"));
+        server1->setName("server1");
+        epoll.addServer(server1->getFd(), server1);
+        toolbox::SharedPtr<Server> server2(new Server(5000, "0.0.0.0"));
+        server2->setName("server2");
+        epoll.addServer(server2->getFd(), server2);
+        try {
+            toolbox::SharedPtr<Server> server3(new Server(5000, "256"));
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
         }
-        int cnt = 0;  // for debug
+        try {
+            toolbox::SharedPtr<Server> server3(new Server(5000, "256.0.0.0"));
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
+        try {
+            toolbox::SharedPtr<Server> server3(new Server(5000, "192.3.33.23"));
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
+        int cnt = 0;
         struct epoll_event events[1000];
         while (1) {
             try {
-                int nfds = Epoll::wait(events, 1000, -1);
+                int nfds = epoll.wait(events, 1000, -1);
                 if (nfds == -1) {
                     throw std::runtime_error("epoll_wait failed");
                 }
@@ -61,12 +61,11 @@ int main(int argc, char* argv[]) {
                             socklen_t addr_len = sizeof(client_addr);
                             int client_sock = accept(server->getFd(), (struct sockaddr*)&client_addr, &addr_len);
                             if (client_sock == -1) {
-                                //continue?
                                 throw std::runtime_error("accept failed");
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
-                            Epoll::addClient(client_sock, client); // this func will throw exception
+                            epoll.addClient(client_sock, client);
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -76,6 +75,9 @@ int main(int argc, char* argv[]) {
                             toolbox::SharedPtr<Client> client = tagged->client;
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
+                            std::cout << "client ip: " << client->getIp() << std::endl;
+                            std::cout << "server ip: " << client->getServerIp() << std::endl;
+                            std::cout << "server port: " << client->getServerPort() << std::endl;
 
                             char buf[1024];
                             int len = 0;
@@ -94,33 +96,13 @@ int main(int argc, char* argv[]) {
                                 }
                             } while (len > 0);
 
-                            // requestをparseして、適切なresponseを作成する
-                            // Response response;
-                            // Request* request;
-                            // if (method == "GET") {
-                            //     request = new GetRequest();
-                            // } else if (method == "HEAD") {
-                            //     request = new HeadRequest();
-                            // } else if (method == "POST") {
-                            //     request = new PostRequest();
-                            // } else if (method == "DELETE") {
-                            //     request = new DeleteRequest();
-                            // } else {
-                            //     the method is not supported
-                            // }
-                            // parseした情報を反映
-                            // request->run(&response);
-                            // std::string response = response->getResponse();
-                            // send(client_sock, response.c_str(), response.size(), 0);
-
                             const char* responseHeader = "HTTP/1.1 200 OK\r\nContent-Length: ";
-                            std::string responseBody = "<html><body>hello" + whole_request + "</body></html>";
+                            std::string responseBody = "<html><body>hello\n" + whole_request + "</body></html>";
                             std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\r\n\r\n" + responseBody;
                             if (send(client_sock, response.c_str(), response.size(), 0) == -1) {
                                 throw std::runtime_error("send failed");
-                                // Send exit status to client
                             }
-                            Epoll::del(client_sock);
+                            epoll.del(client_sock);
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -130,9 +112,7 @@ int main(int argc, char* argv[]) {
                 std::cerr << e.what() << std::endl;
             }
         }
-        for (size_t i = 0; i < servers.size(); ++i) {
-            epoll.del(servers[i]->getFd());
-        }
+        epoll.del(server1->getFd());
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;
