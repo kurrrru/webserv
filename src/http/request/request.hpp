@@ -11,6 +11,16 @@
 
 namespace http {
 
+enum IOPendingState {
+  REQUEST_READING,
+  CGI_BODY_SENDING,
+  CGI_OUTPUT_READING,
+  CGI_LOCAL_REDIRECT_IO_PENDING, // Local RedirectのRequestの処理から帰ってきた時に、子RequestクラスのioPendingStateがNO_IO_PENDING以外になっていたらセットされる
+  ERROR_LOCAL_REDIRECT_IO_PENDING, // Local RedirectのRequestの処理から帰ってきた時に、子RequestクラスのioPendingStateがNO_IO_PENDING以外になっていたらセットされる
+  RESPONSE_SENDING,
+  NO_IO_PENDING
+};
+
 class Request {
  public:
     /**
@@ -25,6 +35,12 @@ class Request {
      * @brief Destructor for the Request object.
      */
     ~Request();
+
+    /**
+     * @brief Runs the request processing, including receiving the request,
+     * fetching configuration, handling the request, and sending the response.
+     */
+    void run();
 
     /**
      * @brief recieve and parses the raw HTTP request string.
@@ -59,6 +75,7 @@ class Request {
     http::Response _response;
     toolbox::SharedPtr<Client> _client;
     std::size_t _requestDepth;
+    IOPendingState _ioPendingState;
 
     Request();
     Request(const Request& other);
