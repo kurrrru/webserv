@@ -1,7 +1,9 @@
 NAME = webserv
 
+
 # sources
 SRCS = $(wildcard toolbox/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*/*/*.cpp)
+SRCS := $(filter-out src/http/request/recv_request.cpp, $(SRCS))
 
 OBJS = $(SRCS:.cpp=.o)
 
