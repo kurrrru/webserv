@@ -14,10 +14,10 @@ class Epoll {
  public:
     class EpollException : public std::exception {
      public:
-         explicit EpollException(const char* message) : _message(message) {}
-         const char* what() const throw() { return _message; }
+        explicit EpollException(const char* message) : _message(message) {}
+        const char* what() const throw() { return _message; }
      private:
-         const char* _message;
+        const char* _message;
      };
 
     static void addServer(int fd, toolbox::SharedPtr<Server> server);
