@@ -11,6 +11,7 @@
 
 #include "server.hpp"
 #include "client.hpp"
+#include "constant.hpp"
 #include "../config/config_namespace.hpp"
 #include "../config/config_parser.hpp"
 #include "../event/epoll.hpp"
@@ -76,11 +77,11 @@ int main(int argc, char* argv[]) {
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
 
-                            char buf[1024];
+                            char buf[core::IO_BUFFER_SIZE];
                             int len = 0;
                             std::string whole_request;
                             do {
-                                len = recv(client_sock, buf, sizeof(buf), 0);
+                                len = recv(client_sock, buf, core::IO_BUFFER_SIZE, 0);
                                 if (len == -1) {
                                     if (errno == EAGAIN) { //if no recv data
                                         break;
@@ -115,7 +116,7 @@ int main(int argc, char* argv[]) {
                             const char* responseHeader = "HTTP/1.1 200 OK\r\nContent-Length: ";
                             std::string responseBody = "<html><body>hello" + whole_request + "</body></html>";
                             std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\r\n\r\n" + responseBody;
-                            if (send(client_sock, response.c_str(), response.size(), 0) == -1) {
+                            if (send(client_sock, response.c_str(), response.size(), 0) == -1) { // this will be deleted later
                                 throw std::runtime_error("send failed");
                                 // Send exit status to client
                             }

@@ -122,6 +122,21 @@ _root(other._root),
 _uploadStore(other._uploadStore) {
 }
 
+ConfigBase& ConfigBase::operator=(const ConfigBase& other) {
+    if (this != &other) {
+        _allowedMethods = other._allowedMethods;
+        _autoindex = other._autoindex;
+        _cgiExtensions = other._cgiExtensions;
+        _cgiPath = other._cgiPath;
+        _clientMaxBodySize = other._clientMaxBodySize;
+        _errorPages = other._errorPages;
+        _indices = other._indices;
+        _root = other._root;
+        _uploadStore = other._uploadStore;
+    }
+    return *this;
+}
+
 ConfigBase::~ConfigBase() {}
 
 }  // namespace config

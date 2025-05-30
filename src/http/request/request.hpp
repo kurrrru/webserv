@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <string>
+
 #include "request_parser.hpp"
 #include "../response/response.hpp"
 #include "../../config/config.hpp"
@@ -32,7 +35,7 @@ class Request {
      */
     bool recvRequest();
 
-    void setLocalRedirectInfo(const std::string& method, 
+    void setLocalRedirectInfo(const std::string& method,
         const std::string& path, const std::string& host);
 
     /**
@@ -65,6 +68,33 @@ class Request {
     bool performRecv(std::string& receivedData);
     bool loadConfig();
     bool validateBodySize();
+    // fetchConfig helper methods
+    toolbox::SharedPtr<config::ServerConfig> selectServer();
+    bool extractCandidateServers(
+        const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
+        std::vector<toolbox::SharedPtr<config::ServerConfig> >& candidateServers);
+    std::string extractHostName();
+    toolbox::SharedPtr<config::ServerConfig> matchServerByName(
+        const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
+        const std::string& hostName);
+    bool processReturn(const config::Return& returnValue);
+    void processReturnWithContent(size_t statusCode,
+                                const std::string& content);
+    void processReturnWithoutContent(size_t statusCode);
+    bool isRedirectStatus(size_t statusCode) const;
+    bool hasDefaultErrorPage(size_t statusCode) const;
+    bool isMinimalResponse(size_t statusCode) const;
+    void setRedirectResponse(size_t statusCode, const std::string& location);
+    void setTextResponse(const std::string& content);
+    void setHtmlErrorResponse(size_t statusCode);
+    void setEmptyTextResponse();
+    std::string generateDefaultBody(size_t statusCode);
+    bool selectLocation(
+        const toolbox::SharedPtr<config::ServerConfig>& server);
+    toolbox::SharedPtr<config::LocationConfig> findDeepestMatchingLocation(
+        const std::vector<toolbox::SharedPtr
+        <config::LocationConfig> >& locations,
+        const std::string& path);
 };
 
-}
+}  // namespace http

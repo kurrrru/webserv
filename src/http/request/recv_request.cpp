@@ -3,13 +3,12 @@
 
 #include "../../../toolbox/stepmark.hpp"
 #include "../../core/client.hpp"
+#include "../../core/constant.hpp"
 #include "request_parser.hpp"
 #include "request.hpp"
 
 namespace http {
-
 namespace {
-const std::size_t BUFFER_SIZE = 2048;
 
 int handleRecvResult(int receivedSize,
                       BaseParser::ValidatePos validatePos,
@@ -52,9 +51,9 @@ bool isValidReceivedLength(std::size_t receivedLength,
 }  // namespace
 
 bool Request::performRecv(std::string& receivedData) {
-    char buffer[BUFFER_SIZE];
+    char buffer[core::IO_BUFFER_SIZE];
 
-    int receivedSize = recv(_client->getFd(), buffer, BUFFER_SIZE - 1, 0);
+    int receivedSize = recv(_client->getFd(), buffer, core::IO_BUFFER_SIZE, 0);
     int statusCode = handleRecvResult(receivedSize, 
                                   _parsedRequest.getValidatePos(), _client);
 
@@ -63,7 +62,6 @@ bool Request::performRecv(std::string& receivedData) {
         return false;
     }
 
-    buffer[receivedSize] = '\0';
     receivedData = std::string(buffer, receivedSize);
     return true;
 }
