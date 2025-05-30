@@ -16,9 +16,6 @@ std::string extractExtension(const std::string& filename) {
 }
 
 ContentTypeManager::ContentTypeManager() {
-    if (!_contentTypeMap.empty()) {
-        return;
-    }
     _contentTypeMap["html"] = "text/html";
     _contentTypeMap["htm"] = "text/html";
     _contentTypeMap["css"] = "text/css";
@@ -55,12 +52,12 @@ std::string ContentTypeManager::getContentType(const std::string& filename) {
     return "application/octet-stream";
 }
 
-std::string ContentTypeManager::getExtension(const std::string& content_type) {
-    if (content_type.empty()) {
+std::string ContentTypeManager::getExtension(const std::string& contentType) {
+    if (contentType.empty()) {
         return "";
     }
     for (ContentTypeMap::const_iterator it = _contentTypeMap.begin(); it != _contentTypeMap.end(); ++it) {
-        if (it->second == content_type) {
+        if (it->second == contentType) {
             return it->first;
         }
     }

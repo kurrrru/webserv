@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 
 #include "../string_utils.hpp"
-// #include "post_method.hpp"
 #include "server_method_handler.hpp"
 
 namespace http {
@@ -269,7 +268,7 @@ void runPost(const std::string& uploadPath, std::string& recvBody,
         }
         response.setStatus(HttpStatus::CREATED);
     } catch (const HttpStatus::EHttpStatus& e) {
-        toolbox::logger::StepMark::error("runPost: setStatus "
+        toolbox::logger::StepMark::error("runPost: failed setStatus "
             + toolbox::to_string(static_cast<int>(e)));
         response.setStatus(e);
     }

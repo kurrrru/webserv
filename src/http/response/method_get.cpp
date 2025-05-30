@@ -1,17 +1,16 @@
-#include <sys/stat.h>
-#include <dirent.h>
-#include <errno.h>
-#include <unistd.h>
-#include <limits.h>
-
 #include <string>
 #include <vector>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <map>
 #include <ctime>
 #include <cstring>
+
+#include <sys/stat.h>
+#include <dirent.h>
+#include <errno.h>
+#include <unistd.h>
+#include <limits.h>
 
 #include "../../../toolbox/stepmark.hpp"
 #include "../../../toolbox/string.hpp"
@@ -101,7 +100,7 @@ std::string processAutoindex(const std::string& path) {
     return ss.str();
 }
 
-void handleDirectory(const std::string& path, std::vector<std::string> indices,
+void handleDirectory(const std::string& path, std::vector<std::string>& indices,
                      Response& response, bool isAutoindex) {
     HttpStatus::EHttpStatus status;
 
@@ -130,7 +129,7 @@ void handleFile(const std::string& path, Response& response) {
 }  // namespace
 
 namespace serverMethod {
-void runGet(const std::string& path, std::vector<std::string> indices,
+void runGet(const std::string& path, std::vector<std::string>& indices,
         bool isAutoindex, Response& response) {
     struct stat st;
 

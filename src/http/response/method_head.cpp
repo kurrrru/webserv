@@ -3,7 +3,6 @@
 
 #include "../request/http_fields.hpp"
 #include "server_method_handler.hpp"
-// #include "head_method.hpp"
 #include "method_utils.hpp"
 
 namespace http {
@@ -42,7 +41,7 @@ void handleFile(const std::string& path, Response& response) {
 }  // namespace
 
 namespace serverMethod {
-void runHead(const std::string& path, std::vector<std::string> indices,
+void runHead(const std::string& path, std::vector<std::string>& indices,
     bool isAutoindex, Response& response) {
     struct stat st;
 

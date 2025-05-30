@@ -23,9 +23,9 @@ void serverMethodHandler(RequestParser& parsedRequest,
                          HTTPFields& fields,
                          Response& response);
 
-void runGet(const std::string& targetPath, std::vector<std::string> indices,
+void runGet(const std::string& targetPath, std::vector<std::string>& indices,
     bool isAutoindex, Response& response);
-void runHead(const std::string& targetPath, std::vector<std::string> indices,
+void runHead(const std::string& targetPath, std::vector<std::string>& indices,
     bool isAutoindex, Response& response);
 void runDelete(const std::string& path, Response& response);
 void runPost(const std::string& uploadPath, std::string& recvBody,

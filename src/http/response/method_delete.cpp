@@ -1,5 +1,4 @@
 #include <string>
-#include <cstdio>
 
 #include "server_method_handler.hpp"
 
