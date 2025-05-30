@@ -26,6 +26,8 @@ class HTTPFields {
     std::size_t countNonEmptyValues();
     FieldValue& getFieldValue(const std::string& key);
     FieldMap& get() { return _fieldsMap; }
+    const FieldValue& getFieldValue(const std::string& key) const;
+    const FieldMap& get() const { return _fieldsMap; }
 
  private:
     HTTPFields(const HTTPFields& other);

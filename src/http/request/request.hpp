@@ -61,6 +61,10 @@ class Request {
     Request(const Request& other);
     Request& operator=(const Request& other);
 
+    // recvRequest helper methods
+    bool performRecv(std::string& receivedData);
+    bool loadConfig();
+    bool validateBodySize();
 };
 
 }
