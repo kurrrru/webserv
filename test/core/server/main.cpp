@@ -20,13 +20,12 @@
 
 int main(void) {
     try {
-        Epoll epoll;
         toolbox::SharedPtr<Server> server1(new Server(3000, "127.1.1.1"));
         server1->setName("server1");
-        epoll.addServer(server1->getFd(), server1);
+        Epoll::addServer(server1->getFd(), server1);
         toolbox::SharedPtr<Server> server2(new Server(5000, "0.0.0.0"));
         server2->setName("server2");
-        epoll.addServer(server2->getFd(), server2);
+        Epoll::addServer(server2->getFd(), server2);
         try {
             toolbox::SharedPtr<Server> server3(new Server(5000, "256"));
         } catch (std::exception& e) {
@@ -46,7 +45,7 @@ int main(void) {
         struct epoll_event events[1000];
         while (1) {
             try {
-                int nfds = epoll.wait(events, 1000, -1);
+                int nfds = Epoll::wait(events, 1000, -1);
                 if (nfds == -1) {
                     throw std::runtime_error("epoll_wait failed");
                 }
@@ -65,7 +64,7 @@ int main(void) {
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
-                            epoll.addClient(client_sock, client);
+                            Epoll::addClient(client_sock, client);
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -102,7 +101,7 @@ int main(void) {
                             if (send(client_sock, response.c_str(), response.size(), 0) == -1) {
                                 throw std::runtime_error("send failed");
                             }
-                            epoll.del(client_sock);
+                            Epoll::del(client_sock);
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
@@ -112,7 +111,7 @@ int main(void) {
                 std::cerr << e.what() << std::endl;
             }
         }
-        epoll.del(server1->getFd());
+        Epoll::del(server1->getFd());
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         return 1;

@@ -27,7 +27,6 @@ int main(int argc, char* argv[]) {
         }
         toolbox::SharedPtr<config::HttpConfig> httpConfig =
                                         config::Config::getHttpConfig();
-        Epoll epoll;
         std::vector<toolbox::SharedPtr<Server> > servers;
         for (size_t i = 0; i < httpConfig->getServers().size(); ++i) {
             toolbox::SharedPtr<config::ServerConfig> serverConfig =
@@ -38,7 +37,7 @@ int main(int argc, char* argv[]) {
                     toolbox::SharedPtr<Server> server(new Server(port, ip));
                     server->setName(
                         serverConfig->getServerNames()[0].getName());
-                    epoll.addServer(server->getFd(), server);
+                    Epoll::addServer(server->getFd(), server);
                     servers.push_back(server);
             }
         }
@@ -131,7 +130,7 @@ int main(int argc, char* argv[]) {
             }
         }
         for (size_t i = 0; i < servers.size(); ++i) {
-            epoll.del(servers[i]->getFd());
+            Epoll::del(servers[i]->getFd());
         }
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
