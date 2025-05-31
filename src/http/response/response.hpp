@@ -37,6 +37,8 @@ class Response {
 
     int getStatus() const;
 
+    std::string getHeader(const FieldName& name) const;
+
     std::size_t getContentLength() const;
 
     std::string getBody() const;
