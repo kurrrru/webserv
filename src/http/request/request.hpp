@@ -29,7 +29,8 @@ class Request {
      * @param requestDepth The depth of the request, used to track local redirects
      * associated with this request.
      */
-    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
+    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0)
+        : _ioPendingState(REQUEST_READING) {};
 
     /**
      * @brief Destructor for the Request object.
@@ -84,7 +85,7 @@ class Request {
     // recvRequest helper methods
     bool performRecv(std::string& receivedData);
     bool loadConfig();
-    bool validateBodySize();
+    bool isValidBodySize();
     // fetchConfig helper methods
     toolbox::SharedPtr<config::ServerConfig> selectServer();
     bool extractCandidateServers(

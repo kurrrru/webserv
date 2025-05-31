@@ -8,6 +8,13 @@
 
 namespace http {
 void Request::handleRequest() {
+    if (_response.getStatus() != 200) {
+        toolbox::logger::StepMark::error(
+            "Request::handleRequest: Response already set status "
+                + std::to_string(_response.getStatus()) + " does not handle request");
+        return;
+    }
+
     HTTPRequest& httpRequest = _parsedRequest.get();
     const std::vector<std::string>& allowedMethods = _config.getAllowedMethods();
 
@@ -27,8 +34,19 @@ void Request::handleRequest() {
     const std::vector<std::string>& cgiExtensionVector = _config.getCgiExtensions();
 
     if (cgiHandler.isCgiRequest(targetPath, cgiExtensionVector, cgiPath)) {
+        
         cgiHandler.handleRequest(httpRequest, _response,
             _config.getRoot(), cgiExtensionVector, cgiPath);
+        
+
+/*
+            //ここでCGIの種類が帰ってくる。
+            DOCUMENT = 0,
+            LOCAL_REDIRECT = 1,
+            CLIENT_REDIRECT = 2,
+            CLIENT_REDIRECT_DOCUMENT = 3,
+            INVALID = 4
+*/
     } else {
         serverMethod::serverMethodHandler(
             _parsedRequest, _config, httpRequest.fields, _response);
