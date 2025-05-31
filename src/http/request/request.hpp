@@ -15,8 +15,8 @@ enum IOPendingState {
   REQUEST_READING,
   CGI_BODY_SENDING,
   CGI_OUTPUT_READING,
-  CGI_LOCAL_REDIRECT_IO_PENDING, // Local RedirectのRequestの処理から帰ってきた時に、子RequestクラスのioPendingStateがNO_IO_PENDING以外になっていたらセットされる
-  ERROR_LOCAL_REDIRECT_IO_PENDING, // Local RedirectのRequestの処理から帰ってきた時に、子RequestクラスのioPendingStateがNO_IO_PENDING以外になっていたらセットされる
+  CGI_LOCAL_REDIRECT_IO_PENDING,
+  ERROR_LOCAL_REDIRECT_IO_PENDING,
   RESPONSE_SENDING,
   NO_IO_PENDING
 };

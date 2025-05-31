@@ -119,10 +119,10 @@ bool Request::recvRequest() {
     }
 
     if (!isValidBodySize()) {
-        toolbox::logger::StepMark::error("Request: recvRequest: request have "
-            "invalid body/content size");
         _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
         _ioPendingState = IOPendingState::NO_IO_PENDING;
+        toolbox::logger::StepMark::error("Request: recvRequest: request have "
+            "invalid body/content size");
         return false;
     }
 
