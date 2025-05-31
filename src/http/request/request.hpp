@@ -30,7 +30,7 @@ class Request {
      * associated with this request.
      */
     Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0)
-        : _ioPendingState(REQUEST_READING) {};
+        : _ioPendingState(REQUEST_READING) {}
 
     /**
      * @brief Destructor for the Request object.
