@@ -102,7 +102,7 @@ bool Request::isValidBodySize() {
 
 bool Request::recvRequest() {
     std::string receivedData;
-    
+
     if (!performRecv(receivedData)) {
         _ioPendingState = IOPendingState::NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: failed to receive data");

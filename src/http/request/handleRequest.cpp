@@ -21,6 +21,7 @@ void Request::handleRequest() {
     if (std::find(allowedMethods.begin(), allowedMethods.end(),
                     httpRequest.method) == allowedMethods.end()) {
         _response.setStatus(HttpStatus::METHOD_NOT_ALLOWED);
+        _ioPendingState = IOPendingState::NO_IO_PENDING;
         toolbox::logger::StepMark::error(
             "Request::handleRequest: Method not allowed: "
                 + httpRequest.method);
@@ -34,19 +35,8 @@ void Request::handleRequest() {
     const std::vector<std::string>& cgiExtensionVector = _config.getCgiExtensions();
 
     if (cgiHandler.isCgiRequest(targetPath, cgiExtensionVector, cgiPath)) {
-        
-        cgiHandler.handleRequest(httpRequest, _response,
+        _ioPendingState = cgiHandler.handleRequest(httpRequest, _response,
             _config.getRoot(), cgiExtensionVector, cgiPath);
-        
-
-/*
-            //ここでCGIの種類が帰ってくる。
-            DOCUMENT = 0,
-            LOCAL_REDIRECT = 1,
-            CLIENT_REDIRECT = 2,
-            CLIENT_REDIRECT_DOCUMENT = 3,
-            INVALID = 4
-*/
     } else {
         serverMethod::serverMethodHandler(
             _parsedRequest, _config, httpRequest.fields, _response);
