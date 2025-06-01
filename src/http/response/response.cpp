@@ -151,6 +151,14 @@ int Response::getStatus() const {
     return _status;
 }
 
+std::string Response::getHeader(const FieldName& name) const {
+    std::map<FieldName, HeaderField>::const_iterator it = _headers.find(name);
+    if (it != _headers.end() && it->second.first) {
+        return it->second.second;
+    }
+    return "";  // Return empty string if header not found or disabled
+}
+
 std::size_t Response::getContentLength() const {
     return _body.size();
 }
