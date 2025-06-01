@@ -148,7 +148,6 @@ void runGet(const std::string& path, std::vector<std::string>& indices,
         } else {
             throw HttpStatus::INTERNAL_SERVER_ERROR;
         }
-        response.setStatus(HttpStatus::OK);
     } catch (const HttpStatus::EHttpStatus& e) {
         toolbox::logger::StepMark::error("runGet: set status "
             + toolbox::to_string(e));

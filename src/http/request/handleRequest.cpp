@@ -8,12 +8,20 @@
 
 namespace http {
 void Request::handleRequest() {
+    if (_response.getStatus() != 200) {
+        toolbox::logger::StepMark::error(
+            "Request::handleRequest: Response already set status "
+                + std::to_string(_response.getStatus()) + " does not handle request");
+        return;
+    }
+
     HTTPRequest& httpRequest = _parsedRequest.get();
     const std::vector<std::string>& allowedMethods = _config.getAllowedMethods();
 
     if (std::find(allowedMethods.begin(), allowedMethods.end(),
                     httpRequest.method) == allowedMethods.end()) {
         _response.setStatus(HttpStatus::METHOD_NOT_ALLOWED);
+        _ioPendingState = IOPendingState::NO_IO_PENDING;
         toolbox::logger::StepMark::error(
             "Request::handleRequest: Method not allowed: "
                 + httpRequest.method);
@@ -27,7 +35,7 @@ void Request::handleRequest() {
     const std::vector<std::string>& cgiExtensionVector = _config.getCgiExtensions();
 
     if (cgiHandler.isCgiRequest(targetPath, cgiExtensionVector, cgiPath)) {
-        cgiHandler.handleRequest(httpRequest, _response,
+        _ioPendingState = cgiHandler.handleRequest(httpRequest, _response,
             _config.getRoot(), cgiExtensionVector, cgiPath);
     } else {
         serverMethod::serverMethodHandler(
