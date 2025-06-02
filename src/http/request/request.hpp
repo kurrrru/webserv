@@ -79,7 +79,7 @@ class Request {
 
     /**
      * @brief Returns the prepared HTTP response.
-     * @return A reference to the Response object.
+     * @return A copy of the Response object.
      */
     http::Response getResponse() const;
 
