@@ -12,7 +12,6 @@ bool BaseFieldParser::parseFieldLine(const HTTPFields::FieldPair& pair,
     }
     HTTPFields::FieldMap::iterator target = fieldMap.find(pair.first);
     if (target == fieldMap.end()) {
-        toolbox::logger::StepMark::info("FieldParser: does not exist key");
         return true;
     }
     if (target->first == fields::HOST) {

@@ -18,6 +18,7 @@
 #include "../event/tagged_epoll_event.hpp"
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/shared.hpp"
+#include "../http/request/request.hpp"
 
 int main(int argc, char* argv[]) {
     try {
@@ -66,6 +67,7 @@ int main(int argc, char* argv[]) {
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
+                            client->setRequest(toolbox::SharedPtr<http::Request>(new http::Request(client)));
                             Epoll::addClient(client_sock, client); // this func will throw exception
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;
@@ -77,49 +79,7 @@ int main(int argc, char* argv[]) {
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
 
-                            char buf[core::IO_BUFFER_SIZE];
-                            int len = 0;
-                            std::string whole_request;
-                            do {
-                                len = recv(client_sock, buf, core::IO_BUFFER_SIZE, 0);
-                                if (len == -1) {
-                                    if (errno == EAGAIN) { //if no recv data
-                                        break;
-                                    }
-                                    throw std::runtime_error("recv failed");
-                                } else if (len == 0) {
-                                    break;
-                                } else {
-                                    whole_request.append(buf, len);
-                                }
-                            } while (len > 0);
-
-                            // requestをparseして、適切なresponseを作成する
-                            // Response response;
-                            // Request* request;
-                            // if (method == "GET") {
-                            //     request = new GetRequest();
-                            // } else if (method == "HEAD") {
-                            //     request = new HeadRequest();
-                            // } else if (method == "POST") {
-                            //     request = new PostRequest();
-                            // } else if (method == "DELETE") {
-                            //     request = new DeleteRequest();
-                            // } else {
-                            //     the method is not supported
-                            // }
-                            // parseした情報を反映
-                            // request->run(&response);
-                            // std::string response = response->getResponse();
-                            // send(client_sock, response.c_str(), response.size(), 0);
-
-                            const char* responseHeader = "HTTP/1.1 200 OK\r\nContent-Length: ";
-                            std::string responseBody = "<html><body>hello" + whole_request + "</body></html>";
-                            std::string response = responseHeader + toolbox::to_string(responseBody.size()) + "\r\n\r\n" + responseBody;
-                            if (send(client_sock, response.c_str(), response.size(), 0) == -1) { // this will be deleted later
-                                throw std::runtime_error("send failed");
-                                // Send exit status to client
-                            }
+                            client->getRequest()->run();
                             Epoll::del(client_sock);
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;

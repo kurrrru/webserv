@@ -8,17 +8,17 @@ void Request::run() {
         recvRequest();
         if (_ioPendingState != NO_IO_PENDING)
             break;
-    // [[fallthrough]]
+    // fallthrough
     case CGI_BODY_SENDING:
     case CGI_OUTPUT_READING:
     case CGI_LOCAL_REDIRECT_IO_PENDING:
         handleRequest();
         if (_ioPendingState != NO_IO_PENDING)
             break;
-    // [[fallthrough]]
+    // fallthrough
     case ERROR_LOCAL_REDIRECT_IO_PENDING:
     case RESPONSE_SENDING:
-        sendResponse();
+        Request::sendResponse();
         break;
     default:
         // never come here

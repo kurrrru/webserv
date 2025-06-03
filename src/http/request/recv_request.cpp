@@ -67,13 +67,11 @@ bool Request::performRecv(std::string& receivedData) {
 }
 
 bool Request::loadConfig() {
-    if (_config.getPath().empty()) {
-        fetchConfig();
-        if (_response.getStatus() != HttpStatus::OK) {
-            toolbox::logger::StepMark::info(
-                "Request: loadConfig: fetchConfig failed");
-            return false;
-        }
+    fetchConfig();
+    if (_response.getStatus() != HttpStatus::OK) {
+        toolbox::logger::StepMark::info(
+            "Request: loadConfig: fetchConfig failed");
+        return false;
     }
     return true;
 }
@@ -104,30 +102,30 @@ bool Request::recvRequest() {
     std::string receivedData;
 
     if (!performRecv(receivedData)) {
-        _ioPendingState = IOPendingState::NO_IO_PENDING;
+        _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: failed to receive data");
         return false;
     }
 
     int parseStatus = _parsedRequest.run(receivedData);
-
+    
     if (parseStatus == BaseParser::P_ERROR) {
         _response.setStatus(_parsedRequest.get().httpStatus.get());
-        _ioPendingState = IOPendingState::NO_IO_PENDING;
+        _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: failed to parse request");
         return false;
     }
-
+    
     if (!isValidBodySize()) {
         _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
-        _ioPendingState = IOPendingState::NO_IO_PENDING;
+        _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: request have "
             "invalid body/content size");
-        return false;
-    }
+            return false;
+        }
 
     if (parseStatus == BaseParser::P_COMPLETED) {
-        _ioPendingState = IOPendingState::NO_IO_PENDING;
+        _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::info("Request: recvRequest: request "
             "received and parsed successfully");
     }
