@@ -1,3 +1,4 @@
+#include <string>
 #include "request.hpp"
 
 #include "../../core/client.hpp"
@@ -13,4 +14,16 @@ http::Request::~Request() {
 
 bool http::Request::isKeepAliveRequest() const {
     return _parsedRequest.isKeepAlive();
+}
+
+void http::Request::setLocalRedirectInfo(const std::string& method,
+                                        const std::string& path,
+                                        const std::string& host) {
+    _parsedRequest.get().method = method;
+    _parsedRequest.get().uri.path = path;
+    _parsedRequest.get().fields.getFieldValue(fields::HOST).push_back(host);
+}
+
+http::Response http::Request::getResponse() const {
+    return _response;
 }
