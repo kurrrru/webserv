@@ -70,6 +70,16 @@ class Request {
      */
     void sendResponse();
 
+    /**
+     * @brief Returns the current I/O pending state of the request.
+     * @return The current I/O pending state.
+     */
+    IOPendingState getIOPendingState() const {
+        return _ioPendingState;
+    }
+
+    bool isKeepAliveRequest() const;
+
  private:
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;
