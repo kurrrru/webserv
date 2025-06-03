@@ -53,7 +53,7 @@ bool hasLastChunk(const std::string* buf) {
 bool RequestParser::isKeepAlive() const {
     HTTPFields::FieldValue value =
         _request.fields.getFieldValue(fields::CONNECTION);
-    return value.empty() || value[0] == "keep-alive" || value[0] == "Keep-Alive";
+    return value.empty() || utils::isEqualCaseInsensitive(value[0], "keep-alive");
 }
 
 BaseParser::ParseStatus RequestParser::processFieldLine() {
