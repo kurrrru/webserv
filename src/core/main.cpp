@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
                             std::cout << "send response to client fd: " << client_sock << std::endl;
 
                             client->getRequest()->run();
-                            if (client->getRequest()->isKeepAliveRequest() &&
+                            if (!client->getRequest()->isKeepAliveRequest() &&
                                 client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
                                 Epoll::del(client_sock);
                             }
