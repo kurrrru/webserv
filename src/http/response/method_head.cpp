@@ -16,7 +16,7 @@ void handleDirectory(const std::string& path, std::vector<std::string> indices,
         std::string fullPath = findFirstExistingIndex(path, indices);
         status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runHead: handleDirectory: checkFileAccess fail " + fullPath + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runHead: handleDirectory: checkFileAccess fail [" + fullPath + "] " + toolbox::to_string(status));
             throw status;
         }
         response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(fullPath));
@@ -31,8 +31,8 @@ void handleFile(const std::string& path, Response& response) {
 
     HttpStatus::EHttpStatus status = checkFileAccess(path, st);
     if (status != HttpStatus::OK) {
-        toolbox::logger::StepMark::error("runHead: handleFile: checkFileAccess fail "
-            + path + " " + toolbox::to_string(status));
+        toolbox::logger::StepMark::error("runHead: handleFile: checkFileAccess fail ["
+            + path + "] " + toolbox::to_string(status));
         throw status;
     }
     response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(path));
@@ -48,8 +48,8 @@ void runHead(const std::string& path, std::vector<std::string>& indices,
     try {
         HttpStatus::EHttpStatus status = checkFileAccess(path, st);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runHead: checkFileAccess fail "
-                + path + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runHead: checkFileAccess fail ["
+                + path + "] " + toolbox::to_string(status));
             throw status;
         }
 

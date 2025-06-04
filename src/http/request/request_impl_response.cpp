@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+#include "../../core/client.hpp"
 #include "../../../toolbox/access.hpp"
 #include "../../../toolbox/string.hpp"
 
@@ -22,12 +23,20 @@ namespace {
         typedef std::string FieldDefaultValue;
 
         // [TODO] ここも後で確認します
+        // const std::pair<std::string, std::string> defaultHeadersArray[] = {
+        //     {http::fields::CONTENT_TYPE, "text/plain"},
+        //     {http::fields::CACHE_CONTROL, "no-cache"},
+        //     {http::fields::CONNECTION, "close"},
+        //     {http::fields::SERVER, "WebServer/1.0"}
+        // };
+
         const std::pair<std::string, std::string> defaultHeadersArray[] = {
-            {http::fields::CONTENT_TYPE, "text/plain"},
-            {http::fields::CACHE_CONTROL, "no-cache"},
-            {http::fields::CONNECTION, "close"},
-            {http::fields::SERVER, "WebServer/1.0"}
+            std::make_pair(http::fields::CONTENT_TYPE, "text/plain"),
+            std::make_pair(http::fields::CACHE_CONTROL, "no-cache"),
+            std::make_pair(http::fields::CONNECTION, "close"),
+            std::make_pair(http::fields::SERVER, "WebServer/1.0")
         };
+
         const std::vector<std::pair<FieldName, FieldDefaultValue> > defaultHeaders(
             defaultHeadersArray, defaultHeadersArray + sizeof(defaultHeadersArray)
             / sizeof(defaultHeadersArray[0]));
@@ -95,7 +104,7 @@ void http::Request::sendResponse() {
                     host = _parsedRequest.get().fields.getFieldValue(
                         http::fields::HOST)[0];
                 }
-                errorRequest.setLocalRedirectInfo(method, path, host);
+                // errorRequest.setLocalRedirectInfo(method, path, host);
                 errorRequest.fetchConfig();
                 errorRequest.handleRequest();
                 if (errorRequest._response.getStatus() == http::HttpStatus::OK) {

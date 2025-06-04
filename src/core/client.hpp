@@ -7,6 +7,12 @@
 #include <exception>
 #include <string>
 
+#include "../../toolbox/shared.hpp"
+
+namespace http {
+class Request;
+}
+
 class Client {
  public:
     class ClientException : public std::exception {
@@ -27,12 +33,16 @@ class Client {
     std::string getServerIp() const;
     size_t getServerPort() const;
 
+    toolbox::SharedPtr<http::Request> getRequest() const;
+    void setRequest(const toolbox::SharedPtr<http::Request> request);
+
  private:
     Client();
 
     int _socket_fd;
     struct sockaddr_in _client_addr;
     socklen_t _client_addr_len;
+    toolbox::SharedPtr<http::Request> _request;
 
     std::string convertIpToString(uint32_t ip) const;
 };

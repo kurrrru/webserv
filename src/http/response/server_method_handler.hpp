@@ -13,8 +13,10 @@
 #include "response.hpp"
 
 namespace config {
+class HttpConfig;  // Forward declaration
+class ServerConfig;  // Forward declaration
 class LocationConfig;  // Forward declaration
-}
+}  // namespace config
 
 namespace http {
 namespace serverMethod {

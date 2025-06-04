@@ -1,6 +1,9 @@
 #include <string>
 #include <vector>
 
+#include "../../config/config_base.hpp"
+#include "../../config/config_http.hpp"
+#include "../../config/config_server.hpp"
 #include "../../config/config_location.hpp"
 #include "server_method_handler.hpp"
 
@@ -10,8 +13,12 @@ void serverMethodHandler(RequestParser& parsedRequest,
                          const config::LocationConfig &config,
                          HTTPFields& fields,
                          Response& response) {
-    std::string method = parsedRequest.get().method;
     std::string targetPath = parsedRequest.get().uri.path;
+    std::string rootPath = config.getRoot();
+    targetPath = joinPath(rootPath, targetPath);
+    toolbox::logger::StepMark::info("serverMethodHandler: make targetPath = " + targetPath);
+
+    std::string method = parsedRequest.get().method;
     std::vector<std::string> indices = config.getIndices();
     bool isAutoindex = config.getAutoindex();
 

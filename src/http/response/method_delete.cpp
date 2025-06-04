@@ -23,20 +23,20 @@ void runDelete(const std::string& path, Response& response) {
     try {
         HttpStatus::EHttpStatus status = checkFileAccess(path, st);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runDelete: checkFileAccess fail "
-                + path + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runDelete: checkFileAccess fail ["
+                + path + "] " + toolbox::to_string(status));
             throw status;
         }
 
         if (isDirectory(st)) {
-            toolbox::logger::StepMark::error("runDelete: isDirectory "
-                + path + " " + toolbox::to_string(HttpStatus::FORBIDDEN));
+            toolbox::logger::StepMark::error("runDelete: isDirectory ["
+                + path + "] " + toolbox::to_string(HttpStatus::FORBIDDEN));
             throw HttpStatus::FORBIDDEN;
         } else if (isRegularFile(st)) {
             handleFile(path);
         } else {
-            toolbox::logger::StepMark::error("runDelete: not a regularfile "
-                + path + " " + toolbox::to_string(HttpStatus::INTERNAL_SERVER_ERROR));
+            toolbox::logger::StepMark::error("runDelete: not a regularfile ["
+                + path + "] " + toolbox::to_string(HttpStatus::INTERNAL_SERVER_ERROR));
             throw HttpStatus::INTERNAL_SERVER_ERROR;
         }
         response.setStatus(HttpStatus::NO_CONTENT);

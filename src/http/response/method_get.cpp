@@ -107,10 +107,11 @@ void handleDirectory(const std::string& path, std::vector<std::string>& indices,
     if (!indices.empty()) {
         struct stat indexSt;
         std::string fullPath = findFirstExistingIndex(path, indices);
+
         status = checkFileAccess(fullPath, indexSt);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runGet: checkFileAccess fail "
-                + fullPath + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runGet: checkFileAccess fail ["
+                + fullPath + "] " + toolbox::to_string(status));
             throw status;
         }
         response.setBody(readFile(fullPath));
@@ -136,8 +137,8 @@ void runGet(const std::string& path, std::vector<std::string>& indices,
     try {
         HttpStatus::EHttpStatus status = checkFileAccess(path, st);
         if (status != HttpStatus::OK) {
-            toolbox::logger::StepMark::error("runGet: checkFileAccess fail "
-                + path + " " + toolbox::to_string(status));
+            toolbox::logger::StepMark::error("runGet: checkFileAccess fail ["
+                + path + "] " + toolbox::to_string(status));
             throw status;
         }
 

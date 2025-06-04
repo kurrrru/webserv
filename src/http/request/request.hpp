@@ -6,8 +6,9 @@
 #include "request_parser.hpp"
 #include "../response/response.hpp"
 #include "../../config/config.hpp"
-#include "../../core/client.hpp"
 #include "../../../toolbox/shared.hpp"
+
+class Client;
 
 namespace http {
 
@@ -29,8 +30,7 @@ class Request {
      * @param requestDepth The depth of the request, used to track local redirects
      * associated with this request.
      */
-    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0)
-        : _ioPendingState(REQUEST_READING) {}
+    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
 
     /**
      * @brief Destructor for the Request object.
@@ -76,6 +76,20 @@ class Request {
      * @brief Sends the prepared HTTP response to the client.
      */
     void sendResponse();
+
+    /**
+     * @brief Returns the current I/O pending state of the request.
+     * @return The current I/O pending state.
+     */
+    IOPendingState getIOPendingState() const {
+        return _ioPendingState;
+    }
+    
+    /**
+     * @brief Checks if the request is a keep-alive request.
+     * @return True if the request is a keep-alive request, false otherwise.
+     */
+    bool isKeepAliveRequest() const;
 
     /**
      * @brief Returns the prepared HTTP response.

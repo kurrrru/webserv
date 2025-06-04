@@ -9,9 +9,7 @@
 
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/stepmark.hpp"
-
-Client::Client() : _socket_fd(-1) {
-}
+#include "../http/request/request.hpp"
 
 Client::Client(int fd, const struct sockaddr_in& client_addr,
             socklen_t client_addr_len) :
@@ -21,7 +19,8 @@ Client::Client(int fd, const struct sockaddr_in& client_addr,
 
 Client::Client(const Client& other): _socket_fd(other._socket_fd),
     _client_addr(other._client_addr),
-    _client_addr_len(other._client_addr_len) {
+    _client_addr_len(other._client_addr_len),
+    _request(other._request) {
 }
 
 Client& Client::operator=(const Client& other) {
@@ -29,6 +28,7 @@ Client& Client::operator=(const Client& other) {
         _socket_fd = other._socket_fd;
         _client_addr = other._client_addr;
         _client_addr_len = other._client_addr_len;
+        _request = other._request;
     }
     return *this;
 }
@@ -79,6 +79,13 @@ size_t Client::getServerPort() const {
     }
     toolbox::logger::StepMark::error("Failed to get server port");
     return 0;
+}
+
+toolbox::SharedPtr<http::Request> Client::getRequest() const {
+    return _request;
+}
+void Client::setRequest(const toolbox::SharedPtr<http::Request> request) {
+    _request = request;
 }
 
 std::string Client::convertIpToString(uint32_t ip) const {

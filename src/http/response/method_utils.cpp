@@ -14,6 +14,23 @@ std::string joinPath(const std::string& base, const std::string& path) {
     if (path.empty()) {
         return base;
     }
+    if (path[0] == '/') {
+        if (path.length() == 1) {
+            if (base[base.size() - 1] == '/') {
+                return base.substr(0, base.size() - 1) + path;
+            } else {
+                return base + path;
+            }
+        } else {
+            std::string pathWithoutSlash = path.substr(1);
+            if (base[base.size() - 1] == '/') {
+                return base + pathWithoutSlash;
+            } else {
+                return base + "/" + pathWithoutSlash;
+            }
+        }
+    }
+
     if (base[base.size() - 1] == '/' || path[0] == '/') {
         return base + path;
     }
