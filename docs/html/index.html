@@ -51,6 +51,24 @@
             font-size: 0.9em;
             color: #777;
         }
+        .test-links {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .test-links h3 {
+            color: #495057;
+            margin-top: 0;
+        }
+        .test-links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .test-links a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -83,10 +101,155 @@
             <li>ファイルアップロード</li>
         </ul>
 
+        <h2>テスト用リンク</h2>
+        <div class="test-links">
+            <h3>GETリクエストテスト</h3>
+            <ul>
+                <li><a href="/test.html" target="_blank">test.html ページへのリンク</a></li>
+                <li><a href="/directory/" target="_blank">ディレクトリリスティングテスト</a></li>
+                <li><a href="/cgi-bin/test.cgi" target="_blank">CGIスクリプトテスト</a></li>
+                <li><a href="/static/image.jpg" target="_blank">静的ファイル（画像）テスト</a></li>
+                <li><a href="/404test" target="_blank">404エラーテスト</a></li>
+            </ul>
+            
+            <h3>POSTリクエストテスト</h3>
+            <h4>ファイルアップロード</h4>
+            <form action="/uploads" method="post" enctype="multipart/form-data" style="margin: 15px 0;">
+                <div style="margin-bottom: 10px;">
+                    <label for="file">ファイルを選択:</label>
+                    <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px;">
+                </div>
+                <button type="submit" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">アップロード</button>
+            </form>
+            <h4>メッセージ送信</h4>
+            <form action="/uploads" method="post" style="margin: 15px 0;">
+                <div style="margin-bottom: 10px;">
+                    <label for="username">ユーザー名:</label>
+                    <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label for="message">メッセージ:</label>
+                    <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px;"></textarea>
+                </div>
+                <button type="submit" style="background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">送信</button>
+            </form>
+            
+            <h3>DELETEリクエストテスト</h3>
+            <div style="margin: 15px 0;">
+                <h4>アップロードされたファイル一覧</h4>
+                <div id="fileList" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                    <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 10px;">ファイル一覧を更新</button>
+                    <div id="files">
+                        <p style="color: #666; font-style: italic;">「ファイル一覧を更新」ボタンをクリックしてファイルを表示</p>
+                    </div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <h4>手動削除テスト</h4>
+                    <input type="text" id="manualDeletePath" placeholder="/uploads/filename.txt" style="width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
+                    <button onclick="deleteManualFile()" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">削除</button>
+                    <small style="display: block; color: #666; margin-top: 5px;">※ ファイルパスを入力して手動削除</small>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // ページ読み込み時に自動でファイル一覧を取得
+            document.addEventListener('DOMContentLoaded', function() {
+                loadFileList();
+            });
+
+            function deleteFile(filepath) {
+                if (confirm('本当にファイル "' + filepath + '" を削除しますか？')) {
+                    fetch(filepath, {
+                        method: 'DELETE'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('ファイルが正常に削除されました');
+                            loadFileList(); // ファイル一覧を更新
+                        } else {
+                            alert('削除に失敗しました: ' + response.status);
+                        }
+                    })
+                    .catch(error => {
+                        alert('エラーが発生しました: ' + error.message);
+                    });
+                }
+            }
+
+            function loadFileList() {
+                // ローディング表示
+                document.getElementById('files').innerHTML = '<p style="color: #666; font-style: italic;">読み込み中...</p>';
+                
+                fetch('/uploads/', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 200) {
+                        // HTMLレスポンスの場合、ディレクトリリスティングをパース
+                        return response.text().then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const links = doc.querySelectorAll('a');
+                            const files = [];
+                            links.forEach(link => {
+                                const href = link.getAttribute('href');
+                                if (href && href !== '../' && !href.endsWith('/')) {
+                                    files.push(href);
+                                }
+                            });
+                            return files;
+                        });
+                    }
+                    throw new Error('ファイル一覧の取得に失敗しました');
+                })
+                .then(files => {
+                    displayFileList(files);
+                })
+                .catch(error => {
+                    document.getElementById('files').innerHTML = '<p style="color: #dc3545;">エラー: ' + error.message + '</p>';
+                });
+            }
+
+            function displayFileList(files) {
+                const filesDiv = document.getElementById('files');
+                if (files.length === 0) {
+                    filesDiv.innerHTML = '<p style="color: #666; font-style: italic;">アップロードされたファイルはありません</p>';
+                    return;
+                }
+
+                let html = '<table style="width: 100%; border-collapse: collapse;">';
+                html += '<tr style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;"><th style="padding: 8px; text-align: left;">ファイル名</th><th style="padding: 8px; text-align: center;">操作</th></tr>';
+                
+                files.forEach(file => {
+                    const filepath = '/uploads/' + file;
+                    html += '<tr style="border-bottom: 1px solid #dee2e6;">';
+                    html += '<td style="padding: 8px;"><a href="' + filepath + '" target="_blank" style="color: #007bff; text-decoration: none;">' + file + '</a></td>';
+                    html += '<td style="padding: 8px; text-align: center;"><button onclick="deleteFile(\'' + filepath + '\')" style="background-color: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">削除</button></td>';
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+                filesDiv.innerHTML = html;
+            }
+
+            function deleteManualFile() {
+                const filepath = document.getElementById('manualDeletePath').value.trim();
+                if (!filepath) {
+                    alert('ファイルパスを入力してください');
+                    return;
+                }
+                deleteFile(filepath);
+            }
+        </script>
         <footer>
             &copy; 2025 Webserv Project
         </footer>
-
     </div>
 </body>
 </html>
