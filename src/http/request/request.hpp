@@ -52,6 +52,13 @@ class Request {
      */
     bool recvRequest();
 
+    /**
+     * @brief Sets the local redirect information for the request.
+     * This is used to handle internal redirects within the server.
+     * @param method The HTTP method (e.g., GET, POST)
+     * @param path The path of the resource being requested
+     * @param host The host header value
+     */
     void setLocalRedirectInfo(const std::string& method,
         const std::string& path, const std::string& host);
 
@@ -69,6 +76,12 @@ class Request {
      * @brief Sends the prepared HTTP response to the client.
      */
     void sendResponse();
+
+    /**
+     * @brief Returns the prepared HTTP response.
+     * @return A copy of the Response object.
+     */
+    http::Response getResponse() const;
 
  private:
     http::RequestParser _parsedRequest;
