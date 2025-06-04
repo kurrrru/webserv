@@ -50,6 +50,12 @@ bool hasLastChunk(const std::string* buf) {
 
 }  // namespace
 
+bool RequestParser::isKeepAlive() const {
+    HTTPFields::FieldValue value =
+        _request.fields.getFieldValue(fields::CONNECTION);
+    return value.empty() || utils::isEqualCaseInsensitive(value[0], "keep-alive");
+}
+
 BaseParser::ParseStatus RequestParser::processFieldLine() {
     while (true) {
         std::size_t lineEndPos = getBuf()->find(symbols::CRLF);

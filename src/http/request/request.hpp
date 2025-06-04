@@ -78,6 +78,20 @@ class Request {
     void sendResponse();
 
     /**
+     * @brief Returns the current I/O pending state of the request.
+     * @return The current I/O pending state.
+     */
+    IOPendingState getIOPendingState() const {
+        return _ioPendingState;
+    }
+    
+    /**
+     * @brief Checks if the request is a keep-alive request.
+     * @return True if the request is a keep-alive request, false otherwise.
+     */
+    bool isKeepAliveRequest() const;
+
+    /**
      * @brief Returns the prepared HTTP response.
      * @return A copy of the Response object.
      */
