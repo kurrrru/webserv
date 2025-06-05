@@ -90,10 +90,10 @@ int main(int argc, char* argv[]) {
                                 continue;
                             }
 
-                            // if (!client->getRequest()->isKeepAliveRequest() &&
-                            //     client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
+                            if (!client->getRequest()->isKeepAliveRequest() &&
+                                client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
                             Epoll::del(client_sock);
-                            // }
+                            }
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
