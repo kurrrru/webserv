@@ -5,6 +5,7 @@
 #include "../cgi/cgi_handler.hpp"
 #include "request.hpp"
 #include "../response/server_method_handler.hpp"
+#include "io_pending_state.hpp"
 
 namespace http {
 void Request::handleRequest() {

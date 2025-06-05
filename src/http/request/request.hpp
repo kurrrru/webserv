@@ -7,20 +7,11 @@
 #include "../response/response.hpp"
 #include "../../config/config.hpp"
 #include "../../../toolbox/shared.hpp"
+#include "io_pending_state.hpp"
 
 class Client;
 
 namespace http {
-
-enum IOPendingState {
-  REQUEST_READING,
-  CGI_BODY_SENDING,
-  CGI_OUTPUT_READING,
-  CGI_LOCAL_REDIRECT_IO_PENDING,
-  ERROR_LOCAL_REDIRECT_IO_PENDING,
-  RESPONSE_SENDING,
-  NO_IO_PENDING
-};
 
 class Request {
  public:

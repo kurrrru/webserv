@@ -6,6 +6,7 @@
 #include "../../core/constant.hpp"
 #include "request_parser.hpp"
 #include "request.hpp"
+#include "io_pending_state.hpp"
 
 namespace http {
 namespace {

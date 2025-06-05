@@ -19,6 +19,7 @@
 #include "../../toolbox/string.hpp"
 #include "../../toolbox/shared.hpp"
 #include "../http/request/request.hpp"
+#include "../http/request/io_pending_state.hpp"
 
 int main(int argc, char* argv[]) {
     try {
