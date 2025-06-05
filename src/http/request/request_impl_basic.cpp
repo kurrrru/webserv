@@ -4,6 +4,7 @@
 #include "../../core/client.hpp"
 #include "../../../toolbox/shared.hpp"
 #include "request_parser.hpp"
+#include "io_pending_state.hpp"
 
 http::Request::Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth)
     : _client(client), _requestDepth(requestDepth), _ioPendingState(REQUEST_READING) {
