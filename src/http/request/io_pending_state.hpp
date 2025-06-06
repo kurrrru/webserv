@@ -8,6 +8,7 @@ enum IOPendingState {
     CGI_LOCAL_REDIRECT_IO_PENDING,
     ERROR_LOCAL_REDIRECT_IO_PENDING,
     RESPONSE_SENDING,
-    NO_IO_PENDING
+    NO_IO_PENDING,
+    END_RESPONSE
 };
 }  // namespace http
