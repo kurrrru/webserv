@@ -80,11 +80,21 @@ int main(int argc, char* argv[]) {
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
 
-                            client->getRequest()->run();
-                            // if (!client->getRequest()->isKeepAliveRequest() &&
-                            //     client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
+                            if (events[i].events & EPOLLRDHUP) {
+                                Epoll::del(client_sock);
+                                continue;
+                            } else if (events[i].events & EPOLLIN) {
+                                client->getRequest()->run();
+                            } else {
+                                toolbox::logger::StepMark::error("Epoll: unknown event for client fd: " + toolbox::to_string(client_sock));
+                                Epoll::del(client_sock);
+                                continue;
+                            }
+
+                            if (!client->getRequest()->isKeepAliveRequest() &&
+                                client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
                             Epoll::del(client_sock);
-                            // }
+                            }
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }

@@ -51,7 +51,7 @@ void Epoll::addServer(int fd, toolbox::SharedPtr<Server> server) {
 void Epoll::addClient(int fd, toolbox::SharedPtr<Client> client) {
     Epoll& epollInstance = getInstance();
     struct epoll_event* ev = new struct epoll_event;
-    ev->events = EPOLLIN;
+    ev->events = EPOLLIN | EPOLLRDHUP;
     taggedEventData* tagged = new taggedEventData;
     tagged->client = client;
     ev->data.ptr = static_cast<void*>(tagged);
