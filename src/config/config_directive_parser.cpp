@@ -219,6 +219,8 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
                 throwConfigError("invalid new status code \"" + newStatusCodeStr + "\" in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
             }
             errorPage.setNewStatusCode(static_cast<int>(newStatusCode));
+        } else {
+            throwConfigError("invalid new status code \"" + newStatusCodeStr + "\" in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
         }
         (*pos)++;
     }
