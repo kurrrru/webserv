@@ -14,9 +14,6 @@
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/string.hpp"
 
-
-#include <iostream>
-
 namespace config {
 
 bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, const std::string directiveName) {
