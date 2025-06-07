@@ -14,6 +14,9 @@
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/string.hpp"
 
+
+#include <iostream>
+
 namespace config {
 
 bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, const std::string directiveName) {
@@ -185,6 +188,7 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     if (tokens[*pos] == config::directive::SEMICOLON) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive");
     }
+    ErrorPage errorPage;
     std::vector<size_t> codes;
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string token = tokens[(*pos)];
@@ -205,11 +209,30 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     } else if (codes.empty()) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\"");
     }
+    if (tokens[*pos][0] == '=')
+    {
+        errorPage.setOverwrite(true);
+        if (*pos >= tokens.size() || tokens[*pos] == config::directive::SEMICOLON) {
+            throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
+        }
+        std::string newStatusCodeStr = tokens[*pos].substr(1);
+        std::size_t newStatusCode;
+        if (config::stringToSizeT(newStatusCodeStr, &newStatusCode)) {
+            if (newStatusCode < config::directive::MIN_NEW_STATUS_CODE || 
+                newStatusCode > config::directive::MAX_NEW_STATUS_CODE) {
+                throwConfigError("invalid new status code \"" + newStatusCodeStr + "\" in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
+            }
+            errorPage.setNewStatusCode(static_cast<int>(newStatusCode));
+        }
+        (*pos)++;
+    }
+    if (*pos >= tokens.size() || tokens[*pos] == config::directive::SEMICOLON) {
+        throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
+    }
     std::string path = tokens[(*pos)++];
     if (tokens[*pos] != config::directive::SEMICOLON) {
         throwConfigError("invalid value in \"" + tokens[*pos] + "\"");
     }
-    ErrorPage errorPage;
     for (size_t i = 0; i < codes.size(); ++i) {
         errorPage.addCode(codes[i]);
     }
