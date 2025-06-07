@@ -206,8 +206,7 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     } else if (codes.empty()) {
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\"");
     }
-    if (tokens[*pos][0] == '=')
-    {
+    if (tokens[*pos][0] == config::directive::EQUAL) {
         errorPage.setOverwrite(true);
         if (*pos >= tokens.size() || tokens[*pos] == config::directive::SEMICOLON) {
             throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
