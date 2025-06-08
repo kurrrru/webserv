@@ -213,14 +213,16 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
         }
         std::string newStatusCodeStr = tokens[*pos].substr(1);
         std::size_t newStatusCode;
-        if (config::stringToSizeT(newStatusCodeStr, &newStatusCode)) {
-            if (newStatusCode < config::directive::MIN_NEW_STATUS_CODE || 
-                newStatusCode > config::directive::MAX_NEW_STATUS_CODE) {
+        if (!newStatusCodeStr.empty()) {
+            if (config::stringToSizeT(newStatusCodeStr, &newStatusCode)) {
+                if (newStatusCode < config::directive::MIN_NEW_STATUS_CODE || 
+                    newStatusCode > config::directive::MAX_NEW_STATUS_CODE) {
+                    throwConfigError("invalid new status code \"" + newStatusCodeStr + "\" in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
+                }
+                errorPage.setNewStatusCode(static_cast<int>(newStatusCode));
+            } else {
                 throwConfigError("invalid new status code \"" + newStatusCodeStr + "\" in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
             }
-            errorPage.setNewStatusCode(static_cast<int>(newStatusCode));
-        } else {
-            throwConfigError("invalid new status code \"" + newStatusCodeStr + "\" in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive after equal sign");
         }
         (*pos)++;
     }
