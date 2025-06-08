@@ -83,18 +83,24 @@ int main(int argc, char* argv[]) {
                             if (events[i].events & EPOLLRDHUP) {
                                 Epoll::del(client_sock);
                                 continue;
-                            } else if (events[i].events & EPOLLIN) {
+                            } else if (events[i].events & EPOLLOUT || (events[i].events & EPOLLIN && 
+                                       client->getRequest()->getIOPendingState() != http::RESPONSE_SENDING)) {
                                 client->getRequest()->run();
-                            } else {
-                                toolbox::logger::StepMark::error("Epoll: unknown event for client fd: " + toolbox::to_string(client_sock));
-                                Epoll::del(client_sock);
-                                continue;
                             }
 
-                            if (!client->getRequest()->isKeepAliveRequest() &&
-                                client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
-                            Epoll::del(client_sock);
-                            }
+                            /*
+                                When ENDRESPONSE is set, uncomment out the following
+                            */
+
+                            // if ((!client->getRequest()->isKeepAliveRequest() &&
+                            //     client->getRequest()->getIOPendingState() == http::END_RESPONSE)
+                            //     || client->getRequest()->getResponse().getStatus() == http::HttpStatus::BAD_REQUEST) {
+                                Epoll::del(client_sock);
+                            // }
+
+                            // else if (client->getRequest()->getIOPendingState() == http::END_RESPONSE) {
+                                // client->clearRequest(client);
+                            // }
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }

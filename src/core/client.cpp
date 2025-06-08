@@ -84,8 +84,13 @@ size_t Client::getServerPort() const {
 toolbox::SharedPtr<http::Request> Client::getRequest() const {
     return _request;
 }
+
 void Client::setRequest(const toolbox::SharedPtr<http::Request> request) {
     _request = request;
+}
+
+void Client::clearRequest(const toolbox::SharedPtr<Client> client) {
+    _request = toolbox::SharedPtr<http::Request>(new http::Request(client));
 }
 
 std::string Client::convertIpToString(uint32_t ip) const {

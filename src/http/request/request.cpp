@@ -4,6 +4,7 @@
 namespace http {
 void Request::run() {
   switch (_ioPendingState) {
+    case START_READING:
     case NO_IO_PENDING:
     case REQUEST_READING:
         recvRequest();

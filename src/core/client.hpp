@@ -35,6 +35,7 @@ class Client {
 
     toolbox::SharedPtr<http::Request> getRequest() const;
     void setRequest(const toolbox::SharedPtr<http::Request> request);
+    void clearRequest(const toolbox::SharedPtr<Client> client);
 
  private:
     Client();

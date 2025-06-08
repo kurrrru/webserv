@@ -108,6 +108,12 @@ bool Request::recvRequest() {
         return false;
     }
 
+    if (_ioPendingState == START_READING && (receivedData == symbols::CRLF || receivedData == symbols::LF)) {
+        return true;
+    }
+
+    _ioPendingState = REQUEST_READING;
+
     int parseStatus = _parsedRequest.run(receivedData);
     
     if (parseStatus == BaseParser::P_ERROR) {
