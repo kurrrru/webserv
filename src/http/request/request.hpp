@@ -95,7 +95,7 @@ class Request {
     toolbox::SharedPtr<Client> _client;
     std::size_t _requestDepth;
     IOPendingState _ioPendingState;
-    toolbox::SharedPtr<http::Request> _ErrorPageRequest;
+    toolbox::SharedPtr<http::Request> _errorPageRequest;
 
     Request();
     Request(const Request& other);

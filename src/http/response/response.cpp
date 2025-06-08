@@ -67,7 +67,7 @@ bool Response::sendResponse(int client_fd) {
         _wholeResponseStr = buildResponse();
         _wholeResponsePtr = _wholeResponseStr.c_str();
     }
-    if (_lengthSent >= _wholeResponseStr.size()) {
+    if (_lengthSent >= static_cast<ssize_t>(_wholeResponseStr.size())) {
         return true;
     }
     ssize_t remaining = _wholeResponseStr.size() - _lengthSent;
@@ -82,7 +82,7 @@ bool Response::sendResponse(int client_fd) {
         throw std::runtime_error(oss.str());
     }
     _lengthSent += sent;
-    if (_lengthSent >= _wholeResponseStr.size()) {
+    if (_lengthSent >= static_cast<ssize_t>(_wholeResponseStr.size())) {
         _wholeResponseStr.clear();
         _wholeResponsePtr = NULL;
         _lengthSent = 0;
