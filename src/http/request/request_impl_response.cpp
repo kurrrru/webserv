@@ -129,7 +129,10 @@ void http::Request::sendResponse() {
                 return;
             }
             int errorStatus = _errorPageRequest->getResponse().getStatus();
-            if (errorStatus >= 200 && errorStatus < 400) { // [TODO]:magic numberなので後で修正
+
+            const int MIN_SUCCESS_CODE = 200;
+            const int MAX_SUCCESS_CODE = 399;
+            if (errorStatus >= MIN_SUCCESS_CODE && errorStatus <= MAX_SUCCESS_CODE) {
                 propagateErrorPage(&_response, _errorPageRequest->getResponse());
             } else {
                 setDefaultErrorPage(&_response, status);
