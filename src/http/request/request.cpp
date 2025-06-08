@@ -6,9 +6,11 @@ void Request::run() {
   switch (_ioPendingState) {
     case NO_IO_PENDING:
     case REQUEST_READING:
-        recvRequest();
-        if (_ioPendingState != NO_IO_PENDING)
-            break;
+        if (_requestDepth == 0) {
+            recvRequest();
+            if (_ioPendingState != NO_IO_PENDING)
+                break;
+        }
     // fallthrough
     case CGI_BODY_SENDING:
     case CGI_OUTPUT_READING:
