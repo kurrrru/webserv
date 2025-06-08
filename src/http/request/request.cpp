@@ -22,7 +22,9 @@ void Request::run() {
         // fallthrough
         case ERROR_LOCAL_REDIRECT_IO_PENDING:
         case RESPONSE_SENDING:
-            Request::sendResponse();
+            if (_requestDepth == root_depth) {
+                Request::sendResponse();
+            }
             break;
         default:
             // never come here
