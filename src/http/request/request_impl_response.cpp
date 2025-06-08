@@ -6,6 +6,7 @@
 #include "../../core/client.hpp"
 #include "../../../toolbox/access.hpp"
 #include "../../../toolbox/string.hpp"
+#include "io_pending_state.hpp"
 
 namespace {
     std::string getFieldValue(
@@ -75,48 +76,54 @@ namespace {
 }
 
 void http::Request::sendResponse() {
+    if (_ioPendingState == http::END_RESPONSE) {
+        return;
+    }
     std::size_t status = _response.getStatus();
+    if (_ioPendingState != http::RESPONSE_SENDING) {
+        if (_ioPendingState != http::ERROR_LOCAL_REDIRECT_IO_PENDING) {
+            if (status >= config::directive::MIN_ERROR_PAGE_CODE
+                    && status <= config::directive::MAX_ERROR_PAGE_CODE) {
+                std::vector<config::ErrorPage> errorPages = _config.getErrorPages();
+                bool useDefaultErrorPage = true;
+                for (std::size_t i = 0; i < errorPages.size(); ++i) {
+                    if (std::find(errorPages[i].getCodes().begin(),
+                            errorPages[i].getCodes().end(), status)
+                        != errorPages[i].getCodes().end()) {
+                        // [TODO] Change the processing of the error page
+                        // depending on the prefix of the error page path
+                        // "/" - ngx_http_internal_redirect
+                        // "@" - ngx_http_named_location
+                        // otherwise - ngx_http_send_refresh or ngx_http_send_special_response
 
-    if (status >= config::directive::MIN_ERROR_PAGE_CODE
-            && status <= config::directive::MAX_ERROR_PAGE_CODE) {
-        std::vector<config::ErrorPage> errorPages = _config.getErrorPages();
-        bool useDefaultErrorPage = true;
-        for (std::size_t i = 0; i < errorPages.size(); ++i) {
-            if (std::find(errorPages[i].getCodes().begin(),
-                    errorPages[i].getCodes().end(), status)
-                != errorPages[i].getCodes().end()) {
-                // [TODO] Change the processing of the error page
-                // depending on the prefix of the error page path
-                // "/" - ngx_http_internal_redirect
-                // "@" - ngx_http_named_location
-                // otherwise - ngx_http_send_refresh or ngx_http_send_special_response
+                        // [TODO] この辺は後で書きます
 
-                // [TODO] この辺は後で書きます
-
-                http::Request errorRequest(_client, _requestDepth + 1);
-                std::string method = http::method::GET;
-                std::string path = errorPages[i].getPath();
-                std::string host;
-                if (_parsedRequest.get().fields.getFieldValue(
-                        http::fields::HOST).empty()) {
-                    host = _client->getServerIp();
-                } else {
-                    host = _parsedRequest.get().fields.getFieldValue(
-                        http::fields::HOST)[0];
+                        http::Request errorRequest(_client, _requestDepth + 1);
+                        std::string method = http::method::GET;
+                        std::string path = errorPages[i].getPath();
+                        std::string host;
+                        if (_parsedRequest.get().fields.getFieldValue(
+                                http::fields::HOST).empty()) {
+                            host = _client->getServerIp();
+                        } else {
+                            host = _parsedRequest.get().fields.getFieldValue(
+                                http::fields::HOST)[0];
+                        }
+                        // errorRequest.setLocalRedirectInfo(method, path, host);
+                        errorRequest.fetchConfig();
+                        errorRequest.handleRequest();
+                        if (errorRequest._response.getStatus() == http::HttpStatus::OK) {
+                            propagateErrorPage(&_response, errorRequest._response);
+                            useDefaultErrorPage = false;
+                        }
+                    }
                 }
-                // errorRequest.setLocalRedirectInfo(method, path, host);
-                errorRequest.fetchConfig();
-                errorRequest.handleRequest();
-                if (errorRequest._response.getStatus() == http::HttpStatus::OK) {
-                    propagateErrorPage(&_response, errorRequest._response);
-                    useDefaultErrorPage = false;
+                if (useDefaultErrorPage) {
+                    setDefaultErrorPage(&_response, status);
                 }
             }
         }
-        if (useDefaultErrorPage) {
-            setDefaultErrorPage(&_response, status);
-        }
-    } 
+    }
 
     std::string remote_addr = _client->getIp();
     std::string remote_user = "-";

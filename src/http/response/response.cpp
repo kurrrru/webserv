@@ -7,22 +7,29 @@
 #include <sstream>
 #include <vector>
 #include <utility>
+#include <algorithm>
 
 #include "../../core/constant.hpp"
 #include "../../../toolbox/stepmark.hpp"
 
 namespace http {
 
-Response::Response() : _status(200), _headers(), _body() {
+Response::Response() : _status(200), _headers(), _body(), 
+_wholeResponseStr(), _wholeResponsePtr(NULL), _lengthSent(0) {
 }
 Response::Response(const Response& other)
-: _status(other._status), _headers(other._headers), _body(other._body) {
+: _status(other._status), _headers(other._headers), _body(other._body),
+_wholeResponseStr(other._wholeResponseStr), _wholeResponsePtr(other._wholeResponsePtr),
+_lengthSent(other._lengthSent) {
 }
 Response& Response::operator=(const Response& other) {
     if (this != &other) {
         _status = other._status;
         _headers = other._headers;
         _body = other._body;
+        _wholeResponseStr = other._wholeResponseStr;
+        _wholeResponsePtr = other._wholeResponsePtr;
+        _lengthSent = other._lengthSent;
     }
     return *this;
 }
@@ -55,25 +62,33 @@ void Response::setBody(const std::string& body) {
     _body = body;
 }
 
-void Response::sendResponse(int client_fd) const {
-    std::string response = buildResponse();
-    ssize_t total_sent = 0;
-    ssize_t to_send = response.size();
-    const char* data = response.c_str();
-
-    while (total_sent < to_send) {
-        ssize_t sent = send(client_fd, data + total_sent,
-            to_send - total_sent, 0); // TODO: change to non-blocking send later
-        if (sent <= 0) {
-            std::ostringstream oss;
-            oss << "Failed to send response:\n";
-            oss << "  Sent: " << total_sent << "\n";
-            oss << "  Total: " << to_send << "\n";
-            oss << "  Error: " << (sent == -1 ? "send() failed" : "Connection closed");
-            throw std::runtime_error(oss.str());
-        }
-        total_sent += sent;
+bool Response::sendResponse(int client_fd) {
+    if (_wholeResponsePtr == NULL) {
+        _wholeResponseStr = buildResponse();
+        _wholeResponsePtr = _wholeResponseStr.c_str();
     }
+    if (_lengthSent >= _wholeResponseStr.size()) {
+        return true;
+    }
+    ssize_t remaining = _wholeResponseStr.size() - _lengthSent;
+    ssize_t sent = send(client_fd, _wholeResponsePtr + _lengthSent,
+        std::min(remaining, static_cast<ssize_t>(core::IO_BUFFER_SIZE)), 0);
+    if (sent <= 0) {
+        std::ostringstream oss;
+        oss << "Failed to send response:\n";
+        oss << "  Sent: " << _lengthSent << "\n";
+        oss << "  Total: " << _wholeResponseStr.size() << "\n";
+        oss << "  Error: " << (sent == -1 ? "send() failed" : "Connection closed");
+        throw std::runtime_error(oss.str());
+    }
+    _lengthSent += sent;
+    if (_lengthSent >= _wholeResponseStr.size()) {
+        _wholeResponseStr.clear();
+        _wholeResponsePtr = NULL;
+        _lengthSent = 0;
+        return true;
+    }
+    return false;
 }
 
 std::string Response::buildResponse() const {
