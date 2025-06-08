@@ -14,7 +14,6 @@ extern const char* DELETE;
 
 namespace uri {
 extern const char* HTTP_VERSION_1_1;
-extern const char* HTTP_VERSION_1_0;
 extern const std::size_t HTTP_MAJOR_VERSION;
 extern const std::size_t HTTP_MINOR_VERSION_MAX;
 extern const std::size_t MAX_URI_SIZE;
@@ -48,7 +47,6 @@ extern const char* LAST_MODIFIED;
 extern const char* FIELDS[];
 extern const std::size_t FIELD_SIZE;
 extern const std::size_t MAX_FIELDLINE_SIZE;
-extern const std::size_t MAX_BODY_SIZE;
 namespace cgi {
 extern const char* STATUS;
 }  // namespace cgi

@@ -510,16 +510,6 @@ void makeHttpVersionTests(TestVector& t) {
     t.push_back(r);
     clearUri(r);
 
-    r._name = "HTTP/1.0";  // 対応するかどうか決める
-    r._request = "GET / HTTP/1.0\r\nHost: sample\r\n\r\n";
-    r._httpStatus.set(http::HttpStatus::OK);
-    r._isSuccessTest = true;
-    r._exceptRequest.method = "GET";
-    r._exceptRequest.path = "/";
-    r._exceptRequest.version = "HTTP/1.0";
-    t.push_back(r);
-    clearUri(r);
-
     r._name = "不正なHTTPバージョン";
     r._request = "GET / HTTP/2.0\r\nHost: sample\r\n\r\n";
     r._httpStatus.set(http::HttpStatus::HTTP_VERSION_NOT_SUPPORTED);
