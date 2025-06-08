@@ -3,10 +3,11 @@
 
 namespace http {
 void Request::run() {
-  switch (_ioPendingState) {
+    const std::size_t root_depth = 0;
+    switch (_ioPendingState) {
     case NO_IO_PENDING:
     case REQUEST_READING:
-        if (_requestDepth == 0) {
+        if (_requestDepth == root_depth) {
             recvRequest();
             if (_ioPendingState != NO_IO_PENDING)
                 break;
