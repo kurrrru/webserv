@@ -161,6 +161,7 @@ void http::Request::sendResponse() {
             http_user_agent
         );
         _ioPendingState = http::RESPONSE_SENDING;
+        return;
     }
     bool endSending = _response.sendResponse(_client->getFd());
     if (endSending) {
