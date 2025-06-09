@@ -3,16 +3,13 @@ NAME = cgi_test.out
 SRC_DIRS = ../../../src
 TOOLBOX_DIR = ../../../toolbox
 
-EXCLUDE_FILES = $(SRC_DIRS)/http/request/recv_request.cpp
-
-HTTP_REQUEST_SRCS = $(filter-out $(EXCLUDE_FILES), $(wildcard $(SRC_DIRS)/http/request/*.cpp))
-
 TEST_SRCS = $(wildcard $(SRC_DIRS)/http/*.cpp)\
-			$(HTTP_REQUEST_SRCS)\
 			$(wildcard $(SRC_DIRS)/http/parsing/*.cpp)\
 			$(wildcard $(SRC_DIRS)/http/cgi/*.cpp)\
+			$(wildcard $(SRC_DIRS)/http/request/*.cpp)\
 			$(wildcard $(SRC_DIRS)/config/*.cpp)\
-			../../../src/http/response/response.cpp\
+			$(wildcard $(SRC_DIRS)/http/response/*.cpp)\
+			../../../src/core/client.cpp\
 			$(wildcard $(TOOLBOX_DIR)/*.cpp)\
 			$(wildcard *.cpp) \
             $(wildcard http/*.cpp) \
