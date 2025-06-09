@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <sstream>
+#include <cstring>
 
 #include "server.hpp"
 #include "client.hpp"
@@ -47,6 +48,8 @@ int main(int argc, char* argv[]) {
         int cnt = 0;  // for debug
         struct epoll_event events[1000];
         while (1) {
+            // usleep 1ms saves CPU usage 
+            usleep(1000);
             try {
                 int nfds = Epoll::wait(events, 1000, -1);
                 if (nfds == -1) {
@@ -80,27 +83,19 @@ int main(int argc, char* argv[]) {
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
 
-                            if (events[i].events & EPOLLRDHUP) {
+                            if (isSocketDisconnected(events[i])) {
                                 Epoll::del(client_sock);
                                 continue;
-                            } else if (events[i].events & EPOLLOUT || (events[i].events & EPOLLIN && 
-                                       client->getRequest()->getIOPendingState() != http::RESPONSE_SENDING)) {
+                            } else if (events[i].events & EPOLLOUT ||
+                                (events[i].events & EPOLLIN && client->getRequest()->getIOPendingState() != http::RESPONSE_SENDING)) {
                                 client->getRequest()->run();
                             }
-
-                            /*
-                                When ENDRESPONSE is set, uncomment out the following
-                            */
-
-                            // if ((!client->getRequest()->isKeepAliveRequest() &&
-                            //     client->getRequest()->getIOPendingState() == http::END_RESPONSE)
-                            //     || client->getRequest()->getResponse().getStatus() == http::HttpStatus::BAD_REQUEST) {
+                            // If the client is not keep-alive and the response is complete or bad request
+                            if (client->isOnceConnectionEnd() || client->isBadRequest()) {
                                 Epoll::del(client_sock);
-                            // }
-
-                            // else if (client->getRequest()->getIOPendingState() == http::END_RESPONSE) {
-                                // client->clearRequest(client);
-                            // }
+                            } else if (client->getRequest()->getIOPendingState() == http::END_RESPONSE) {
+                                client->clearRequest(client);
+                            }
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;
                         }
