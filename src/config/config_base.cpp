@@ -6,19 +6,20 @@
 namespace config {
 
 ErrorPage::ErrorPage() :
-_codes(),
-_path() {
+_codes(), _path(), _overwrite(false), _newStatusCode(-1) {
 }
 
 ErrorPage::ErrorPage(const ErrorPage& other) :
-_codes(other._codes),
-_path(other._path) {
+_codes(other._codes), _path(other._path), _overwrite(other._overwrite),
+_newStatusCode(other._newStatusCode) {
 }
 
 ErrorPage& ErrorPage::operator=(const ErrorPage& other) {
     if (this != &other) {
         _codes = other._codes;
         _path = other._path;
+        _overwrite = other._overwrite;
+        _newStatusCode = other._newStatusCode;
     }
     return *this;
 }

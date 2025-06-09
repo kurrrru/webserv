@@ -38,9 +38,16 @@ class ErrorPage {
     const std::string& getPath() const { return _path; }
     void setPath(const std::string& path) { _path = path; }
 
+    bool isOverwrite() const { return _overwrite; }
+    void setOverwrite(bool overwrite) { _overwrite = overwrite; }
+    int getNewStatusCode() const { return _newStatusCode; }
+    void setNewStatusCode(int newStatusCode) { _newStatusCode = newStatusCode; }
+
  private:
     std::vector<size_t> _codes;
     std::string _path;
+    bool _overwrite;  // Indicates if the HTTP status code should be overwritten
+    int _newStatusCode;
 };
 
 /**

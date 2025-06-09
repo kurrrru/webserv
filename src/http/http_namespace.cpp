@@ -10,7 +10,6 @@ const char* DELETE = "DELETE";
 }  // namespace method
 
 namespace uri {
-const char* HTTP_VERSION_1_0 = "HTTP/1.0";
 const char* HTTP_VERSION_1_1 = "HTTP/1.1";
 const std::size_t HTTP_MAJOR_VERSION = 1;
 const std::size_t HTTP_MINOR_VERSION_MAX = 999;
@@ -52,7 +51,6 @@ LAST_MODIFIED
 };
 const std::size_t FIELD_SIZE = sizeof(FIELDS) / sizeof(FIELDS[0]);
 const std::size_t MAX_FIELDLINE_SIZE = 8192;
-const std::size_t MAX_BODY_SIZE = 1048576;
 namespace cgi {
 const char* STATUS = "Status";
 }
