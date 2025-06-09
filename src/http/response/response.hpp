@@ -32,7 +32,7 @@ class Response {
 
     void setBody(const std::string& body);
 
-    void sendResponse(int client_fd) const;
+    bool sendResponse(int client_fd);
     static std::string getStatusMessage(int code);
 
     int getStatus() const;
@@ -47,6 +47,9 @@ class Response {
     int _status;
     std::map<FieldName, HeaderField> _headers;
     std::string _body;
+    std::string _wholeResponseStr;
+    const char* _wholeResponsePtr;
+    ssize_t _lengthSent;
 
     std::string buildResponse() const;
 };
