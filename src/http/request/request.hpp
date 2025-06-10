@@ -5,7 +5,6 @@
 
 #include "request_parser.hpp"
 #include "../response/response.hpp"
-#include "../cgi/cgi_handler.hpp"
 #include "../../config/config.hpp"
 #include "../../../toolbox/shared.hpp"
 #include "io_pending_state.hpp"
@@ -76,7 +75,7 @@ class Request {
     IOPendingState getIOPendingState() const {
         return _ioPendingState;
     }
-
+    
     /**
      * @brief Checks if the request is a keep-alive request.
      * @return True if the request is a keep-alive request, false otherwise.
@@ -89,14 +88,6 @@ class Request {
      */
     http::Response getResponse() const;
 
-    /**
-     * @brief Sets the redirect count for the request.
-     * This is used to track how many redirects have occurred
-     * for this request, which is important for handling local redirects.
-     * @param count The number of redirects to set.
-     */
-    void setRedirectCount(size_t count);
-
  private:
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;
@@ -105,7 +96,6 @@ class Request {
     std::size_t _requestDepth;
     IOPendingState _ioPendingState;
     toolbox::SharedPtr<http::Request> _errorPageRequest;
-    CgiHandler _cgiHandler;
 
     Request();
     Request(const Request& other);

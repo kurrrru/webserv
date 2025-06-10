@@ -28,8 +28,3 @@ void http::Request::setLocalRedirectInfo(const std::string& method,
 http::Response http::Request::getResponse() const {
     return _response;
 }
-
-void http::Request::setRedirectCount(size_t count) {
-    _requestDepth = count;
-    _cgiHandler.setRedirectCount(count);
-}

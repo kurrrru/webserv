@@ -29,42 +29,19 @@ void Request::handleRequest() {
         return;
     }
 
-    switch (_ioPendingState) {
-        case CGI_LOCAL_REDIRECT_IO_PENDING:
-            _response = http::Response();
-            fetchConfig();
-            _cgiHandler.reset();
-            _cgiHandler.setRedirectCount(_requestDepth);
-            _ioPendingState = NO_IO_PENDING;
-            toolbox::logger::StepMark::info(
-                "CGI_LOCAL_REDIRECT_IO_PENDING: requestDepth="
-                + toolbox::to_string(_requestDepth));
-            break;
-        case CGI_BODY_SENDING:
-        case CGI_OUTPUT_READING:
-            _ioPendingState = _cgiHandler.handleRequest(httpRequest, _response,
-            _client, _config, _ioPendingState);
-            return;
-        default:
-            break;
-    }
-    const std::string& targetPath =
-                    http::joinPath(_config.getRoot(), httpRequest.uri.path);
-    bool isCgi = _cgiHandler.isCgiRequest(targetPath,
-                                _config.getCgiExtensions(),
-                                _config.getCgiPath());
-    if (isCgi) {
-        if (_ioPendingState == NO_IO_PENDING) {
-            _cgiHandler.reset();
-        }
-        _cgiHandler.setRedirectCount(_requestDepth);
-        _ioPendingState = _cgiHandler.handleRequest(httpRequest, _response,
-            _client, _config, _ioPendingState);
-    } else {
-        _requestDepth = 0;
+    // CgiHandler cgiHandler;
+
+    // const std::string& targetPath = http::joinPath(_config.getRoot(), httpRequest.uri.path);
+    // const std::string& cgiPath = _config.getCgiPath();
+    // const std::vector<std::string>& cgiExtensionVector = _config.getCgiExtensions();
+
+    // if (cgiHandler.isCgiRequest(targetPath, cgiExtensionVector, cgiPath)) {
+    //     _ioPendingState = cgiHandler.handleRequest(httpRequest, _response,
+    //         _config.getRoot(), cgiExtensionVector, cgiPath);
+    // } else {
         serverMethod::serverMethodHandler(
             _parsedRequest, _config, httpRequest.fields, _response);
-    }
+    // }
 
     toolbox::logger::StepMark::info("Request::handleRequest: handled request for "
         + httpRequest.uri.path + " with method " + httpRequest.method);
