@@ -59,4 +59,10 @@ std::size_t BaseParser::getLineEndLen
     return symbols::LF_SIZE;
 }
 
+void BaseParser::reset() {
+    _parseStatus = P_IN_PROGRESS;
+    _buf.clear();
+    _validatePos = V_REQUEST_LINE;
+}
+
 }  // namespace http
