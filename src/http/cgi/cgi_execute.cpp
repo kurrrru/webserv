@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <ctime>
 
 #include <fcntl.h>
 #include <sys/wait.h>
@@ -12,18 +13,29 @@
 #include <signal.h>
 
 #include "cgi_execute.hpp"
-
-#include "../../toolbox/stepmark.hpp"
-#include "../../toolbox/string.hpp"
+#include "../response/method_utils.hpp"
+#include "../../core/constant.hpp"
+#include "../../event/epoll.hpp"
+#include "../../../toolbox/stepmark.hpp"
+#include "../../../toolbox/string.hpp"
 
 namespace http {
 
 CgiExecute::CgiExecute() :
 _childPid(-1),
 _timeoutSeconds(http::cgi::TIMEOUT),
+_startTime(0),
 _hasPostBody(false),
 _isTimeOut(false),
-_isExecveError(false) {
+_isExecveError(false),
+_writeState(WRITE_IDLE),
+_totalBytes(0),
+_bytesWritten(0),
+_writeBuffer(),
+_readState(READ_IDLE),
+_parser(),
+_readStartTime(0),
+_lastReadTime(0) {
     _inputPipe[0] = -1;
     _inputPipe[1] = -1;
     _outputPipe[0] = -1;
@@ -34,48 +46,55 @@ CgiExecute::~CgiExecute() {
     cleanupPipes();
 }
 
-/**
- * Main method for executing CGI scripts.
- * 
- * @param scriptPath Path to the CGI script to execute
- * @param interpreter Path to the interpreter (empty if directly executable)
- * @param request HTTP request information
- * @param output String to store CGI script output (output parameter)
- * @return Enumeration value of ExecuteResult indicating execution result
- * 
- * Process flow:
- * 1. Script path validation - Checks if executable
- * 2. Environment variables setup - Prepares HTTP request and server information
- * 3. POST body preparation - Prepares request body data processing
- * 4. Pipe creation - Establishes communication channels between parent and child processes
- * 5. Execution start time recording - For timeout management
- * 6. Child process creation and execution - Runs CGI script in a separate process
- * 7. Data processing - Sends POST data and reads CGI output
- * 8. Resource cleanup - Releases used pipes and other resources
- * 
- * Each step terminates early with appropriate error code if an error occurs
- */
-CgiExecute::ExecuteResult CgiExecute::execute(const std::string& scriptPath,
-                                            const std::string& interpreter,
-                                            const HTTPRequest& request,
-                                            std::string& output) {
+void CgiExecute::reset() {
+    cleanupPipes();
+    _childPid = -1;
+    _timeoutSeconds = http::cgi::TIMEOUT;
+    _startTime = 0;
+    _hasPostBody = false;
+    _isTimeOut = false;
+    _isExecveError = false;
+    _writeState = WRITE_IDLE;
+    _totalBytes = 0;
+    _bytesWritten = 0;
+    _writeBuffer.clear();
+    _readState = READ_IDLE;
+    _parser.reset();
+    _readStartTime = 0;
+    _lastReadTime = 0;
+    _inputPipe[0] = -1;
+    _inputPipe[1] = -1;
+    _outputPipe[0] = -1;
+    _outputPipe[1] = -1;
+    _environment.clear();
+    _envStrings.clear();
+    _client.reset();
+}
+
+CgiExecute::ExecuteResult CgiExecute::execute(
+                                const std::string& scriptPath,
+                                const std::string& interpreter,
+                                const HTTPRequest& request,
+                                const toolbox::SharedPtr<Client>& client,
+                                const config::LocationConfig& locationConfig) {
+    _client = client;
     if (!validateScriptPath(scriptPath)) {
         toolbox::logger::StepMark::error(
             "Invalid CGI script path: " + scriptPath);
         return EXECUTE_PATH_ERROR;
     }
-    setupEnvironmentVariables(request, scriptPath);
+    setupEnvironmentVariables(request, scriptPath, client, locationConfig);
     preparePostBody(request);
     ExecuteResult result = createPipes();
     if (result != EXECUTE_SUCCESS) {
         return result;
     }
-    _startTime = time(NULL);
+    _startTime = std::time(NULL);
     if (!forkAndExecute(scriptPath, interpreter)) {
         cleanupPipes();
         return EXECUTE_FORK_ERROR;
     }
-    result = processData(request, output);
+    result = processData(request);
     if (result != EXECUTE_SUCCESS) {
         return result;
     }
@@ -101,27 +120,42 @@ bool CgiExecute::validateScriptPath(const std::string& scriptPath) const {
 }
 
 void CgiExecute::setupEnvironmentVariables(const HTTPRequest& request,
-                                        const std::string& scriptPath) {
+                                const std::string& scriptPath,
+                                const toolbox::SharedPtr<Client>& client,
+                                const config::LocationConfig& locationConfig) {
     _environment.clear();
     _environment[http::cgi::meta::AUTH_TYPE] = "";
-    setServerVariables(request);
-    setClientVariables();
+    setServerVariables(request, client);
+    setClientVariables(client);
     setRequestVariables(request);
-    setPathVariables(request, scriptPath);
+    setPathVariables(request, scriptPath, locationConfig.getRoot());
     convertHeadersToEnv(request);
 }
 
-void CgiExecute::setServerVariables(const HTTPRequest& request) {
+void CgiExecute::setServerVariables(const HTTPRequest& request,
+                                    const toolbox::SharedPtr<Client>& client) {
     _environment[http::cgi::meta::SERVER_SOFTWARE] = http::cgi::SERVER_SOFTWARE;
-    _environment[http::cgi::meta::SERVER_NAME] = "";
-    _environment[http::cgi::meta::SERVER_PORT] = "";
+    const HTTPFields::FieldValue& hostValues =
+                        request.fields.getFieldValue(http::fields::HOST);
+    if (hostValues.empty()) {
+        _environment[http::cgi::meta::SERVER_NAME] = "";
+    } else {
+        _environment[http::cgi::meta::SERVER_NAME] = hostValues.front();
+    }
+    size_t serverPort = client->getServerPort();
+    if (serverPort == 0) {
+        _environment[http::cgi::meta::SERVER_PORT] = "";
+    } else {
+        _environment[http::cgi::meta::SERVER_PORT] =
+                                toolbox::to_string(serverPort);
+    }
     _environment[http::cgi::meta::SERVER_PROTOCOL] = request.version;
     _environment[http::cgi::meta::GATEWAY_INTERFACE] =
                                         http::cgi::GATEWAY_INTERFACE;
 }
 
-void CgiExecute::setClientVariables() {
-    _environment[http::cgi::meta::REMOTE_ADDR] = "";
+void CgiExecute::setClientVariables(const toolbox::SharedPtr<Client>& client) {
+    _environment[http::cgi::meta::REMOTE_ADDR] = client->getIp();
     _environment[http::cgi::meta::REMOTE_HOST] = "";
     _environment[http::cgi::meta::REMOTE_IDENT] = "";
     _environment[http::cgi::meta::REMOTE_USER] = "";
@@ -166,14 +200,15 @@ void CgiExecute::setRequestVariables(const HTTPRequest& request) {
 }
 
 void CgiExecute::setPathVariables(const HTTPRequest& request,
-                                const std::string& scriptPath) {
+                                const std::string& scriptPath,
+                                const std::string& rootPath) {
     std::string scriptName = extractScriptName(request.uri.path, scriptPath);
     _environment[http::cgi::meta::SCRIPT_NAME] = scriptName;
     std::string pathInfo = request.uri.path;
     if (!pathInfo.empty()) {
         _environment[http::cgi::meta::PATH_INFO] = pathInfo;
-        // Should actually be rootPath + pathInfo
-        _environment[http::cgi::meta::PATH_TRANSLATED] = pathInfo;
+        _environment[http::cgi::meta::PATH_TRANSLATED] =
+                                http::joinPath(rootPath, pathInfo);
     }
 }
 
@@ -211,15 +246,25 @@ void CgiExecute::preparePostBody(const HTTPRequest& request) {
 
 CgiExecute::ExecuteResult CgiExecute::createPipes() {
     if (pipe(_outputPipe) == -1) {
+        toolbox::logger::StepMark::error("Failed to create output pipe");
+        return EXECUTE_IO_ERROR;
+    }
+    if (!setNonBlocking(_outputPipe[0])) {
+        cleanupPipes();
         toolbox::logger::StepMark::error(
-            "Failed to create output pipe: " + std::string(strerror(errno)));
+            "Failed to set output pipe read end to non-blocking");
         return EXECUTE_IO_ERROR;
     }
     if (_hasPostBody) {
         if (pipe(_inputPipe) == -1) {
             cleanupPipes();
+            toolbox::logger::StepMark::error("Failed to create input pipe");
+            return EXECUTE_IO_ERROR;
+        }
+        if (!setNonBlocking(_inputPipe[1])) {
+            cleanupPipes();
             toolbox::logger::StepMark::error(
-                "Failed to create input pipe: " + std::string(strerror(errno)));
+                "Failed to set input pipe write end to non-blocking");
             return EXECUTE_IO_ERROR;
         }
     }
@@ -234,8 +279,7 @@ bool CgiExecute::forkAndExecute(const std::string& scriptPath,
     if (_childPid == 0) {
         executeChildProcess(scriptPath, interpreter);
         toolbox::logger::StepMark::error(
-            "Child process failed to execute CGI script: " +
-            std::string(strerror(errno)));
+            "Child process failed to execute CGI script");
         std::exit(127);
     }
     closeUnusedPipeEnds();
@@ -245,8 +289,7 @@ bool CgiExecute::forkAndExecute(const std::string& scriptPath,
 bool CgiExecute::createChildProcess() {
     _childPid = fork();
     if (_childPid == -1) {
-        toolbox::logger::StepMark::error(
-            "Fork failed: " + std::string(strerror(errno)));
+        toolbox::logger::StepMark::error("Fork failed");
         return false;
     }
     return true;
@@ -279,11 +322,16 @@ void CgiExecute::setupNullStdin() {
 
 void CgiExecute::closeChildPipeEnds() {
     if (_hasPostBody) {
-        wrapClose(_inputPipe[0]);
-        wrapClose(_inputPipe[1]);
+        if (_inputPipe[1] != STDOUT_FILENO && _inputPipe[1] != STDIN_FILENO) {
+            wrapClose(_inputPipe[1]);
+        }
     }
-    wrapClose(_outputPipe[0]);
-    wrapClose(_outputPipe[1]);
+    if (_outputPipe[0] != STDOUT_FILENO && _outputPipe[0] != STDIN_FILENO) {
+        wrapClose(_outputPipe[0]);
+    }
+    if (_outputPipe[1] != STDOUT_FILENO && _outputPipe[1] != STDIN_FILENO) {
+        wrapClose(_outputPipe[1]);
+    }
 }
 
 std::vector<char*> CgiExecute::prepareEnvironmentVariables() {
@@ -326,22 +374,31 @@ void CgiExecute::closeUnusedPipeEnds() {
 }
 
 CgiExecute::ExecuteResult CgiExecute::processData(
-    const HTTPRequest& request, std::string& output) {
-    if (_hasPostBody) {
-        if (!writeRequestBody(request)) {
-            terminateChildProcess();
-            cleanupPipes();
-            return EXECUTE_IO_ERROR;
+    const HTTPRequest& request) {
+    if (_hasPostBody && _writeState != WRITE_COMPLETED) {
+        if (!initWriteRequestBody(request)) {
+            if (_writeState == WRITE_ERROR) {
+                terminateChildProcess();
+                cleanupPipes();
+                return EXECUTE_IO_ERROR;
+            }
+            return EXECUTE_WRITE_PENDING;
         }
-        wrapClose(_inputPipe[1]);
     }
-    if (!readChildOutput(output)) {
-        terminateChildProcess();
-        cleanupPipes();
-        if (_isTimeOut) {
-            return EXECUTE_TIMEOUT;
+    if (_readState == READ_IDLE) {
+        if (!initReadOutput()) {
+            if (_readState == READ_ERROR) {
+                terminateChildProcess();
+                cleanupPipes();
+                if (_isTimeOut) {
+                    return EXECUTE_TIMEOUT;
+                }
+                return EXECUTE_IO_ERROR;
+            }
+            return EXECUTE_READ_PENDING;
         }
-        return EXECUTE_IO_ERROR;
+    } else if (_readState != READ_COMPLETED) {
+        return EXECUTE_READ_PENDING;
     }
     if (!waitForChildProcess()) {
         terminateChildProcess();
@@ -355,61 +412,151 @@ CgiExecute::ExecuteResult CgiExecute::processData(
     return EXECUTE_SUCCESS;
 }
 
-bool CgiExecute::writeRequestBody(const HTTPRequest& request) {
-    try {
-        const std::string& body = request.body.content;
-        size_t totalBytes = 0;
-        const char* data = body.c_str();
-        size_t remaining = body.size();
-        while (remaining > 0) {
-            ssize_t written = write(_inputPipe[1],
-                                    data + totalBytes,
-                                    remaining);
-            if (written <= 0) {
-                if (errno == EINTR) {
-                    continue;
-                }
-                toolbox::logger::StepMark::error(
-                                "Failed to write request body: "
-                                + std::string(strerror(errno)));
-                return false;
-            }
-            totalBytes += written;
-            remaining -= written;
-        }
+
+bool CgiExecute::initWriteRequestBody(const HTTPRequest& request) {
+    if (!_hasPostBody) {
+        _writeState = WRITE_COMPLETED;
         return true;
-    } catch (const std::exception& e) {
-        toolbox::logger::StepMark::error(
-            "Exception writing request body: " + std::string(e.what()));
+    }
+    _writeState = WRITE_IN_PROGRESS;
+    _writeBuffer = request.body.content;
+    _totalBytes = _writeBuffer.size();
+    _bytesWritten = 0;
+    return false;
+}
+
+bool CgiExecute::continueWriteRequestBody() {
+    if (_writeState != WRITE_IN_PROGRESS) {
+        return _writeState == WRITE_COMPLETED;
+    }
+    if (hasTimedOut()) {
+        _isTimeOut = true;
+        toolbox::logger::StepMark::error("CGI write operation timed out");
+        _writeState = WRITE_ERROR;
         return false;
+    }
+    size_t remaining = _totalBytes - _bytesWritten;
+    size_t writeSize = remaining;
+    if (writeSize > core::IO_BUFFER_SIZE) {
+        writeSize = core::IO_BUFFER_SIZE;
+    }
+    ssize_t written = write(_inputPipe[1],
+                            _writeBuffer.c_str() + _bytesWritten,
+                            writeSize);
+    toolbox::logger::StepMark::info(
+        "continueWriteRequestBody: write returned "
+        + toolbox::to_string(written) + " bytes");
+    if (written > 0) {
+        _bytesWritten += written;
+        if (_bytesWritten >= _totalBytes) {
+            _writeState = WRITE_COMPLETED;
+            wrapClose(_inputPipe[1]);
+            toolbox::logger::StepMark::debug(
+                "POST data write completed, pipe closed");
+            return true;
+        }
+        return false;
+    } else if (written == -1) {
+        // Non-blocking write might return -1 when it would block
+        // Continue trying later
+        return false;
+    } else {
+        _writeState = WRITE_ERROR;
+        return false;
+    }
+    return false;
+}
+
+bool CgiExecute::initReadOutput() {
+    if (_readState != READ_IDLE) {
+        return _readState == READ_COMPLETED;
+    }
+    if (isChildProcessEnded()) {
+        toolbox::logger::StepMark::warning(
+            "Child process already ended before reading output");
+    }
+    _readState = READ_IN_PROGRESS;
+    _readStartTime = std::time(NULL);
+    return false;
+}
+
+bool CgiExecute::continueReadOutput() {
+    if (_readState != READ_IN_PROGRESS) {
+        return _readState == READ_COMPLETED;
+    }
+    if (hasTimedOut()) {
+        _isTimeOut = true;
+        toolbox::logger::StepMark::error("CGI read operation timed out");
+        _readState = READ_ERROR;
+        return false;
+    }
+    time_t currentTime = std::time(NULL);
+    time_t elapsed = currentTime - _readStartTime;
+    if (elapsed < 1) {
+        return false;
+    }
+    if (_lastReadTime != 0 && (currentTime - _lastReadTime) < 1) {
+        return false;
+    }
+    char buffer[core::IO_BUFFER_SIZE];
+    ssize_t bytes = read(_outputPipe[0], buffer, sizeof(buffer) - 1);
+    toolbox::logger::StepMark::info(
+        "continueReadOutput: read returned "
+        + toolbox::to_string(bytes) + " bytes");
+    if (bytes > 0) {
+        _lastReadTime = 0;
+        return processReadBytes(buffer, bytes);
+    } else if (bytes == 0) {
+        return processEndOfFile();
+    } else {
+        _lastReadTime = currentTime;
+        return handleReadError();
     }
 }
 
-bool CgiExecute::readChildOutput(std::string& output) {
-    char buffer[http::cgi::READ_BUFFER_SIZE];
-    time_t startReadTime = time(NULL);
-    const int READ_TIMEOUT = http::cgi::READ_TIMEOUT_SEC;
-    fcntl(_outputPipe[0], F_SETFL, O_NONBLOCK);
+bool CgiExecute::processReadBytes(const char* buffer, size_t bytes) {
+    BaseParser::ParseStatus status = _parser.run(std::string(buffer, bytes));
+    if (status == BaseParser::P_COMPLETED) {
+        _readState = READ_COMPLETED;
+        _parser.get().identifyCgiType();
+        return true;
+    } else if (status == BaseParser::P_ERROR) {
+        toolbox::logger::StepMark::error("CGI response parsing error");
+        _readState = READ_ERROR;
+        return false;
+    }
+    // P_NEED_MORE_DATA or P_IN_PROGRESS - continue reading
+    return false;
+}
 
-    while (true) {
-        bool processEnded = isChildProcessEnded();
-        int readStatus =
-                    readDataFromPipe(buffer, http::cgi::READ_BUFFER_SIZE - 1);
-        if (readStatus > 0) {
-            int bytesRead = readStatus;
-            buffer[bytesRead] = '\0';
-            output.append(buffer, bytesRead);
-            startReadTime = time(NULL);
-        } else if (readStatus == 0) {
-            break;
-        } else if (readStatus == -1) {
-            return false;
-        }
-        if (shouldTimeout(processEnded, startReadTime, READ_TIMEOUT)) {
+bool CgiExecute::processEndOfFile() {
+    BaseParser::ParseStatus status = _parser.run("");
+    if (status == BaseParser::P_ERROR) {
+        toolbox::logger::StepMark::error("CGI response parsing error at EOF");
+        _readState = READ_ERROR;
+        return false;
+    }
+    _parser.get().identifyCgiType();
+    _readState = READ_COMPLETED;
+    return true;
+}
+
+bool CgiExecute::handleReadError() {
+    if (hasTimedOut()) {
+        _isTimeOut = true;
+        toolbox::logger::StepMark::error("CGI execution timed out");
+        _readState = READ_ERROR;
+        return false;
+    }
+    bool childEnded = isChildProcessEnded();
+    if (childEnded) {
+        const int READ_TIMEOUT = http::cgi::READ_TIMEOUT_SEC;
+        if ((std::time(NULL) - _readStartTime) > READ_TIMEOUT) {
+            _readState = READ_ERROR;
             return false;
         }
     }
-    return true;
+    return false;
 }
 
 bool CgiExecute::isChildProcessEnded() {
@@ -421,36 +568,6 @@ bool CgiExecute::isChildProcessEnded() {
     return (result == _childPid);
 }
 
-int CgiExecute::readDataFromPipe(char* buffer, size_t maxSize) {
-    ssize_t bytes = read(_outputPipe[0], buffer, maxSize);
-    if (bytes > 0) {
-        return bytes;
-    } else if (bytes == 0) {
-        return 0;
-    } else {
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
-            return -2;
-        } else {
-            toolbox::logger::StepMark::error(
-                "Failed to read CGI output: " + std::string(strerror(errno)));
-            return -1;
-        }
-    }
-}
-
-bool CgiExecute::shouldTimeout(bool processEnded,
-                            time_t startReadTime, int readTimeout) {
-    if (hasTimedOut()) {
-        _isTimeOut = true;
-        toolbox::logger::StepMark::error("CGI execution timed out");
-        return true;
-    }
-    if (processEnded && (time(NULL) - startReadTime > readTimeout)) {
-        return true;
-    }
-    return false;
-}
-
 bool CgiExecute::waitForChildProcess() {
     int status;
     while (true) {
@@ -459,7 +576,8 @@ bool CgiExecute::waitForChildProcess() {
             return handleProcessExit(status);
         }
         if (result == -1) {
-            return handleWaitpidError();
+            _childPid = -1;
+            return true;
         }
         if (hasTimedOut()) {
             _isTimeOut = true;
@@ -488,16 +606,13 @@ bool CgiExecute::handleProcessExit(int status) {
     return true;
 }
 
-bool CgiExecute::handleWaitpidError() {
-    if (errno == EINTR) {
+
+bool CgiExecute::hasTimedOut() const {
+    time_t currentTime = std::time(NULL);
+    time_t elapsed = currentTime - _startTime;
+    if (elapsed > _timeoutSeconds) {
         return true;
     }
-    if (errno == ECHILD) {
-        _childPid = -1;
-        return true;
-    }
-    toolbox::logger::StepMark::error(
-        "Waitpid error: " + std::string(strerror(errno)));
     return false;
 }
 
@@ -522,6 +637,19 @@ void CgiExecute::wrapClose(int& fd) {
         close(fd);
         fd = -1;
     }
+}
+
+bool CgiExecute::setNonBlocking(int fd) {
+    int flags = fcntl(fd, F_GETFL, 0);
+    if (flags == -1) {
+        toolbox::logger::StepMark::error("Failed to get file descriptor flags");
+        return false;
+    }
+    if (fcntl(fd, F_SETFL, flags | O_NONBLOCK) == -1) {
+        toolbox::logger::StepMark::error("Failed to set non-blocking mode");
+        return false;
+    }
+    return true;
 }
 
 std::string CgiExecute::extractScriptName(const std::string& requestPath,
