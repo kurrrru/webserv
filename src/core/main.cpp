@@ -48,8 +48,6 @@ int main(int argc, char* argv[]) {
         int cnt = 0;  // for debug
         struct epoll_event events[1000];
         while (1) {
-            // usleep 1ms saves CPU usage 
-            usleep(1000);
             try {
                 int nfds = Epoll::wait(events, 1000, -1);
                 if (nfds == -1) {
@@ -86,8 +84,8 @@ int main(int argc, char* argv[]) {
                             if (isSocketDisconnected(events[i])) {
                                 Epoll::del(client_sock);
                                 continue;
-                            } else if (events[i].events & EPOLLOUT ||
-                                (events[i].events & EPOLLIN && client->getRequest()->getIOPendingState() != http::RESPONSE_SENDING)) {
+                            } else if ((events[i].events & EPOLLOUT && (client->isResponseSending() || client->isCgiProcessing())) ||
+                                (events[i].events & EPOLLIN && !client->isResponseSending())) {
                                 client->getRequest()->run();
                             }
                             // If the client is not keep-alive and the response is complete or bad request

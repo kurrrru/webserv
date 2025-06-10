@@ -98,6 +98,16 @@ bool Client::isBadRequest() const {
     return _request->getResponse().getStatus() == http::HttpStatus::BAD_REQUEST;
 }
 
+bool Client::isResponseSending() const {
+    return _request->getIOPendingState() == http::RESPONSE_SENDING;
+}
+
+bool Client::isCgiProcessing() const {
+    return _request->getIOPendingState() == http::CGI_BODY_SENDING
+        || _request->getIOPendingState() == http::CGI_OUTPUT_READING
+        || _request->getIOPendingState() == http::CGI_LOCAL_REDIRECT_IO_PENDING;
+}
+
 void Client::clearRequest(const toolbox::SharedPtr<Client> client) {
     _request = toolbox::SharedPtr<http::Request>(new http::Request(client));
 }
