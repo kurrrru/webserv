@@ -5,9 +5,6 @@
 #include <vector>
 #include <unistd.h>
 #include <sys/types.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 
 #include "../request/http_request.hpp"
 #include "../../config/config_base.hpp"
