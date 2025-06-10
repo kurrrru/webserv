@@ -131,6 +131,7 @@ class CgiExecute {
     CgiResponseParser _parser;
     time_t _readStartTime;
     time_t _lastReadTime;
+    time_t _lastWriteTime;
     toolbox::SharedPtr<Client> _client;
 };
 

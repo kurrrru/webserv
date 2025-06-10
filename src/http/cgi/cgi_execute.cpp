@@ -62,6 +62,7 @@ void CgiExecute::reset() {
     _parser.reset();
     _readStartTime = 0;
     _lastReadTime = 0;
+    _lastWriteTime = 0;
     _inputPipe[0] = -1;
     _inputPipe[1] = -1;
     _outputPipe[0] = -1;
@@ -435,6 +436,10 @@ bool CgiExecute::continueWriteRequestBody() {
         _writeState = WRITE_ERROR;
         return false;
     }
+    time_t currentTime = std::time(NULL);
+    if (_lastWriteTime != 0 && (currentTime - _lastWriteTime) < 1) {
+        return false;
+    }
     size_t remaining = _totalBytes - _bytesWritten;
     size_t writeSize = remaining;
     if (writeSize > core::IO_BUFFER_SIZE) {
@@ -448,6 +453,7 @@ bool CgiExecute::continueWriteRequestBody() {
         + toolbox::to_string(written) + " bytes");
     if (written > 0) {
         _bytesWritten += written;
+        _lastWriteTime = 0;
         if (_bytesWritten >= _totalBytes) {
             _writeState = WRITE_COMPLETED;
             wrapClose(_inputPipe[1]);
@@ -458,7 +464,8 @@ bool CgiExecute::continueWriteRequestBody() {
         return false;
     } else if (written == -1) {
         // Non-blocking write might return -1 when it would block
-        // Continue trying later
+        // Set timer for next retry attempt
+        _lastWriteTime = currentTime;
         return false;
     } else {
         _writeState = WRITE_ERROR;
