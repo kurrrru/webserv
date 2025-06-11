@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <sstream>
+#include <cstring>
 
 #include "server.hpp"
 #include "client.hpp"
@@ -80,20 +81,18 @@ int main(int argc, char* argv[]) {
                             int client_sock = client->getFd();
                             std::cout << "send response to client fd: " << client_sock << std::endl;
 
-                            if (events[i].events & EPOLLRDHUP) {
+                            if (isSocketDisconnected(events[i])) {
                                 Epoll::del(client_sock);
                                 continue;
-                            } else if (events[i].events & EPOLLIN) {
+                            } else if ((events[i].events & EPOLLOUT && (client->isResponseSending() || client->isCgiProcessing())) ||
+                                (events[i].events & EPOLLIN && !client->isResponseSending())) {
                                 client->getRequest()->run();
-                            } else {
-                                toolbox::logger::StepMark::error("Epoll: unknown event for client fd: " + toolbox::to_string(client_sock));
-                                Epoll::del(client_sock);
-                                continue;
                             }
-
-                            if (!client->getRequest()->isKeepAliveRequest() &&
-                                client->getRequest()->getIOPendingState() == http::NO_IO_PENDING) {
-                            Epoll::del(client_sock);
+                            // If the client is not keep-alive and the response is complete or bad request
+                            if (client->isOnceConnectionEnd() || client->isBadRequest()) {
+                                Epoll::del(client_sock);
+                            } else if (client->getRequest()->getIOPendingState() == http::END_RESPONSE) {
+                                client->clearRequest(client);
                             }
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;

@@ -36,3 +36,5 @@ class Epoll {
     int _epfd;
     std::map<int, struct epoll_event*> _events;
 };
+
+inline bool isSocketDisconnected(const epoll_event& event) { return (event.events & EPOLLRDHUP) != 0; }

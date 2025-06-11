@@ -5,6 +5,7 @@ namespace http {
 void Request::run() {
     const std::size_t root_depth = 0;
     switch (_ioPendingState) {
+        case START_READING:
         case NO_IO_PENDING:
         case REQUEST_READING:
             if (_requestDepth == root_depth) {

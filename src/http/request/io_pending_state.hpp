@@ -2,6 +2,7 @@
 
 namespace http {
 enum IOPendingState {
+    START_READING,
     REQUEST_READING,
     CGI_BODY_SENDING,
     CGI_OUTPUT_READING,
