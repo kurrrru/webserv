@@ -33,6 +33,7 @@ class BaseParser {
 
     BaseParser::ParseStatus run(const std::string& buf);
     ValidatePos getValidatePos() const { return _validatePos; }
+    void reset();
 
  protected:
     BaseParser(const BaseParser& other);

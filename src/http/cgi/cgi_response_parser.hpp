@@ -24,6 +24,7 @@ class CgiResponseParser : public BaseParser {
     ~CgiResponseParser() {}
 
     inline CgiResponse& get() { return _response; }
+    void reset();
 
  private:
     ParseStatus processRequestLine() { return BaseParser::P_ERROR; }

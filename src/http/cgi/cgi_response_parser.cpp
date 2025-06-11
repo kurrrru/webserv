@@ -98,4 +98,14 @@ bool CgiResponseParser::parseStatus(HTTPFields::FieldPair& pair) {
     return true;
 }
 
+void CgiResponseParser::reset() {
+    BaseParser::reset();
+    setValidatePos(V_FIELD);
+    _response.httpStatus.set(HttpStatus::UNSET);
+    _response.fields.get().clear();
+    _response.fields.initFieldsMap();
+    _response.body.clear();
+    _response.cgiType = CgiResponse::INVALID;
+}
+
 }  // namespace http
