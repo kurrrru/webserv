@@ -104,7 +104,10 @@ void handleDirectory(const std::string& path, std::vector<std::string>& indices,
                      Response& response, bool isAutoindex) {
     HttpStatus::EHttpStatus status;
 
-    if (!indices.empty()) {
+    if (isAutoindex) {
+        response.setBody(processAutoindex(path));
+        response.setHeader(fields::CONTENT_TYPE, "text/html");
+    } else if (!indices.empty()) {
         struct stat indexSt;
         std::string fullPath = findFirstExistingIndex(path, indices);
 
@@ -117,9 +120,11 @@ void handleDirectory(const std::string& path, std::vector<std::string>& indices,
         response.setBody(readFile(fullPath));
         response.setHeader(fields::CONTENT_TYPE, ContentTypeManager::getInstance().getContentType(fullPath));
         response.setHeader(fields::LAST_MODIFIED, getModifiedTime(indexSt));
-    }  else if (isAutoindex) {
-        response.setBody(processAutoindex(path));
-        response.setHeader(fields::CONTENT_TYPE, "text/html");
+    }  else {
+        status = HttpStatus::NOT_FOUND;
+        toolbox::logger::StepMark::error("runGet: directory not found ["
+            + path + "] " + toolbox::to_string(status));
+        throw status;
     }
 }
 
