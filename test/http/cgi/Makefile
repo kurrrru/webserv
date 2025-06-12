@@ -5,7 +5,9 @@ TOOLBOX_DIR = ../../../toolbox
 
 TEST_SRCS = $(wildcard $(SRC_DIRS)/http/*.cpp)\
 			$(wildcard $(SRC_DIRS)/http/parsing/*.cpp)\
-			$(wildcard $(SRC_DIRS)/http/cgi/*.cpp)\
+			$(SRC_DIRS)/http/cgi/cgi_field_parser.cpp\
+			$(SRC_DIRS)/http/cgi/cgi_response_parser.cpp\
+			$(SRC_DIRS)/http/cgi/cgi_response.cpp\
 			$(wildcard $(SRC_DIRS)/http/request/*.cpp)\
 			$(wildcard $(SRC_DIRS)/config/*.cpp)\
 			$(wildcard $(SRC_DIRS)/http/response/*.cpp)\
