@@ -23,7 +23,7 @@ void Request::run() {
         // fallthrough
         case ERROR_LOCAL_REDIRECT_IO_PENDING:
         case RESPONSE_SENDING:
-            if (_requestDepth == root_depth) {
+            if (_requestDepth == root_depth || _requestDepth == http::cgi::MAX_REDIRECTS) {
                 Request::sendResponse();
             }
             break;
