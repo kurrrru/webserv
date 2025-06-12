@@ -70,6 +70,7 @@
             text-decoration: underline;
         }
     </style>
+    <script src="cgi-test.js"></script>
 </head>
 <body>
     <div class="container">
@@ -182,10 +183,47 @@
             <h4>CGI GET - 現在時刻取得</h4>
             <div style="margin: 15px 0;">
                 <button onclick="performCgiGetRequest()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻を取得</button>
-                <div id="cgiGetResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none;">
-                    <h5 style="margin-top: 0; color: #495057;">CGI GETレスポンス結果:</h5>
-                    <div id="cgiGetResponseContent"></div>
-                </div>
+            </div>
+
+            <h4>環境変数テスト</h4>
+            <div style="margin: 15px 0;">
+                <button onclick="testCgiScript('/env_test.py', 'GET')" style="background-color: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">env_test.py - CGI環境変数を表示</button>
+            </div>
+
+            <h4>ドキュメントレスポンステスト</h4>
+            <div style="margin: 15px 0;">
+                <button onclick="testCgiScript('/document.py', 'GET')" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">document.py - 標準HTMLレスポンス</button>
+            </div>
+
+            <h4>リダイレクトテスト</h4>
+            <div style="margin: 15px 0;">
+                <button onclick="testCgiScript('/client_redirect.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">client_redirect.py - 外部リダイレクト</button>
+                <button onclick="testCgiScript('/redirect_to_static.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">redirect_to_static.py - 静的ファイルへ</button>
+                <button onclick="testCgiScript('/redirect1.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">redirect1.py - リダイレクトチェーン</button>
+            </div>
+
+            <h4>リダイレクトループテスト</h4>
+            <div style="margin: 15px 0;">
+                <button onclick="testCgiScript('/loop1.py', 'GET')" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">loop1.py - 無限ループテスト</button>
+                <small style="display: block; color: #666; margin-top: 5px;">※ サーバーが無限ループを検出してエラーを返すことを確認</small>
+            </div>
+
+            <h4>大容量データテスト</h4>
+            <div style="margin: 15px 0;">
+                <button onclick="testLargeOutput()" style="background-color: #20c997; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">large_output_test.py - 64KB出力</button>
+                <button onclick="testCgiLargePost()" style="background-color: #20c997; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">large_post_test.py - 大容量POST</button>
+            </div>
+
+            <h4>タイムアウトテスト</h4>
+            <div style="margin: 15px 0;">
+                <button onclick="testCgiScript('/read_timeout_test.py', 'GET')" style="background-color: #6610f2; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">read_timeout_test.py - 読み取りタイムアウト</button>
+                <button onclick="testCgiWriteTimeout()" style="background-color: #6610f2; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">write_timeout_test.py - 書き込みタイムアウト</button>
+                <small style="display: block; color: #666; margin-top: 5px;">※ タイムアウトは30秒で設定</small>
+            </div>
+
+            <div id="cgiTestResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 20px; font-family: monospace; white-space: pre-wrap; display: none;">
+                <h5 style="margin-top: 0; color: #495057;">CGI テスト結果:</h5>
+                <div id="cgiTestContent"></div>
             </div>
 
             <h4>CGI POST - ファイルアップロード</h4>
@@ -202,11 +240,8 @@
                     </div>
                     <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
                 </form>
-                <div id="cgiPostResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none;">
-                    <h5 style="margin-top: 0; color: #495057;">CGI POSTレスポンス結果:</h5>
-                    <div id="cgiPostResponseContent"></div>
-                </div>
             </div>
+
         </div>
 
         <script>
@@ -385,191 +420,6 @@
                     return;
                 }
                 deleteFile(filepath);
-            }
-
-            // CGI GET request test (get current time)
-            async function performCgiGetRequest() {
-                const responseDiv = document.getElementById('cgiGetResponse');
-                const contentDiv = document.getElementById('cgiGetResponseContent');
-                
-                // Show response display area
-                responseDiv.style.display = 'block';
-                contentDiv.innerHTML = 'CGI GETリクエスト送信中...';
-                
-                try {
-                    const response = await fetch('/cgi-bin/script.py', {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'text/plain'
-                        }
-                    });
-                    
-                    const responseText = await response.text();
-                    
-                    let responseInfo = '';
-                    responseInfo += '=== CGI GETリクエスト結果 ===\n';
-                    responseInfo += 'URL: /cgi-bin/script.py\n';
-                    responseInfo += 'メソッド: GET\n\n';
-                    
-                    // Status info
-                    responseInfo += '=== ステータス ===\n';
-                    responseInfo += 'ステータスコード: ' + response.status + '\n';
-                    responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
-                    responseInfo += 'OK: ' + response.ok + '\n\n';
-                    
-                    if (response.ok) {
-                        responseInfo += '=== レスポンス内容 ===\n';
-                        responseInfo += responseText + '\n\n';
-                    } else {
-                        responseInfo += '=== エラー内容 ===\n';
-                        responseInfo += responseText + '\n\n';
-                    }
-                    
-                    // Header info
-                    responseInfo += '=== レスポンスヘッダー ===\n';
-                    const headers = [];
-                    for (let [key, value] of response.headers.entries()) {
-                        headers.push(key + ': ' + value);
-                    }
-                    
-                    if (headers.length > 0) {
-                        headers.sort();
-                        responseInfo += headers.join('\n');
-                    } else {
-                        responseInfo += '(ヘッダーが見つかりません)';
-                    }
-                    
-                    contentDiv.innerHTML = responseInfo;
-                    if (!response.ok) {
-                        contentDiv.style.color = '#dc3545'; // Red color for errors
-                    } else {
-                        contentDiv.style.color = '#212529'; // Normal color for success
-                    }
-                } catch (error) {
-                    let errorInfo = '';
-                    errorInfo += '=== CGI GETリクエストエラー ===\n';
-                    errorInfo += 'URL: /cgi-bin/script.py\n';
-                    errorInfo += 'メソッド: GET\n\n';
-                    errorInfo += 'エラー内容: ' + error.message + '\n\n';
-                    errorInfo += '考えられる原因:\n';
-                    errorInfo += '- CGIスクリプトが存在しない\n';
-                    errorInfo += '- CGIスクリプトに実行権限がない\n';
-                    errorInfo += '- サーバーのCGI設定に問題がある\n';
-                    errorInfo += '- ネットワーク接続エラー';
-                    
-                    contentDiv.innerHTML = errorInfo;
-                    contentDiv.style.color = '#dc3545';
-                }
-            }
-
-            // CGI POST request test (file upload)
-            async function performCgiPostRequest() {
-                const fileInput = document.getElementById('cgiFile');
-                const filenameInput = document.getElementById('cgiFilename');
-                const responseDiv = document.getElementById('cgiPostResponse');
-                const contentDiv = document.getElementById('cgiPostResponseContent');
-                
-                if (!fileInput.files.length) {
-                    alert('ファイルを選択してください');
-                    return;
-                }
-                
-                const file = fileInput.files[0];
-                const customFilename = filenameInput.value.trim();
-                
-                // Show response display area
-                responseDiv.style.display = 'block';
-                contentDiv.innerHTML = `ファイル "${file.name}" をCGI経由でアップロード中...`;
-                
-                try {
-                    const formData = new FormData();
-                    // Use custom filename if specified
-                    if (customFilename) {
-                        const blob = new Blob([file], { type: file.type });
-                        formData.append('file', blob, customFilename);
-                    } else {
-                        formData.append('file', file);
-                    }
-                    
-                    const response = await fetch('/cgi-bin/script.py', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    const responseText = await response.text();
-                    
-                    let responseInfo = '';
-                    responseInfo += '=== CGI POSTリクエスト結果 ===\n';
-                    responseInfo += 'URL: /cgi-bin/script.py\n';
-                    responseInfo += 'メソッド: POST\n';
-                    responseInfo += 'Content-Type: multipart/form-data\n\n';
-                    
-                    // Upload info
-                    responseInfo += '=== アップロード情報 ===\n';
-                    responseInfo += 'ファイル名: ' + file.name + '\n';
-                    responseInfo += 'ファイルサイズ: ' + file.size + ' bytes\n';
-                    responseInfo += 'ファイルタイプ: ' + (file.type || 'unknown') + '\n';
-                    if (customFilename) {
-                        responseInfo += '指定ファイル名: ' + customFilename + '\n';
-                    }
-                    responseInfo += '\n';
-                    
-                    // Status info
-                    responseInfo += '=== ステータス ===\n';
-                    responseInfo += 'ステータスコード: ' + response.status + '\n';
-                    responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
-                    responseInfo += 'OK: ' + response.ok + '\n\n';
-                    
-                    if (response.ok) {
-                        responseInfo += '=== アップロード結果 ===\n';
-                        responseInfo += responseText + '\n\n';
-                    } else {
-                        responseInfo += '=== エラー内容 ===\n';
-                        responseInfo += responseText + '\n\n';
-                    }
-                    
-                    // Header info
-                    responseInfo += '=== レスポンスヘッダー ===\n';
-                    const headers = [];
-                    for (let [key, value] of response.headers.entries()) {
-                        headers.push(key + ': ' + value);
-                    }
-                    
-                    if (headers.length > 0) {
-                        headers.sort();
-                        responseInfo += headers.join('\n');
-                    } else {
-                        responseInfo += '(ヘッダーが見つかりません)';
-                    }
-                    
-                    contentDiv.innerHTML = responseInfo;
-                    if (response.ok) {
-                        contentDiv.style.color = '#212529';
-                        // Clear file input and filename input on successful upload
-                        fileInput.value = '';
-                        filenameInput.value = '';
-                        // Update file list
-                        loadFileList();
-                    } else {
-                        contentDiv.style.color = '#dc3545';
-                    }
-                } catch (error) {
-                    let errorInfo = '';
-                    errorInfo += '=== CGI POSTリクエストエラー ===\n';
-                    errorInfo += 'URL: /cgi-bin/script.py\n';
-                    errorInfo += 'メソッド: POST\n\n';
-                    errorInfo += 'エラー内容: ' + error.message + '\n\n';
-                    errorInfo += '考えられる原因:\n';
-                    errorInfo += '- CGIスクリプトが存在しない\n';
-                    errorInfo += '- CGIスクリプトに実行権限がない\n';
-                    errorInfo += '- アップロードディレクトリに書き込み権限がない\n';
-                    errorInfo += '- ファイルサイズが上限を超えている\n';
-                    errorInfo += '- サーバーのCGI設定に問題がある\n';
-                    errorInfo += '- ネットワーク接続エラー';
-                    
-                    contentDiv.innerHTML = errorInfo;
-                    contentDiv.style.color = '#dc3545';
-                }
             }
         </script>
         <footer>
