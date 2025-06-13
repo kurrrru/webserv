@@ -1,0 +1,147 @@
+#pragma once
+
+#include <vector>
+#include <string>
+
+#include "request_parser.hpp"
+#include "../response/response.hpp"
+#include "../cgi/cgi_handler.hpp"
+#include "../../config/config.hpp"
+#include "../../../toolbox/shared.hpp"
+#include "io_pending_state.hpp"
+
+class Client;
+
+namespace http {
+
+class Request {
+ public:
+    /**
+     * @brief Constructs a Request object with the given client.
+     * @param client A shared pointer to the Client object
+     * @param requestDepth The depth of the request, used to track local redirects
+     * associated with this request.
+     */
+    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
+
+    /**
+     * @brief Destructor for the Request object.
+     */
+    ~Request();
+
+    /**
+     * @brief Runs the request processing, including receiving the request,
+     * fetching configuration, handling the request, and sending the response.
+     */
+    void run();
+
+    /**
+     * @brief recieve and parses the raw HTTP request string.
+     * @note fetchConfig() is called inside this method to retrieve
+     * the configuration for the request.
+     * @return True if the request was fully received and parsed,
+     * false otherwise.
+     */
+    bool recvRequest();
+
+    /**
+     * @brief Sets the local redirect information for the request.
+     * This is used to handle internal redirects within the server.
+     * @param method The HTTP method (e.g., GET, POST)
+     * @param path The path of the resource being requested
+     * @param host The host header value
+     */
+    void setLocalRedirectInfo(const std::string& method,
+        const std::string& path, const std::string& host);
+
+    /**
+    * @brief Fetches the configuration for the current request.
+    */
+    void fetchConfig();
+
+    /**
+     * @brief Handles the HTTP request and prepares a response.
+     */
+    void handleRequest();
+
+    /**
+     * @brief Sends the prepared HTTP response to the client.
+     */
+    void sendResponse();
+
+    /**
+     * @brief Returns the current I/O pending state of the request.
+     * @return The current I/O pending state.
+     */
+    IOPendingState getIOPendingState() const {
+        return _ioPendingState;
+    }
+
+    /**
+     * @brief Checks if the request is a keep-alive request.
+     * @return True if the request is a keep-alive request, false otherwise.
+     */
+    bool isKeepAliveRequest() const;
+
+    /**
+     * @brief Returns the prepared HTTP response.
+     * @return A copy of the Response object.
+     */
+    http::Response getResponse() const;
+
+    /**
+     * @brief Sets the redirect count for the request.
+     * This is used to track how many redirects have occurred
+     * for this request, which is important for handling local redirects.
+     * @param count The number of redirects to set.
+     */
+    void setRedirectCount(size_t count);
+
+ private:
+    http::RequestParser _parsedRequest;
+    config::LocationConfig _config;
+    http::Response _response;
+    toolbox::SharedPtr<Client> _client;
+    std::size_t _requestDepth;
+    IOPendingState _ioPendingState;
+    toolbox::SharedPtr<http::Request> _errorPageRequest;
+    CgiHandler _cgiHandler;
+
+    Request();
+    Request(const Request& other);
+    Request& operator=(const Request& other);
+
+    // recvRequest helper methods
+    bool performRecv(std::string& receivedData);
+    bool loadConfig();
+    bool isValidBodySize();
+    // fetchConfig helper methods
+    toolbox::SharedPtr<config::ServerConfig> selectServer();
+    bool extractCandidateServers(
+        const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
+        std::vector<toolbox::SharedPtr<config::ServerConfig> >& candidateServers);
+    std::string extractHostName();
+    toolbox::SharedPtr<config::ServerConfig> matchServerByName(
+        const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
+        const std::string& hostName);
+    bool processReturn(const config::Return& returnValue);
+    void processReturnWithContent(size_t statusCode,
+                                const std::string& content);
+    void processReturnWithoutContent(size_t statusCode);
+    bool isRedirectStatus(size_t statusCode) const;
+    bool hasDefaultErrorPage(size_t statusCode) const;
+    bool isMinimalResponse(size_t statusCode) const;
+    void setRedirectResponse(size_t statusCode, const std::string& location);
+    void setTextResponse(const std::string& content);
+    void setHtmlErrorResponse(size_t statusCode);
+    void setEmptyTextResponse();
+    std::string generateDefaultBody(size_t statusCode);
+    bool selectLocation(
+        const toolbox::SharedPtr<config::ServerConfig>& server);
+    toolbox::SharedPtr<config::LocationConfig> findDeepestMatchingLocation(
+        const std::vector<toolbox::SharedPtr
+        <config::LocationConfig> >& locations,
+        const std::string& path);
+};
+
+}  // namespace http
