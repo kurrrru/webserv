@@ -1,4 +1,4 @@
-#include "get_http_date.hpp"
+#include "get_gmt.hpp"
 
 #include <iostream>
 #include <string>
@@ -6,7 +6,7 @@
 
 namespace http {
 
-std::string getHttpDate() {
+std::string getCurrentGMT() {
     char buffer[32];
     std::time_t now = std::time(NULL);
     std::tm* gmtm = std::gmtime(&now);

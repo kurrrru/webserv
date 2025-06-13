@@ -12,6 +12,6 @@ namespace http {
  * 
  * @return A string representing the current date in HTTP format.
  */
-std::string getHttpDate();
+std::string getCurrentGMT();
 
 }  // namespace http
