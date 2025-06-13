@@ -179,10 +179,10 @@
 
             <h3>CGIスクリプトテスト</h3>
             <p>CGIスクリプト（script.py）を使用したテストです。サーバーの直接処理ではなく、外部スクリプトによる動的処理をテストします。</p>
-            
-            <h4>CGI GET - 現在時刻取得</h4>
+
+            <h4>現在時刻取得</h4>
             <div style="margin: 15px 0;">
-                <button onclick="performCgiGetRequest()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻を取得</button>
+                <button onclick="testCgiScript('/script.py', 'GET')" style="background-color: #7dadd8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻</button>
             </div>
 
             <h4>環境変数テスト</h4>

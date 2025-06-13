@@ -71,7 +71,7 @@ CgiResponseParser::LineEndInfo CgiResponseParser::findLineEnd() {
 
 bool CgiResponseParser::isValidStatusMessage(int code,
                                              const std::string& message) {
-    return message == Response::getStatusMessage(code);
+    return message == Response::getStatusMessage(code) || message.empty();
 }
 
 bool CgiResponseParser::parseStatus(HTTPFields::FieldPair& pair) {
