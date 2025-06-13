@@ -1,6 +1,5 @@
 #include "get_gmt.hpp"
 
-#include <iostream>
 #include <string>
 #include <ctime>
 
