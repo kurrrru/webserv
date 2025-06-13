@@ -140,7 +140,7 @@
             <h3>POSTリクエストテスト（サーバー直接）</h3>
             <p>Webサーバーの内蔵機能による直接的なファイルアップロードとデータ送信のテストです。</p>
             <h4>ファイルアップロード</h4>
-            <form action="/uploads" method="post" enctype="multipart/form-data" style="margin: 15px 0;">
+            <form action="/uploads" method="POST" enctype="multipart/form-data" style="margin: 15px 0;">
                 <div style="margin-bottom: 10px;">
                     <label for="file">ファイルを選択:</label>
                     <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px;">
@@ -238,7 +238,7 @@
                         <input type="text" id="cgiFilename" placeholder="カスタムファイル名 (オプション)" style="margin-left: 10px; width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
                         <small style="display: block; color: #666; margin-top: 5px; margin-left: 100px;">※ 空の場合は元のファイル名を使用</small>
                     </div>
-                    <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
+                    <button type="button" onclick="testCgiScript('/uploads', 'POST')" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
                 </form>
             </div>
 

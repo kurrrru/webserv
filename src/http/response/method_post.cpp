@@ -38,13 +38,13 @@ std::string getTimestamp() {
 
 void saveToFile(const std::string& filepath, const std::string& content) {
     std::ofstream ofs(filepath.c_str(), std::ios::binary);
-    if (!ofs) {
-        toolbox::logger::StepMark::error("runPost: saveToFile failed: " + filepath);
+    if (ofs.fail()) {
+        toolbox::logger::StepMark::error("runPost: saveToFile make ofs failed: " + filepath);
         throw HttpStatus::INTERNAL_SERVER_ERROR;
     }
     ofs.write(content.data(), content.size());
     if (ofs.fail()) {
-        toolbox::logger::StepMark::error("runPost: saveToFile failed: " + filepath);
+        toolbox::logger::StepMark::error("runPost: saveToFile write ofs failed: " + filepath);
         throw HttpStatus::INTERNAL_SERVER_ERROR;
     }
     toolbox::logger::StepMark::info("runPost: file created: " + filepath);

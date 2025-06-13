@@ -29,9 +29,10 @@ void serverMethodHandler(RequestParser& parsedRequest,
     } else if (method == method::DELETE) {
         runDelete(targetPath, response);
     } else if (method == method::POST) {
-        std::string uploadPath = config.getUploadStore();
+        std::string serverUploadsPath = joinPath(config.getRoot(), config.getPath());
+        std::string uploadStorePath = joinPath(serverUploadsPath, config.getUploadStore());
         std::string recvBody = parsedRequest.get().body.content;
-        runPost(uploadPath, recvBody, fields, response);
+        runPost(uploadStorePath, recvBody, fields, response);
     }
 }
 
