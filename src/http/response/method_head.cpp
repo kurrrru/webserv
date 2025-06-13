@@ -13,7 +13,6 @@ void handleDirectory(const std::string& path, std::vector<std::string> indices,
 
     if (isAutoindex) {
         response.setHeader(fields::CONTENT_TYPE, "text/html");
-
     } else if (!indices.empty()) {
         struct stat indexSt;
         std::string fullPath = findFirstExistingIndex(path, indices);
