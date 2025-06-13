@@ -14,18 +14,20 @@ void serverMethodHandler(RequestParser& parsedRequest,
                          HTTPFields& fields,
                          Response& response) {
     std::string targetPath = parsedRequest.get().uri.path;
-    std::string rootPath = config.getRoot();
-    targetPath = joinPath(rootPath, targetPath);
-    toolbox::logger::StepMark::info("serverMethodHandler: make targetPath = " + targetPath);
+    std::string fullPath = joinPath(config.getRoot(), targetPath);
+    toolbox::logger::StepMark::info("serverMethodHandler: make targetPath " + targetPath);
 
     std::string method = parsedRequest.get().method;
     std::vector<std::string> indices = config.getIndices();
     bool isAutoindex = config.getAutoindex();
 
+    // 先頭の/を削除することでrootからの相対パスとなり正しく削除できるが、キモすぎる
+    targetPath = targetPath.substr(1);
+
     if (method == method::GET) {
-        runGet(targetPath, indices, isAutoindex, response);
+        runGet(fullPath, indices, isAutoindex, response);
     } else if (method == method::HEAD) {
-        runHead(targetPath, indices, isAutoindex, response);
+        runHead(fullPath, indices, isAutoindex, response);
     } else if (method == method::DELETE) {
         runDelete(targetPath, response);
     } else if (method == method::POST) {

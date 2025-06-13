@@ -356,32 +356,41 @@
                 // Show loading message
                 document.getElementById('files').innerHTML = '<p style="color: #666; font-style: italic;">読み込み中...</p>';
                 
-                fetch('/uploads/', {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                fetch('/uploads/8080/', {
+                    method: 'GET'
                 })
                 .then(response => {
                     if (response.ok) {
-                        return response.json();
-                    } else if (response.status === 200) {
-                        // For HTML response, parse directory listing
-                        return response.text().then(html => {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(html, 'text/html');
-                            const links = doc.querySelectorAll('a');
-                            const files = [];
-                            links.forEach(link => {
-                                const href = link.getAttribute('href');
-                                if (href && href !== '../' && !href.endsWith('/')) {
-                                    files.push(href);
-                                }
+                        // Check if response is JSON
+                        const contentType = response.headers.get('content-type');
+                        if (contentType && contentType.includes('application/json')) {
+                            return response.json();
+                        } else {
+                            // Parse HTML directory listing
+                            return response.text().then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const links = doc.querySelectorAll('a');
+                                const files = [];
+                                links.forEach(link => {
+                                    const href = link.getAttribute('href');
+                                    // Skip parent directory, subdirectories, and hidden files
+                                    if (href && href !== '../' && href !== '.' && href !== '..' && 
+                                        !href.endsWith('/') && !href.startsWith('.')) {
+                                        // Remove URL encoding if present
+                                        const decodedHref = decodeURIComponent(href);
+                                        // Also check decoded name for hidden files
+                                        const filename = decodedHref.split('/').pop();
+                                        if (!filename.startsWith('.')) {
+                                            files.push(decodedHref);
+                                        }
+                                    }
+                                });
+                                return files;
                             });
-                            return files;
-                        });
+                        }
                     }
-                    throw new Error('ファイル一覧の取得に失敗しました');
+                    throw new Error('ファイル一覧の取得に失敗しました (Status: ' + response.status + ')');
                 })
                 .then(files => {
                     displayFileList(files);
@@ -402,7 +411,7 @@
                 html += '<tr style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;"><th style="padding: 8px; text-align: left;">ファイル名</th><th style="padding: 8px; text-align: center;">操作</th></tr>';
                 
                 files.forEach(file => {
-                    const filepath = '/uploads/' + file;
+                    const filepath = file;
                     html += '<tr style="border-bottom: 1px solid #dee2e6;">';
                     html += '<td style="padding: 8px;"><a href="' + filepath + '" target="_blank" style="color: #007bff; text-decoration: none;">' + file + '</a></td>';
                     html += '<td style="padding: 8px; text-align: center;"><button onclick="deleteFile(\'' + filepath + '\')" style="background-color: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">削除</button></td>';
