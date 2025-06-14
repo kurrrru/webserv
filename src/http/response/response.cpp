@@ -98,7 +98,7 @@ std::string Response::buildResponse() const {
 
     std::map<FieldName, HeaderField>::const_iterator it = _headers.find("Server");
     if (it != _headers.end() && it->second.first) {
-        oss << "Server:" << it->second.second << "\r\n";
+        oss << "Server: " << it->second.second << "\r\n";
     } else {
         oss << "Server: Webserv/Ideal Broccoli\r\n";
     }
