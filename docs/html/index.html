@@ -335,7 +335,7 @@
 
             function deleteFile(filepath) {
                 if (confirm('本当にファイル "' + filepath + '" を削除しますか？')) {
-                    fetch(filepath, {
+                    fetch('/' + filepath, {
                         method: 'DELETE'
                     })
                     .then(response => {
@@ -382,7 +382,7 @@
                                         // Also check decoded name for hidden files
                                         const filename = decodedHref.split('/').pop();
                                         if (!filename.startsWith('.')) {
-                                            files.push(decodedHref);
+                                            files.push('uploads/8080/' + filename);
                                         }
                                     }
                                 });
@@ -412,8 +412,9 @@
                 
                 files.forEach(file => {
                     const filepath = file;
+                    const filename = file.split('/').pop(); // Extract only the filename
                     html += '<tr style="border-bottom: 1px solid #dee2e6;">';
-                    html += '<td style="padding: 8px;"><a href="' + filepath + '" target="_blank" style="color: #007bff; text-decoration: none;">' + file + '</a></td>';
+                    html += '<td style="padding: 8px;"><a href="' + filepath + '" target="_blank" style="color: #007bff; text-decoration: none;">' + filename + '</a></td>';
                     html += '<td style="padding: 8px; text-align: center;"><button onclick="deleteFile(\'' + filepath + '\')" style="background-color: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">削除</button></td>';
                     html += '</tr>';
                 });

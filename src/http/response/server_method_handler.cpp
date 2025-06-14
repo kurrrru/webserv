@@ -13,25 +13,20 @@ void serverMethodHandler(RequestParser& parsedRequest,
                          const config::LocationConfig &config,
                          HTTPFields& fields,
                          Response& response) {
-    std::string targetPath = parsedRequest.get().uri.path;
-    std::string fullPath = joinPath(config.getRoot(), targetPath);
-    toolbox::logger::StepMark::info("serverMethodHandler: make targetPath " + targetPath);
-
+    std::string rootPath = config.getRoot();
+    std::string fullPath = joinPath(rootPath, parsedRequest.get().uri.path);
     std::string method = parsedRequest.get().method;
     std::vector<std::string> indices = config.getIndices();
     bool isAutoindex = config.getAutoindex();
-
-    // 先頭の/を削除することでrootからの相対パスとなり正しく削除できるが、キモすぎる
-    targetPath = targetPath.substr(1);
 
     if (method == method::GET) {
         runGet(fullPath, indices, isAutoindex, response);
     } else if (method == method::HEAD) {
         runHead(fullPath, indices, isAutoindex, response);
     } else if (method == method::DELETE) {
-        runDelete(targetPath, response);
+        runDelete(fullPath, response);
     } else if (method == method::POST) {
-        std::string serverUploadsPath = joinPath(config.getRoot(), config.getPath());
+        std::string serverUploadsPath = joinPath(rootPath, config.getPath());
         std::string uploadStorePath = joinPath(serverUploadsPath, config.getUploadStore());
         std::string recvBody = parsedRequest.get().body.content;
         runPost(uploadStorePath, recvBody, fields, response);
