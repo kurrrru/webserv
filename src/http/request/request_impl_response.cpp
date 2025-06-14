@@ -18,6 +18,12 @@ namespace {
         return "-";
     }
 
+    // [TODO] ここは後で書きます
+    void errorPageInternalRedirect();
+    void errorPageNamedLocation();
+    void errorPageSendRefresh();
+    void errorPageSendSpecialResponse();
+
     void propagateErrorPage(
         http::Response* response, const http::Response& errorResponse) {
         typedef std::string FieldName;
@@ -31,11 +37,13 @@ namespace {
         //     {http::fields::SERVER, "WebServer/1.0"}
         // };
 
+
+        // [TODO] 対応しないヘッダーフィールド・後から自動的に付加するヘッダーは削除する
         const std::pair<std::string, std::string> defaultHeadersArray[] = {
             std::make_pair(http::fields::CONTENT_TYPE, "text/plain"),
-            std::make_pair(http::fields::CACHE_CONTROL, "no-cache"),
-            std::make_pair(http::fields::CONNECTION, "close"),
-            std::make_pair(http::fields::SERVER, "WebServer/1.0")
+            std::make_pair(http::fields::CACHE_CONTROL, "no-cache")
+            // std::make_pair(http::fields::CONNECTION, "close"),
+            // std::make_pair(http::fields::SERVER, "WebServer/1.0") 
         };
 
         const std::vector<std::pair<FieldName, FieldDefaultValue> > defaultHeaders(
@@ -93,7 +101,7 @@ void http::Request::sendResponse() {
         status <= config::directive::MAX_ERROR_PAGE_CODE) {
         if (_ioPendingState != http::ERROR_LOCAL_REDIRECT_IO_PENDING) {
             std::vector<config::ErrorPage> errorPages = _config.getErrorPages();
-            bool useDefaultErrorPage = true;
+            bool errorPageFound = false;
             for (std::size_t i = 0; i < errorPages.size(); ++i) {
                 if (std::find(errorPages[i].getCodes().begin(),
                         errorPages[i].getCodes().end(), status)
@@ -108,7 +116,13 @@ void http::Request::sendResponse() {
 
                     _errorPageRequest = toolbox::SharedPtr<http::Request>(
                         new http::Request(_client, _requestDepth + 1));
-                    std::string method = http::method::GET;
+                    std::string method;
+                    if (_parsedRequest.get().method == http::method::HEAD) {
+                        method = http::method::HEAD;
+                    } else {
+                        method = http::method::GET;
+                    }
+
                     std::string path = errorPages[i].getPath();
                     std::string host;
                     if (_parsedRequest.get().fields.getFieldValue(
@@ -120,11 +134,11 @@ void http::Request::sendResponse() {
                     }
                     _errorPageRequest->setLocalRedirectInfo(method, path, host);
                     _errorPageRequest->fetchConfig();
-                    useDefaultErrorPage = false;
+                    errorPageFound = true;
                     break;
                 }
             }
-            if (useDefaultErrorPage) {
+            if (!errorPageFound) {
                 setDefaultErrorPage(&_response, status);
             }
         }
