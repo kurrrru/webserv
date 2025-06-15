@@ -13,6 +13,7 @@
 #include <signal.h>
 
 #include "cgi_execute.hpp"
+#include "../request/request.hpp"
 #include "../response/method_utils.hpp"
 #include "../../core/constant.hpp"
 #include "../../event/epoll.hpp"
@@ -205,6 +206,7 @@ void CgiExecute::setPathVariables(const HTTPRequest& request,
                                 const std::string& rootPath) {
     std::string scriptName = extractScriptName(request.uri.path, scriptPath);
     _environment[http::cgi::meta::SCRIPT_NAME] = scriptName;
+    _environment[http::cgi::meta::UPLOAD_DIR] = _client->getRequest()->getUploadPath();
     std::string pathInfo = request.uri.path;
     if (!pathInfo.empty()) {
         _environment[http::cgi::meta::PATH_INFO] = pathInfo;
@@ -278,7 +280,15 @@ bool CgiExecute::forkAndExecute(const std::string& scriptPath,
         return false;
     }
     if (_childPid == 0) {
-        executeChildProcess(scriptPath, interpreter);
+        std::size_t lastSlashPos = scriptPath.find_last_of('/');
+        if (chdir(scriptPath.substr(0, lastSlashPos).c_str()) != 0) {
+            toolbox::logger::StepMark::error(
+                "Failed to change directory to CGI script directory: "
+                + scriptPath.substr(0, lastSlashPos));
+            std::exit(127);
+        }
+        std::string newPath = scriptPath.substr(lastSlashPos + 1);
+        executeChildProcess(newPath, interpreter);
         toolbox::logger::StepMark::error(
             "Child process failed to execute CGI script");
         std::exit(127);

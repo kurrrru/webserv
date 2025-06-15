@@ -97,6 +97,7 @@ extern const char* SERVER_NAME;
 extern const char* SERVER_PORT;
 extern const char* SERVER_PROTOCOL;
 extern const char* SERVER_SOFTWARE;
+extern const char* UPLOAD_DIR;
 }  // namespace meta
 }  // namespace cgi
 }  // namespace http

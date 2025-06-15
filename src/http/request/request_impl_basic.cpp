@@ -29,3 +29,7 @@ void http::Request::setRedirectCount(size_t count) {
     _requestDepth = count;
     _cgiHandler.setRedirectCount(count);
 }
+
+const std::string& http::Request::getUploadPath() const {
+    return _config.getUploadStore();
+}

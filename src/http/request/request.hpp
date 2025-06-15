@@ -91,6 +91,12 @@ class Request {
      */
     void setRedirectCount(size_t count);
 
+    /**
+     * @brief Returns the upload path for the request.
+     * @return A const reference to the upload path string.
+     */
+    const std::string& getUploadPath() const;
+
  private:
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;

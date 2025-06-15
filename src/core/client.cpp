@@ -103,10 +103,6 @@ bool Client::isCgiProcessing() const {
         || _request->getIOPendingState() == http::CGI_LOCAL_REDIRECT_IO_PENDING;
 }
 
-void Client::clearRequest(const toolbox::SharedPtr<Client> client) {
-    _request = toolbox::SharedPtr<http::Request>(new http::Request(client));
-}
-
 std::string Client::convertIpToString(uint32_t ip) const {
     return toolbox::to_string((ip >> 24) & 0xFF) + "." +
             toolbox::to_string((ip >> 16) & 0xFF) + "." +

@@ -171,7 +171,7 @@
                 </div>
                 <div style="margin-top: 10px;">
                     <h4>手動削除テスト</h4>
-                    <input type="text" id="manualDeletePath" placeholder="/uploads/filename.txt" style="width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
+                    <input type="text" id="manualDeletePath" placeholder="/uploads/8080/filename.txt" style="width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
                     <button onclick="deleteManualFile()" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">削除</button>
                     <small style="display: block; color: #666; margin-top: 5px;">※ ファイルパスを入力して手動削除</small>
                 </div>
@@ -238,7 +238,7 @@
                         <input type="text" id="cgiFilename" placeholder="カスタムファイル名 (オプション)" style="margin-left: 10px; width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
                         <small style="display: block; color: #666; margin-top: 5px; margin-left: 100px;">※ 空の場合は元のファイル名を使用</small>
                     </div>
-                    <button type="button" onclick="testCgiScript('/uploads', 'POST')" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
+                    <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
                 </form>
             </div>
 
