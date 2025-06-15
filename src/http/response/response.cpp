@@ -15,12 +15,14 @@
 namespace http {
 
 Response::Response() : _status(200), _headers(), _body(), 
-_wholeResponseStr(), _wholeResponsePtr(NULL), _lengthSent(0) {
+_wholeResponseStr(), _wholeResponsePtr(NULL), _lengthSent(0),
+_errorPageNewStatus(-1), _errorPageOverwrite(false) {
 }
 Response::Response(const Response& other)
 : _status(other._status), _headers(other._headers), _body(other._body),
 _wholeResponseStr(other._wholeResponseStr), _wholeResponsePtr(other._wholeResponsePtr),
-_lengthSent(other._lengthSent) {
+_lengthSent(other._lengthSent), _errorPageNewStatus(other._errorPageNewStatus),
+_errorPageOverwrite(other._errorPageOverwrite) {
 }
 Response& Response::operator=(const Response& other) {
     if (this != &other) {
@@ -30,6 +32,8 @@ Response& Response::operator=(const Response& other) {
         _wholeResponseStr = other._wholeResponseStr;
         _wholeResponsePtr = other._wholeResponsePtr;
         _lengthSent = other._lengthSent;
+        _errorPageNewStatus = other._errorPageNewStatus;
+        _errorPageOverwrite = other._errorPageOverwrite;
     }
     return *this;
 }

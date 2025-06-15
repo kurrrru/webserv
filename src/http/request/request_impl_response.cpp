@@ -29,21 +29,9 @@ namespace {
         typedef std::string FieldName;
         typedef std::string FieldDefaultValue;
 
-        // [TODO] ここも後で確認します
-        // const std::pair<std::string, std::string> defaultHeadersArray[] = {
-        //     {http::fields::CONTENT_TYPE, "text/plain"},
-        //     {http::fields::CACHE_CONTROL, "no-cache"},
-        //     {http::fields::CONNECTION, "close"},
-        //     {http::fields::SERVER, "WebServer/1.0"}
-        // };
-
-
-        // [TODO] 対応しないヘッダーフィールド・後から自動的に付加するヘッダーは削除する
         const std::pair<std::string, std::string> defaultHeadersArray[] = {
             std::make_pair(http::fields::CONTENT_TYPE, "text/plain"),
             std::make_pair(http::fields::CACHE_CONTROL, "no-cache")
-            // std::make_pair(http::fields::CONNECTION, "close"),
-            // std::make_pair(http::fields::SERVER, "WebServer/1.0") 
         };
 
         const std::vector<std::pair<FieldName, FieldDefaultValue> > defaultHeaders(
@@ -107,18 +95,11 @@ void http::Request::sendResponse() {
                         errorPages[i].getCodes().end(), status)
                     != errorPages[i].getCodes().end()) {
                     
-                    // [TODO] 検討事項：errorPageのパスが"/"で始まらない場合に、Requestのインスタンスを作るべきかどうか
-                    
+                    _response.setErrorPage(
+                        errorPages[i].isOverwrite(),
+                        errorPages[i].getNewStatusCode());
                     std::string path = errorPages[i].getPath();
-                    if (path.size() > 0 && path[0] == '/') {
-                        // [TODO] Change the processing of the error page
-                        // depending on the prefix of the error page path
-                        // "/" - ngx_http_internal_redirect
-                        // "@" - ngx_http_named_location
-                        // otherwise - ngx_http_send_refresh or ngx_http_send_special_response
-
-                        // [TODO] この辺は後で書きます
-
+                    if (path.size() > 0 && (path[0] == '/' || path[0] == '@')) {
                         _errorPageRequest = toolbox::SharedPtr<http::Request>(
                             new http::Request(_client, _requestDepth + 1));
                         std::string method;
@@ -136,15 +117,46 @@ void http::Request::sendResponse() {
                                 http::fields::HOST)[0];
                         }
                         _errorPageRequest->setLocalRedirectInfo(method, path, host);
-                        _errorPageRequest->fetchConfig();
-                        _errorPageRequest->setErrorInternalRedirect();
-                    } else if (path.size() > 0 && path[0] == '@') {
-                        // [TODO] ここは後で書きます
-                        // errorPageNamedLocation();
+                        if (path.size() > 0 && path[0] == '/') {
+                            _errorPageRequest->fetchConfig();
+                            _errorPageRequest->setErrorInternalRedirect();
+                        } else if (path.size() > 0 && path[0] == '@') {
+                            _errorPageRequest->_response.setStatus(0);
+                            _errorPageRequest->fetchConfig();
+                            if (_errorPageRequest->_response.getStatus() != 0) {
+                                if (_response.getErrorPageNewStatus() != -1) {
+                                    _response.setStatus(_response.getErrorPageNewStatus());
+                                } else if (_response.isErrorPageOverwrite()) {
+                                    _response.setStatus(_errorPageRequest->_response.getStatus());
+                                }
+                                _response.setHeader(
+                                    http::fields::CONTENT_TYPE,
+                                    _errorPageRequest->_response.getHeader(
+                                        http::fields::CONTENT_TYPE));
+                                _response.setHeader(
+                                    http::fields::CACHE_CONTROL,
+                                    _errorPageRequest->_response.getHeader(
+                                        http::fields::CACHE_CONTROL));
+                                _response.setBody(_errorPageRequest->_response.getBody());
+                            } else {
+                                setDefaultErrorPage(&_response, status);
+                            }
+                        }                    
                     } else {
                         // [TODO] ここは後で書きます
                         // errorPageSendRefresh();
                         // errorPageSendSpecialResponse();
+                        if (_response.getErrorPageNewStatus() == http::HttpStatus::MOVED_PERMANENTLY
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::FOUND
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::SEE_OTHER
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::TEMPORARY_REDIRECT
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::PERMANENT_REDIRECT) {
+                            _response.setStatus(_response.getErrorPageNewStatus());
+                        } else {
+                            _response.setStatus(http::HttpStatus::FOUND);
+                        }
+                        _response.setHeader(http::fields::LOCATION, path);
+                        setDefaultErrorPage(&_response, _response.getStatus());
                     }
                     errorPageFound = true;
                     break;
@@ -167,6 +179,11 @@ void http::Request::sendResponse() {
             const int MIN_SUCCESS_CODE = 200;
             const int MAX_SUCCESS_CODE = 399;
             if (errorStatus >= MIN_SUCCESS_CODE && errorStatus <= MAX_SUCCESS_CODE) {
+                if (_response.getErrorPageNewStatus() != -1) {
+                    _response.setStatus(_response.getErrorPageNewStatus());
+                } else if (_response.isErrorPageOverwrite()) {
+                    _response.setStatus(errorStatus);
+                }
                 propagateErrorPage(&_response, _errorPageRequest->getResponse());
             } else {
                 setDefaultErrorPage(&_response, status);
@@ -175,7 +192,6 @@ void http::Request::sendResponse() {
     }
 
     if (_ioPendingState != http::RESPONSE_SENDING) {
-        // access logはio_pending_stateがRESPONSE_SENDINGに変更すると同時に記録する
         std::string remote_addr = _client->getIp();
         std::string remote_user = "-";
         std::string request = _parsedRequest.get().originalRequestLine;
