@@ -97,7 +97,7 @@ Epoll& Epoll::getInstance() {
     return instance;
 }
 
-void toolbox::setNonBlocking(int fd) {
+static void toolbox::setNonBlocking(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1) {
         throw std::runtime_error("fcntl F_GETFL failed");
