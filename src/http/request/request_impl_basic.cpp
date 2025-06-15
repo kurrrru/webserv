@@ -7,7 +7,8 @@
 #include "io_pending_state.hpp"
 
 http::Request::Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth)
-    : _client(client), _requestDepth(requestDepth), _ioPendingState(REQUEST_READING) {
+    : _client(client), _requestDepth(requestDepth), _ioPendingState(REQUEST_READING),
+    _isErrorInternalRedirect(false) {
 }
 
 http::Request::~Request() {
@@ -32,4 +33,12 @@ http::Response http::Request::getResponse() const {
 void http::Request::setRedirectCount(size_t count) {
     _requestDepth = count;
     _cgiHandler.setRedirectCount(count);
+}
+
+bool http::Request::isErrorInternalRedirect() const {
+    return _isErrorInternalRedirect;
+}
+
+void http::Request::setErrorInternalRedirect() {
+    _isErrorInternalRedirect = true;
 }

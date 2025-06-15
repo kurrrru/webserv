@@ -106,34 +106,46 @@ void http::Request::sendResponse() {
                 if (std::find(errorPages[i].getCodes().begin(),
                         errorPages[i].getCodes().end(), status)
                     != errorPages[i].getCodes().end()) {
-                    // [TODO] Change the processing of the error page
-                    // depending on the prefix of the error page path
-                    // "/" - ngx_http_internal_redirect
-                    // "@" - ngx_http_named_location
-                    // otherwise - ngx_http_send_refresh or ngx_http_send_special_response
-
-                    // [TODO] この辺は後で書きます
-
-                    _errorPageRequest = toolbox::SharedPtr<http::Request>(
-                        new http::Request(_client, _requestDepth + 1));
-                    std::string method;
-                    if (_parsedRequest.get().method == http::method::HEAD) {
-                        method = http::method::HEAD;
-                    } else {
-                        method = http::method::GET;
-                    }
-
+                    
+                    // [TODO] 検討事項：errorPageのパスが"/"で始まらない場合に、Requestのインスタンスを作るべきかどうか
+                    
                     std::string path = errorPages[i].getPath();
-                    std::string host;
-                    if (_parsedRequest.get().fields.getFieldValue(
-                            http::fields::HOST).empty()) {
-                        host = _client->getServerIp();
+                    if (path.size() > 0 && path[0] == '/') {
+                        // [TODO] Change the processing of the error page
+                        // depending on the prefix of the error page path
+                        // "/" - ngx_http_internal_redirect
+                        // "@" - ngx_http_named_location
+                        // otherwise - ngx_http_send_refresh or ngx_http_send_special_response
+
+                        // [TODO] この辺は後で書きます
+
+                        _errorPageRequest = toolbox::SharedPtr<http::Request>(
+                            new http::Request(_client, _requestDepth + 1));
+                        std::string method;
+                        if (_parsedRequest.get().method == http::method::HEAD) {
+                            method = http::method::HEAD;
+                        } else {
+                            method = http::method::GET;
+                        }
+                        std::string host;
+                        if (_parsedRequest.get().fields.getFieldValue(
+                                http::fields::HOST).empty()) {
+                            host = _client->getServerIp();
+                        } else {
+                            host = _parsedRequest.get().fields.getFieldValue(
+                                http::fields::HOST)[0];
+                        }
+                        _errorPageRequest->setLocalRedirectInfo(method, path, host);
+                        _errorPageRequest->fetchConfig();
+                        _errorPageRequest->setErrorInternalRedirect();
+                    } else if (path.size() > 0 && path[0] == '@') {
+                        // [TODO] ここは後で書きます
+                        // errorPageNamedLocation();
                     } else {
-                        host = _parsedRequest.get().fields.getFieldValue(
-                            http::fields::HOST)[0];
+                        // [TODO] ここは後で書きます
+                        // errorPageSendRefresh();
+                        // errorPageSendSpecialResponse();
                     }
-                    _errorPageRequest->setLocalRedirectInfo(method, path, host);
-                    _errorPageRequest->fetchConfig();
                     errorPageFound = true;
                     break;
                 }
@@ -142,7 +154,7 @@ void http::Request::sendResponse() {
                 setDefaultErrorPage(&_response, status);
             }
         }
-        if (_errorPageRequest) {
+        if (_errorPageRequest && _errorPageRequest->isErrorInternalRedirect()) {
             _errorPageRequest->run();
             if (_errorPageRequest->getIOPendingState() == http::CGI_BODY_SENDING
                 || _errorPageRequest->getIOPendingState() == http::CGI_OUTPUT_READING

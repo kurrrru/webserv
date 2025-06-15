@@ -97,6 +97,9 @@ class Request {
      */
     void setRedirectCount(size_t count);
 
+    bool isErrorInternalRedirect() const;
+    void setErrorInternalRedirect();
+
  private:
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;
@@ -106,6 +109,7 @@ class Request {
     IOPendingState _ioPendingState;
     toolbox::SharedPtr<http::Request> _errorPageRequest;
     CgiHandler _cgiHandler;
+    bool _isErrorInternalRedirect;
 
     Request();
     Request(const Request& other);
