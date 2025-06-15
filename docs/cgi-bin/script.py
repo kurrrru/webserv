@@ -158,7 +158,7 @@ def handleGetRequest():
     Returns current timestamp in Japanese format
     """
     body = datetime.datetime.now().strftime('%Y年%m月%d日 %H時%M分%S秒')
-    sendResponse(200, {"Content-Type": "text/plain"}, body)
+    sendResponse(200, {"Content-Type": "text/plain; charset=utf-8"}, body)
 
 def handlePostRequest():
     """
