@@ -78,12 +78,6 @@ class Request {
     }
 
     /**
-     * @brief Checks if the request is a keep-alive request.
-     * @return True if the request is a keep-alive request, false otherwise.
-     */
-    bool isKeepAliveRequest() const;
-
-    /**
      * @brief Returns the prepared HTTP response.
      * @return A copy of the Response object.
      */

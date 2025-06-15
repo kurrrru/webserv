@@ -89,11 +89,6 @@ void Client::setRequest(const toolbox::SharedPtr<http::Request> request) {
     _request = request;
 }
 
-bool Client::isOnceConnectionEnd() const {
-    return !_request->isKeepAliveRequest()
-        && _request->getIOPendingState() == http::END_RESPONSE;
-}
-
 bool Client::isBadRequest() const {
     return _request->getResponse().getStatus() == http::HttpStatus::BAD_REQUEST;
 }
