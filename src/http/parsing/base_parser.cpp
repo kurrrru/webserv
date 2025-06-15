@@ -6,8 +6,14 @@ namespace http {
 BaseParser::ParseException::ParseException(const char* message)
 : _message(message) {}
 
+BaseParser::ParseException::ParseException(const ParseException& other)
+: _message(other._message) {}
+
 const char* BaseParser::ParseException::what() const throw() {
     return _message;
+}
+
+BaseParser::ParseException::~ParseException() throw() {
 }
 
 BaseParser::ParseStatus BaseParser::run(const std::string& buf) {

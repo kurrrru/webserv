@@ -32,6 +32,12 @@ Epoll::~Epoll() {
     _events.clear();
 }
 
+Epoll::EpollException::EpollException(const EpollException& other)
+: _message(other._message) {}
+
+Epoll::EpollException::~EpollException() throw() {
+}
+
 void Epoll::addServer(int fd, toolbox::SharedPtr<Server> server) {
     Epoll& epollInstance = getInstance();
     struct epoll_event* ev = new struct epoll_event;
@@ -91,7 +97,7 @@ Epoll& Epoll::getInstance() {
     return instance;
 }
 
-static void toolbox::setNonBlocking(int fd) {
+void toolbox::setNonBlocking(int fd) {
     int flags = fcntl(fd, F_GETFL, 0);
     if (flags == -1) {
         throw std::runtime_error("fcntl F_GETFL failed");

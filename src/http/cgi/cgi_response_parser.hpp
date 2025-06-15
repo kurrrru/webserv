@@ -27,6 +27,9 @@ class CgiResponseParser : public BaseParser {
     void reset();
 
  private:
+    CgiResponseParser(const CgiResponseParser& other);
+    CgiResponseParser& operator=(const CgiResponseParser& other);
+
     ParseStatus processRequestLine() { return BaseParser::P_ERROR; }
     ParseStatus processFieldLine();
     ParseStatus processBody();

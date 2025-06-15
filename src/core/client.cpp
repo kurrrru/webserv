@@ -42,8 +42,14 @@ Client::~Client() {
 Client::ClientException::ClientException(const char* message) :
                             _message(message) {}
 
+Client::ClientException::ClientException(const ClientException& other)
+: _message(other._message) {}
+
 const char* Client::ClientException::what() const throw() {
     return _message;
+}
+
+Client::ClientException::~ClientException() throw() {
 }
 
 int Client::getFd() const {
