@@ -75,8 +75,13 @@
 <body>
     <div class="container">
         <h1>Webserv テストページ</h1>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <img src="/images/burokkori.jpg" alt="Burokkori Image" style="max-width: 50%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
+        </div>
         
         <div class="success-message">
+            http://localhost:8080<br>
             サーバーが正常に動作しています！
         </div>
         
@@ -106,13 +111,11 @@
         <div class="test-links">
             <h3>GETリクエストテスト</h3>
             <ul>
-                <li><a href="/index.html" target="_blank">index.html ページへのリンク</a></li>
-                <li><a href="/directory/" target="_blank">ディレクトリリスティングテスト</a></li>
-                <li><a href="/cgi-bin/test.cgi" target="_blank">CGIスクリプトテスト</a></li>
-                <li><a href="/static/image.jpg" target="_blank">静的ファイル（画像）テスト</a></li>
-                <li><a href="/404test" target="_blank">404エラーテスト</a></li>
-                <li><a href="/408teapot" target="_blank">teapot</a></li>
-
+                <li><a href="/index.html">index.html ページへのリンク</a></li>
+                <li><a href="/autoindex/">ディレクトリリスティングテスト</a></li>
+                <li><a href="/404test">404エラーテスト</a></li>
+                <li><a href="/408teapot">teapot</a></li>
+                <li><a href="http://localhost:5000">localhost:5000</a></li>
             </ul>
 
             <h3>HEADリクエストテスト</h3>
@@ -121,11 +124,10 @@
                 <div style="margin-bottom: 10px;">
                     <label for="headUrl">テスト対象URL:</label>
                     <select id="headUrl" style="margin-left: 10px; width: 250px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                        <option value="/">/ (トップページ)</option>
-                        <option value="/index.html">/index.html</option>
-                        <option value="/uploads/">/uploads/ (ディレクトリ)</option>
+                        <option value="/">/ (index.html)</option>
+                        <option value="/autoindex/">/autoindex/ (allowディレクトリ)</option>
+                        <option value="/uploads/">/uploads/ (not allowディレクトリ)</option>
                         <option value="/404test">/404test (存在しないページ)</option>
-                        <option value="/cgi-bin/">/cgi-bin/ (CGIディレクトリ)</option>
                     </select>
                     <button onclick="performHeadRequest()" style="background-color: #6f42c1; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">HEAD送信</button>
                 </div>
@@ -177,10 +179,10 @@
 
             <h3>CGIスクリプトテスト</h3>
             <p>CGIスクリプト（script.py）を使用したテストです。サーバーの直接処理ではなく、外部スクリプトによる動的処理をテストします。</p>
-            
-            <h4>CGI GET - 現在時刻取得</h4>
+
+            <h4>現在時刻取得</h4>
             <div style="margin: 15px 0;">
-                <button onclick="performCgiGetRequest()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻を取得</button>
+                <button onclick="testCgiScript('/script.py', 'GET')" style="background-color: #7dadd8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻</button>
             </div>
 
             <h4>環境変数テスト</h4>
