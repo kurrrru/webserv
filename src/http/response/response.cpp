@@ -182,4 +182,17 @@ const std::string& Response::getBody() const {
     return _body;
 }
 
+bool Response::isErrorPageOverwrite() const {
+    return _errorPageOverwrite;
+}
+
+int Response::getErrorPageNewStatus() const {
+    return _errorPageNewStatus;
+}
+
+void Response::setErrorPage(bool overwrite, int newStatus) {
+    _errorPageOverwrite = overwrite;
+    _errorPageNewStatus = newStatus;
+}
+
 }  // namespace http

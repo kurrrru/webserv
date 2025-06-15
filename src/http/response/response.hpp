@@ -43,6 +43,10 @@ class Response {
 
     const std::string& getBody() const;
 
+    bool isErrorPageOverwrite() const;
+    int getErrorPageNewStatus() const;
+    void setErrorPage(bool overwrite, int newStatus);
+
  private:
     int _status;
     std::map<FieldName, HeaderField> _headers;
@@ -50,6 +54,9 @@ class Response {
     std::string _wholeResponseStr;
     const char* _wholeResponsePtr;
     ssize_t _lengthSent;
+    
+    int _errorPageNewStatus;
+    bool _errorPageOverwrite;
 
     std::string buildResponse() const;
 };
