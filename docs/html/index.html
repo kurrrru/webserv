@@ -140,26 +140,26 @@
             <h3>POSTリクエストテスト（サーバー直接）</h3>
             <p>Webサーバーの内蔵機能による直接的なファイルアップロードとデータ送信のテストです。</p>
             <h4>ファイルアップロード</h4>
-            <form action="/uploads" method="POST" enctype="multipart/form-data" style="margin: 15px 0;">
+            <form action="/uploads" method="POST" enctype="multipart/form-data" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0;">
                 <div style="margin-bottom: 10px;">
                     <label for="file">ファイルを選択:</label>
-                    <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px;">
+                    <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
                 </div>
                 <button type="submit" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">アップロード</button>
             </form>
             <h4>メッセージ送信</h4>
-            <form action="/uploads" method="post" style="margin: 15px 0;">
+            <form action="/uploads" method="post" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0;">
                 <div style="margin-bottom: 10px;">
                     <label for="username">ユーザー名:</label>
-                    <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px;">
+                    <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
                 </div>
                 <div style="margin-bottom: 10px;">
                     <label for="message">メッセージ:</label>
-                    <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px;"></textarea>
+                    <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;"></textarea>
                 </div>
                 <button type="submit" style="background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">送信</button>
             </form>
-            
+
             <h3>DELETEリクエストテスト</h3>
             <div style="margin: 15px 0;">
                 <h4>アップロードされたファイル一覧</h4>
@@ -228,10 +228,10 @@
 
             <h4>CGI POST - ファイルアップロード</h4>
             <div style="margin: 15px 0;">
-                <form id="cgiUploadForm" style="margin-bottom: 15px;">
+                <form method="post" action="/uploads/script.py" enctype="multipart/form-data" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 10px 0;">
                     <div style="margin-bottom: 10px;">
-                        <label for="cgiFile">ファイルを選択:</label>
-                        <input type="file" id="cgiFile" name="uploadFile" accept="*/*" style="margin-left: 10px;">
+                        <label for="cgiFiles">ファイルを選択:</label>
+                        <input type="file" id="cgiFiles" name="files" multiple accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
                     </div>
                     <div style="margin-bottom: 10px;">
                         <label for="cgiFilename">保存ファイル名:</label>
@@ -240,6 +240,7 @@
                     </div>
                     <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
                 </form>
+                <small style="display: block; color: #666; margin-top: 5px;">※ CGIスクリプト（script.py）を経由してファイルをアップロード</small>
             </div>
 
         </div>
