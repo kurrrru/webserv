@@ -18,12 +18,6 @@ namespace {
         return "-";
     }
 
-    // [TODO] ここは後で書きます
-    void errorPageInternalRedirect();
-    void errorPageNamedLocation();
-    void errorPageSendRefresh();
-    void errorPageSendSpecialResponse();
-
     void propagateErrorPage(
         http::Response* response, const http::Response& errorResponse) {
         typedef std::string FieldName;
@@ -143,9 +137,6 @@ void http::Request::sendResponse() {
                             }
                         }                    
                     } else {
-                        // [TODO] ここは後で書きます
-                        // errorPageSendRefresh();
-                        // errorPageSendSpecialResponse();
                         if (_response.getErrorPageNewStatus() == http::HttpStatus::MOVED_PERMANENTLY
                             || _response.getErrorPageNewStatus() == http::HttpStatus::FOUND
                             || _response.getErrorPageNewStatus() == http::HttpStatus::SEE_OTHER
