@@ -1,7 +1,8 @@
-#include <unistd.h>
-
 #include <string>
 #include <vector>
+#include <ctime>
+
+#include <unistd.h>
 
 #include "method_utils.hpp"
 
@@ -64,10 +65,11 @@ std::string findFirstExistingIndex(const std::string& path,
 }
 
 std::string getModifiedTime(const struct stat& st) {
-    char timeStr[26];
-    ctime_r(&st.st_mtime, timeStr);
-    timeStr[24] = '\0';  // del newline
-    return std::string(timeStr);
+    char buffer[32];
+    std::tm* fileTime = std::localtime(&st.st_mtime);
+
+    std::strftime(buffer, sizeof(buffer), "%a, %d %b %Y %H:%M:%S", fileTime);
+    return std::string(buffer);
 }
 
 }  // namespace http
