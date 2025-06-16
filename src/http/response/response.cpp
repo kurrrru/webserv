@@ -97,8 +97,12 @@ bool Response::sendResponse(int client_fd) {
 
 std::string Response::buildResponse() const {
     std::ostringstream oss;
-    oss << "HTTP/1.1 " << _status << " " << getStatusMessage(_status) << "\r\n";
-
+    oss << "HTTP/1.1 " << _status;
+    if (getStatusMessage(_status) != "Unknown Status") {
+        oss << " " << getStatusMessage(_status);
+    }
+    oss << "\r\n";
+    
     for (std::map<FieldName, HeaderField>::const_iterator header = _headers.begin();
          header != _headers.end(); ++header) {
         if (header->second.first) {
