@@ -409,7 +409,7 @@ async function performCgiGetRequest() {
 }
 
 function performCgiPostRequest() {
-    const fileInput = document.getElementById('cgiFile');
+    const fileInput = document.getElementById('cgiFiles');
     const filenameInput = document.getElementById('cgiFilename');
     
     if (!fileInput.files.length) {
@@ -427,9 +427,9 @@ function performCgiPostRequest() {
             const formData = new FormData();
             if (customFilename) {
                 const blob = new Blob([file], { type: file.type });
-                formData.append('file', blob, customFilename);
+                formData.append('files', blob, customFilename);
             } else {
-                formData.append('file', file);
+                formData.append('files', file);
             }
             
             const response = await fetch('/script.py', {
@@ -441,7 +441,7 @@ function performCgiPostRequest() {
             
             let responseInfo = '';
             responseInfo += '=== CGI POSTリクエスト結果 ===\n';
-            responseInfo += 'URL: /script.py\n';
+            responseInfo += 'URL: /uploads/script.py\n';
             responseInfo += 'メソッド: POST\n';
             responseInfo += 'Content-Type: multipart/form-data\n\n';
             responseInfo += '=== アップロード情報 ===\n';
@@ -489,7 +489,7 @@ function performCgiPostRequest() {
         } catch (error) {
             let errorInfo = '';
             errorInfo += '=== CGI POSTリクエストエラー ===\n';
-            errorInfo += 'URL: /script.py\n';
+            errorInfo += 'URL: /uploads/script.py\n';
             errorInfo += 'メソッド: POST\n\n';
             errorInfo += 'エラー内容: ' + error.message + '\n\n';
             errorInfo += '考えられる原因:\n';
