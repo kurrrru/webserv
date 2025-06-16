@@ -15,10 +15,15 @@ void Request::fetchConfig() {
         return;
     }
     if (processReturn(selectedServer->getReturnValue())) {
+        _ioPendingState = RESPONSE_SENDING;
         return;
     }
     if (!selectLocation(selectedServer)) {
         _response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+        return;
+    }
+    if (processReturn(_config.getReturnValue())) {
+        _ioPendingState = RESPONSE_SENDING;
         return;
     }
 }
@@ -179,9 +184,9 @@ std::string Request::generateDefaultBody(size_t statusCode) {
            "<body>\n"
            "<center><h1>" + toolbox::to_string(statusCode)
            + " " + statusText + "</h1></center>\n"
-           "<hr><center>webserv</center>\n"
+           "<hr><center>webserv/Ideal Broccoli</center>\n"
            "</body>\n"
-           "</html>";
+           "</html>\n";
 }
 
 bool Request::selectLocation(
