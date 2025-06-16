@@ -15,10 +15,15 @@ void Request::fetchConfig() {
         return;
     }
     if (processReturn(selectedServer->getReturnValue())) {
+        _ioPendingState = RESPONSE_START;
         return;
     }
     if (!selectLocation(selectedServer)) {
         _response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
+        return;
+    }
+    if (processReturn(_config.getReturnValue())) {
+        _ioPendingState = RESPONSE_START;
         return;
     }
 }
@@ -119,7 +124,7 @@ void Request::processReturnWithoutContent(size_t statusCode) {
     } else if (hasDefaultErrorPage(statusCode)) {
         setHtmlErrorResponse(statusCode);
     } else if (isMinimalResponse(statusCode)) {
-        _response.setHeader(http::fields::CONTENT_LENGTH, "0");
+        // Minimal response with empty body - Content-Length auto-calculated
     } else {
         setEmptyTextResponse();
     }
@@ -146,29 +151,22 @@ void Request::setRedirectResponse(size_t statusCode,
     std::string defaultBody = generateDefaultBody(statusCode);
     _response.setBody(defaultBody);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/html");
-    _response.setHeader(http::fields::CONTENT_LENGTH,
-                        toolbox::to_string(defaultBody.size()));
 }
 
 void Request::setTextResponse(const std::string& content) {
     _response.setBody(content);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/plain");
-    _response.setHeader(http::fields::CONTENT_LENGTH,
-                        toolbox::to_string(content.size()));
 }
 
 void Request::setHtmlErrorResponse(size_t statusCode) {
     std::string defaultBody = generateDefaultBody(statusCode);
     _response.setBody(defaultBody);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/html");
-    _response.setHeader(http::fields::CONTENT_LENGTH,
-                        toolbox::to_string(defaultBody.size()));
 }
 
 void Request::setEmptyTextResponse() {
     _response.setBody("");
     _response.setHeader(http::fields::CONTENT_TYPE, "text/plain");
-    _response.setHeader(http::fields::CONTENT_LENGTH, "0");
 }
 
 std::string Request::generateDefaultBody(size_t statusCode) {
@@ -179,9 +177,9 @@ std::string Request::generateDefaultBody(size_t statusCode) {
            "<body>\n"
            "<center><h1>" + toolbox::to_string(statusCode)
            + " " + statusText + "</h1></center>\n"
-           "<hr><center>webserv</center>\n"
+           "<hr><center>webserv/Ideal Broccoli</center>\n"
            "</body>\n"
-           "</html>";
+           "</html>\n";
 }
 
 bool Request::selectLocation(

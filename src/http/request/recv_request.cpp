@@ -69,6 +69,9 @@ bool Request::performRecv(std::string& receivedData) {
 
 bool Request::loadConfig() {
     fetchConfig();
+    if (_ioPendingState == RESPONSE_START) {
+        return false;
+    }
     if (_response.getStatus() != HttpStatus::OK) {
         toolbox::logger::StepMark::info(
             "Request: loadConfig: fetchConfig failed");
@@ -124,6 +127,9 @@ bool Request::recvRequest() {
     }
     
     if (!isValidBodySize()) {
+        if (_ioPendingState == RESPONSE_START) {
+            return false;
+        }
         _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: request have "

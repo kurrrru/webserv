@@ -11,6 +11,7 @@
 
 #include "../../core/constant.hpp"
 #include "../../../toolbox/stepmark.hpp"
+#include "../get_gmt.hpp"
 
 namespace http {
 
@@ -102,15 +103,32 @@ std::string Response::buildResponse() const {
         oss << " " << getStatusMessage(_status);
     }
     oss << "\r\n";
-    
+
+    std::map<FieldName, HeaderField>::const_iterator it = _headers.find("Server");
+    if (it != _headers.end() && it->second.first) {
+        oss << "Server: " << it->second.second << "\r\n";
+    } else {
+        oss << "Server: Webserv/Ideal Broccoli\r\n";
+    }
+    oss << "Date: " << http::getCurrentGMT() << "\r\n";
+
     for (std::map<FieldName, HeaderField>::const_iterator header = _headers.begin();
-         header != _headers.end(); ++header) {
+        header != _headers.end(); ++header) {
+        if (header->first == "Server" || header->first == "Date" ||
+            header->first == "Content-Length") {
+            continue;
+        }
         if (header->second.first) {
             oss << header->first << ": " << header->second.second << "\r\n";
         }
     }
 
-    oss << "Content-Length: " << _body.size() << "\r\n";
+    const int noContentStatus = 204;
+    const int notModifiedStatus = 304;
+    if (_status != noContentStatus && _status != notModifiedStatus &&
+        _headers.count("Transfer-Encoding") == 0) {
+        oss << "Content-Length: " << _body.size() << "\r\n";
+    }
     oss << "\r\n";
     oss << _body;
 

@@ -9,6 +9,9 @@
 
 namespace http {
 void Request::handleRequest() {
+    if (_ioPendingState == RESPONSE_START) {
+        return;
+    }
     if (_response.getStatus() != 200) {
         toolbox::logger::StepMark::error(
             "Request::handleRequest: Response already set status "

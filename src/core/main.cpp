@@ -28,6 +28,9 @@ int main(int argc, char* argv[]) {
             config::Config::loadConfig(config::DEFAULT_FILE);
         } else if (argc == 2) {
             config::Config::loadConfig(argv[1]);
+        } else {
+            std::cerr << "Usage: " << argv[0] << " [config_file]" << std::endl;
+            return EXIT_FAILURE;
         }
         toolbox::SharedPtr<config::HttpConfig> httpConfig =
                                         config::Config::getHttpConfig();
@@ -108,7 +111,7 @@ int main(int argc, char* argv[]) {
         }
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }
