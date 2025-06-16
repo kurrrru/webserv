@@ -79,6 +79,7 @@ void http::Request::sendResponse() {
     }
     std::size_t status = _response.getStatus();
     if (_ioPendingState != http::RESPONSE_SENDING && 
+        _ioPendingState != http::RESPONSE_START &&
         status >= config::directive::MIN_ERROR_PAGE_CODE && 
         status <= config::directive::MAX_ERROR_PAGE_CODE) {
         if (_ioPendingState != http::ERROR_LOCAL_REDIRECT_IO_PENDING) {
@@ -186,6 +187,7 @@ void http::Request::sendResponse() {
         std::string remote_addr = _client->getIp();
         std::string remote_user = "-";
         std::string request = _parsedRequest.get().originalRequestLine;
+        int finalStatus = _response.getStatus();
         std::size_t body_bytes_sent = _response.getContentLength();
         std::string http_referer = getFieldValue(
             _parsedRequest.get(), http::fields::REFERER);
@@ -196,7 +198,7 @@ void http::Request::sendResponse() {
             remote_addr,
             remote_user,
             request,
-            status,
+            finalStatus,
             body_bytes_sent,
             http_referer,
             http_user_agent
