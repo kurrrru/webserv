@@ -44,7 +44,7 @@ class RequestParser : public BaseParser {
     ParseStatus processFieldLine();
     ParseStatus processBody();
     bool isChunkedEncoding();
-    void parseChunkedEncoding();
+    ParseStatus parseChunkedEncoding();
 
     HTTPRequest _request;
     RequestFieldParser _fieldParser;

@@ -31,7 +31,8 @@ int handleRecvResult(int receivedSize,
 
 bool isValidContentLength(std::size_t contentLength,
                           std::size_t clientMaxBodySize) {
-    if (contentLength > clientMaxBodySize) {
+    if (contentLength != std::numeric_limits<std::size_t>::max()
+        && contentLength > clientMaxBodySize) {
         toolbox::logger::StepMark::info( "Request: recvRequest: content length"
             " exceeds client max body size");
         return false;
@@ -91,7 +92,7 @@ bool Request::isValidBodySize() {
     const std::size_t clientMaxBodySize = _config.getClientMaxBodySize();
     const std::size_t contentLength = _parsedRequest.get().body.contentLength;
     const std::size_t receivedLength = _parsedRequest.get().body.receivedLength;
-
+    
     if (!isValidContentLength(contentLength, clientMaxBodySize) ||
         !isValidReceivedLength(receivedLength, clientMaxBodySize)) {
         return false;
