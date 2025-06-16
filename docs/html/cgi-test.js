@@ -441,7 +441,7 @@ function performCgiPostRequest() {
             
             let responseInfo = '';
             responseInfo += '=== CGI POSTリクエスト結果 ===\n';
-            responseInfo += 'URL: /uploads/script.py\n';
+            responseInfo += 'URL: /script.py\n';
             responseInfo += 'メソッド: POST\n';
             responseInfo += 'Content-Type: multipart/form-data\n\n';
             responseInfo += '=== アップロード情報 ===\n';
@@ -489,7 +489,7 @@ function performCgiPostRequest() {
         } catch (error) {
             let errorInfo = '';
             errorInfo += '=== CGI POSTリクエストエラー ===\n';
-            errorInfo += 'URL: /uploads/script.py\n';
+            errorInfo += 'URL: /script.py\n';
             errorInfo += 'メソッド: POST\n\n';
             errorInfo += 'エラー内容: ' + error.message + '\n\n';
             errorInfo += '考えられる原因:\n';
