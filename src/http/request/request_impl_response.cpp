@@ -55,21 +55,29 @@ namespace {
     }
 
     void setDefaultErrorPage(http::Response* response, std::size_t status) {
-        // [TODO] 設定すべきフィールドを確認する
-        // [TODO] デフォルトのエラーページを設定する
-        response->setHeader(http::fields::CONTENT_TYPE, "text/html");
         response->setStatus(status);
+        response->setHeader(http::fields::CONTENT_TYPE, "text/html");
         std::stringstream ss;
+
         ss << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "<head>\n"
             << "<title>Error " << status << "</title>\n"
             << "</head>\n"
             << "<body>\n"
-            << "<h1>Error " << status << "</h1>\n"
-            << "<p>An error occurred while processing your request.</p>\n"
+            << "<p><strong>Error " << status << "</strong></p>\n"
+            << "<p>\n"
+            << "The essence you seek, in its most harmonious form, "
+            << "resides within the realm of Ideals.<br>\n"
+            << "What we encounter now is but a fleeting shadow, "
+            << "a temporary deviation from its true perfection.<br>\n"
+            << "Fear not, for just like the Ideal Broccoli, "
+            << "always striving for its perfect green, "
+            << "its ultimate manifestation will surely emerge.<br>"
+            << "<small>- Ideal Broccoli: Cultivating perfection, one step at a time.</small>\n"
+            << "</p>"
             << "</body>\n"
-            << "</html>";
+            << "</html>\n";
         response->setBody(ss.str());
     }
 

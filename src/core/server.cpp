@@ -50,6 +50,9 @@ _message(message) {}
 Server::ServerException::ServerException(const std::string& message) :
 _message(message) {}
 
+Server::ServerException::ServerException(const ServerException& other) :
+_message(other._message) {}
+
 Server::ServerException::~ServerException() throw() {
 }
 

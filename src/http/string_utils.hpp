@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <cctype>
 #include <cstdlib>
@@ -17,7 +19,7 @@ bool isAlnumStr(const std::string& str);
 void trimSpace(std::string* str);
 void skipSpace(std::string* line);
 bool isEqualCaseInsensitive(
-        const std::string& str1, const std::string& str2);
+const std::string& str1, const std::string& str2);
 bool percentDecode(std::string& str, std::string* buf);
 
 }  // namespace utils

@@ -42,9 +42,9 @@ static void cleanupTestEnvironment() {
     chmod("./test_dir/no_permission.html", 0644);
     chmod("./test_dir/no_permission_dir", 0755);
 
-    remove("./test_dir/test.html");
-    remove("./test_dir/index.html");
-    remove("./test_dir/no_permission.html");
+    std::remove("./test_dir/test.html");
+    std::remove("./test_dir/index.html");
+    std::remove("./test_dir/no_permission.html");
 
     rmdir("./test_dir/empty_dir");
     rmdir("./test_dir/no_permission_dir");

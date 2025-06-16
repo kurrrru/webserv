@@ -140,9 +140,9 @@ bool RequestParser::isValidFormat() {
     }
     char* endptr = NULL;
     std::size_t majorVersion =
-        strtol(_request.version.substr(5, dotPos).c_str(), &endptr, 10);
+        std::strtol(_request.version.substr(5, dotPos).c_str(), &endptr, 10);
     std::size_t minorVersion =
-        strtol(_request.version.substr(dotPos + 1).c_str(), &endptr, 10);
+        std::strtol(_request.version.substr(dotPos + 1).c_str(), &endptr, 10);
     if (majorVersion < uri::HTTP_MAJOR_VERSION ||
         minorVersion > uri::HTTP_MINOR_VERSION_MAX) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
@@ -251,11 +251,11 @@ void RequestParser::percentDecode(std::string& line) {
 
 bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
     if (hexStr.size() != parser::HEX_DIGIT_LENGTH ||
-        !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
+        !std::isxdigit(hexStr[0]) || !std::isxdigit(hexStr[1])) {
         return false;
     }
     char* endptr = NULL;
-    std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
+    std::size_t hex = std::strtol(hexStr.c_str(), &endptr, 16);
     decodedStr = static_cast<char>(hex);
     if (*endptr != '\0' || hex == '\0') {
         return false;
@@ -382,9 +382,9 @@ BaseParser::ParseStatus RequestParser::parseChunkedEncoding() {
         std::string hexStr = getBuf()->substr(0, pos);
         std::size_t chunkSize;
         char* endPtr;
-
-        chunkSize = strtol(hexStr.c_str(), &endPtr, 16);
-        if (endPtr == hexStr.c_str() || (*endPtr != '\0' && *endPtr != ';')) {
+        chunkSize = std::strtol(hexStr.c_str(), &endPtr, 16);
+        if (*endPtr != *http::symbols::CR) {
+            toolbox::logger::StepMark::error("RequestParser: invalid chunk size");
             throw ParseException("");
         }
         if (chunkSize == 0) {

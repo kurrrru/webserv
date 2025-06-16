@@ -40,9 +40,9 @@ static void setupTestEnvironment() {
 static void cleanupTestEnvironment() {
     chmod("./test_dir/no_permission.html", 0644);
 
-    remove("./test_dir/test.html");
-    remove("./test_dir/index.html");
-    remove("./test_dir/no_permission.html");
+    std::remove("./test_dir/test.html");
+    std::remove("./test_dir/index.html");
+    std::remove("./test_dir/no_permission.html");
 
     rmdir("./test_dir");
 }

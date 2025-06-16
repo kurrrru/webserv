@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <ctime>
 
 #include <sys/stat.h>
 
@@ -32,7 +33,7 @@ bool isFileExists(const std::string& name) {
 }
 
 std::string getTimestamp() {
-    return toolbox::to_string(time(NULL));
+    return toolbox::to_string(std::time(NULL));
 }
 
 void saveToFile(const std::string& filepath, const std::string& content) {
