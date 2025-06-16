@@ -13,25 +13,23 @@ void serverMethodHandler(RequestParser& parsedRequest,
                          const config::LocationConfig &config,
                          HTTPFields& fields,
                          Response& response) {
-    std::string targetPath = parsedRequest.get().uri.path;
     std::string rootPath = config.getRoot();
-    targetPath = joinPath(rootPath, targetPath);
-    toolbox::logger::StepMark::info("serverMethodHandler: make targetPath = " + targetPath);
-
+    std::string fullPath = joinPath(rootPath, parsedRequest.get().uri.path);
     std::string method = parsedRequest.get().method;
     std::vector<std::string> indices = config.getIndices();
     bool isAutoindex = config.getAutoindex();
 
     if (method == method::GET) {
-        runGet(targetPath, indices, isAutoindex, response);
+        runGet(fullPath, indices, isAutoindex, response);
     } else if (method == method::HEAD) {
-        runHead(targetPath, indices, isAutoindex, response);
+        runHead(fullPath, indices, isAutoindex, response);
     } else if (method == method::DELETE) {
-        runDelete(targetPath, response);
+        runDelete(fullPath, response);
     } else if (method == method::POST) {
-        std::string uploadPath = config.getUploadStore();
+        std::string serverUploadsPath = joinPath(rootPath, config.getPath());
+        std::string uploadStorePath = joinPath(serverUploadsPath, config.getUploadStore());
         std::string recvBody = parsedRequest.get().body.content;
-        runPost(uploadPath, recvBody, fields, response);
+        runPost(uploadStorePath, recvBody, fields, response);
     }
 }
 

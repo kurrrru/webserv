@@ -95,11 +95,6 @@ void Client::setRequest(const toolbox::SharedPtr<http::Request> request) {
     _request = request;
 }
 
-bool Client::isOnceConnectionEnd() const {
-    return !_request->isKeepAliveRequest()
-        && _request->getIOPendingState() == http::END_RESPONSE;
-}
-
 bool Client::isBadRequest() const {
     return _request->getResponse().getStatus() == http::HttpStatus::BAD_REQUEST;
 }
@@ -112,10 +107,6 @@ bool Client::isCgiProcessing() const {
     return _request->getIOPendingState() == http::CGI_BODY_SENDING
         || _request->getIOPendingState() == http::CGI_OUTPUT_READING
         || _request->getIOPendingState() == http::CGI_LOCAL_REDIRECT_IO_PENDING;
-}
-
-void Client::clearRequest(const toolbox::SharedPtr<Client> client) {
-    _request = toolbox::SharedPtr<http::Request>(new http::Request(client));
 }
 
 std::string Client::convertIpToString(uint32_t ip) const {
