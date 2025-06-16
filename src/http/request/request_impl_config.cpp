@@ -124,7 +124,7 @@ void Request::processReturnWithoutContent(size_t statusCode) {
     } else if (hasDefaultErrorPage(statusCode)) {
         setHtmlErrorResponse(statusCode);
     } else if (isMinimalResponse(statusCode)) {
-        _response.setHeader(http::fields::CONTENT_LENGTH, "0");
+        // Minimal response with empty body - Content-Length auto-calculated
     } else {
         setEmptyTextResponse();
     }
@@ -151,29 +151,22 @@ void Request::setRedirectResponse(size_t statusCode,
     std::string defaultBody = generateDefaultBody(statusCode);
     _response.setBody(defaultBody);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/html");
-    _response.setHeader(http::fields::CONTENT_LENGTH,
-                        toolbox::to_string(defaultBody.size()));
 }
 
 void Request::setTextResponse(const std::string& content) {
     _response.setBody(content);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/plain");
-    _response.setHeader(http::fields::CONTENT_LENGTH,
-                        toolbox::to_string(content.size()));
 }
 
 void Request::setHtmlErrorResponse(size_t statusCode) {
     std::string defaultBody = generateDefaultBody(statusCode);
     _response.setBody(defaultBody);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/html");
-    _response.setHeader(http::fields::CONTENT_LENGTH,
-                        toolbox::to_string(defaultBody.size()));
 }
 
 void Request::setEmptyTextResponse() {
     _response.setBody("");
     _response.setHeader(http::fields::CONTENT_TYPE, "text/plain");
-    _response.setHeader(http::fields::CONTENT_LENGTH, "0");
 }
 
 std::string Request::generateDefaultBody(size_t statusCode) {
