@@ -92,7 +92,7 @@ bool Request::isValidBodySize() {
     const std::size_t clientMaxBodySize = _config.getClientMaxBodySize();
     const std::size_t contentLength = _parsedRequest.get().body.contentLength;
     const std::size_t receivedLength = _parsedRequest.get().body.receivedLength;
-    
+
     if (!isValidContentLength(contentLength, clientMaxBodySize) ||
         !isValidReceivedLength(receivedLength, clientMaxBodySize)) {
         return false;

@@ -336,7 +336,7 @@
 
             function deleteFile(filepath) {
                 if (confirm('本当にファイル "' + filepath + '" を削除しますか？')) {
-                    fetch('/' + filepath, {
+                    fetch(filepath, {
                         method: 'DELETE'
                     })
                     .then(response => {
