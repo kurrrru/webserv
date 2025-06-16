@@ -15,7 +15,7 @@ void Request::fetchConfig() {
         return;
     }
     if (processReturn(selectedServer->getReturnValue())) {
-        _ioPendingState = RESPONSE_SENDING;
+        _ioPendingState = RESPONSE_START;
         return;
     }
     if (!selectLocation(selectedServer)) {
@@ -23,7 +23,7 @@ void Request::fetchConfig() {
         return;
     }
     if (processReturn(_config.getReturnValue())) {
-        _ioPendingState = RESPONSE_SENDING;
+        _ioPendingState = RESPONSE_START;
         return;
     }
 }
