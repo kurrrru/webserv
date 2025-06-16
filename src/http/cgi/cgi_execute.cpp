@@ -281,6 +281,9 @@ bool CgiExecute::forkAndExecute(const std::string& scriptPath,
     }
     if (_childPid == 0) {
         std::size_t lastSlashPos = scriptPath.find_last_of('/');
+        if (lastSlashPos == std::string::npos) {
+            lastSlashPos = scriptPath.size();
+        }
         if (chdir(scriptPath.substr(0, lastSlashPos).c_str()) != 0) {
             toolbox::logger::StepMark::error(
                 "Failed to change directory to CGI script directory: "
