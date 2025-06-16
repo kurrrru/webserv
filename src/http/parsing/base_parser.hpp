@@ -11,8 +11,12 @@ class BaseParser {
     class ParseException : public std::exception {
      public:
         explicit ParseException(const char* message);
+        ParseException(const ParseException& other);
+        virtual ~ParseException() throw();
         const char* what() const throw();
      private:
+        ParseException();
+        ParseException& operator=(const ParseException& other);
         const char* _message;
     };
     enum ValidatePos {

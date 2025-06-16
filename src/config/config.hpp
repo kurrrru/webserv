@@ -77,9 +77,13 @@ class ConfigException : public std::exception {
  public:
     explicit ConfigException(const std::string& message);
     virtual ~ConfigException() throw();
+    ConfigException(const ConfigException& other);
     virtual const char* what() const throw();
 
  private:
+    ConfigException();
+    ConfigException& operator=(const ConfigException& other);
+
     std::string _message;
 };
 

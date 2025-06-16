@@ -50,6 +50,10 @@ ConfigException::ConfigException(const std::string& message):
 _message(message) {
 }
 
+ConfigException::ConfigException(const ConfigException& other)
+: _message(other._message) {
+}
+
 ConfigException::~ConfigException() throw() {
 }
 

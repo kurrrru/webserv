@@ -18,8 +18,12 @@ class Client {
     class ClientException : public std::exception {
      public:
         explicit ClientException(const char* message);
+        ClientException(const ClientException& other);
+        virtual ~ClientException() throw();
         const char* what() const throw();
      private:
+        ClientException();
+        ClientException& operator=(const ClientException& other);
         const char* _message;
     };
     Client(int fd, const struct sockaddr_in& client_addr,

@@ -12,6 +12,9 @@ class CgiFieldParser : public BaseFieldParser {
     ~CgiFieldParser() {}
 
  private:
+    CgiFieldParser(const CgiFieldParser& other);
+    CgiFieldParser& operator=(const CgiFieldParser& other);
+
     bool isUnique(const std::string& key);
     void handleInvalidFieldError(const std::string& key, HttpStatus& hs);
     void handleDuplicateFieldError(const std::string& key, HttpStatus& hs);
