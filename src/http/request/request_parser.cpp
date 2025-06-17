@@ -330,35 +330,35 @@ void RequestParser::verifySafePath() {
 }
 
 BaseParser::ParseStatus RequestParser::processBody() {
-    if (isChunkedEncoding()) {
-        _request.body.isChunked = true;
-        ParseStatus status = parseChunkedEncoding();
-        if (status == P_COMPLETED || status == P_ERROR) {
-            return status;
+        if (isChunkedEncoding()) {
+            _request.body.isChunked = true;
+            ParseStatus status = parseChunkedEncoding();
+            if (status == P_COMPLETED || status == P_ERROR) {
+                return status;
+            }
+            return P_NEED_MORE_DATA;
         }
+        if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
+            std::vector<std::string>& contentLen =
+                _request.fields.getFieldValue(fields::CONTENT_LENGTH);
+            if (contentLen.empty()) {
+                _request.body.contentLength = 0;
+            } else {
+                _request.body.contentLength = std::atoi(contentLen.front().c_str());
+            }
+        }
+        if (_request.body.contentLength > _request.body.receivedLength) {
+            std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
+    
+            _request.body.content += getBuf()->substr(0, remainLen);
+            _request.body.receivedLength = _request.body.content.size();
+        }
+        if (_request.body.contentLength <= _request.body.receivedLength) {
+            setValidatePos(V_COMPLETED);
+            return P_COMPLETED;
+        }
+        getBuf()->clear();
         return P_NEED_MORE_DATA;
-    }
-    if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
-        std::vector<std::string>& contentLen =
-            _request.fields.getFieldValue(fields::CONTENT_LENGTH);
-        if (contentLen.empty()) {
-            _request.body.contentLength = 0;
-        } else {
-            _request.body.contentLength = std::atoi(contentLen.front().c_str());
-        }
-    }
-    if (_request.body.contentLength > _request.body.receivedLength) {
-        std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
-
-        _request.body.content += getBuf()->substr(0, remainLen);
-        _request.body.receivedLength = _request.body.content.size();
-    }
-    if (_request.body.contentLength <= _request.body.receivedLength) {
-        setValidatePos(V_COMPLETED);
-        return P_COMPLETED;
-    }
-    getBuf()->clear();
-    return P_NEED_MORE_DATA;
 }
 
 bool RequestParser::isChunkedEncoding() {
@@ -367,7 +367,7 @@ bool RequestParser::isChunkedEncoding() {
     return !value.empty() && value[0] == "chunked";
 }
 
-void solveChunkedBody(std::string& recvBody) {
+void RequestParser::solveChunkedBody(std::string& recvBody) {
     std::string unchunkedBody;
     std::size_t pos = 0;
 
