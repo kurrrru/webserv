@@ -84,7 +84,6 @@ namespace meta {
 extern const char* AUTH_TYPE;
 extern const char* CONTENT_LENGTH;
 extern const char* CONTENT_TYPE;
-extern const char* TRANSFER_ENCODING;
 extern const char* GATEWAY_INTERFACE;
 extern const char* PATH_INFO;
 extern const char* PATH_TRANSLATED;

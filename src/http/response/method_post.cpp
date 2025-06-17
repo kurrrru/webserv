@@ -214,54 +214,54 @@ void handleMultipartFormData(const std::string& uploadPath, std::string& recvBod
     }
 }
 
-void solveChunkedBody(std::string& recvBody) {
-    std::string unchunkedBody;
-    std::size_t pos = 0;
+// void solveChunkedBody(std::string& recvBody) {
+//     std::string unchunkedBody;
+//     std::size_t pos = 0;
 
-    while (pos < recvBody.size()) {
-        std::size_t chunkSizeEnd = recvBody.find(symbols::CRLF, pos);
-        if (chunkSizeEnd == std::string::npos) {
-            toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: chunk size end not found");
-            throw HttpStatus::BAD_REQUEST;
-        }
+//     while (pos < recvBody.size()) {
+//         std::size_t chunkSizeEnd = recvBody.find(symbols::CRLF, pos);
+//         if (chunkSizeEnd == std::string::npos) {
+//             toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: chunk size end not found");
+//             throw HttpStatus::BAD_REQUEST;
+//         }
 
-        std::string chunkSizeStr = recvBody.substr(pos, chunkSizeEnd - pos);
+//         std::string chunkSizeStr = recvBody.substr(pos, chunkSizeEnd - pos);
 
-        if (chunkSizeStr.empty()) {
-            toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: empty chunk size");
-            throw HttpStatus::BAD_REQUEST;
-        }
+//         if (chunkSizeStr.empty()) {
+//             toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: empty chunk size");
+//             throw HttpStatus::BAD_REQUEST;
+//         }
 
-        char* endPtr = NULL;
-        size_t chunkSize = std::strtol(chunkSizeStr.c_str(), &endPtr, 16);
-        if (*endPtr != '\0') {
-            toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: invalid chunk size " + chunkSizeStr);
-            throw HttpStatus::BAD_REQUEST;
-        }
-        if (chunkSize == 0) {
-            break;
-        }
+//         char* endPtr = NULL;
+//         size_t chunkSize = std::strtol(chunkSizeStr.c_str(), &endPtr, 16);
+//         if (*endPtr != '\0') {
+//             toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: invalid chunk size " + chunkSizeStr);
+//             throw HttpStatus::BAD_REQUEST;
+//         }
+//         if (chunkSize == 0) {
+//             break;
+//         }
 
-        pos = chunkSizeEnd + symbols::CRLF_SIZE;
-        if (pos + chunkSize > recvBody.size()) {
-            toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: chunk size exceeds body size");
-            throw HttpStatus::BAD_REQUEST;
-        }
+//         pos = chunkSizeEnd + symbols::CRLF_SIZE;
+//         if (pos + chunkSize > recvBody.size()) {
+//             toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: chunk size exceeds body size");
+//             throw HttpStatus::BAD_REQUEST;
+//         }
 
-        std::string chunkData = recvBody.substr(pos, chunkSize);
-        pos += chunkSize;
+//         std::string chunkData = recvBody.substr(pos, chunkSize);
+//         pos += chunkSize;
 
-        if (pos + symbols::CRLF_SIZE > recvBody.size() || 
-            recvBody.find(symbols::CRLF, pos) != pos) {
-            toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: CRLF not found after chunk data");
-            throw HttpStatus::BAD_REQUEST;
-        }
-        pos += symbols::CRLF_SIZE;
+//         if (pos + symbols::CRLF_SIZE > recvBody.size() || 
+//             recvBody.find(symbols::CRLF, pos) != pos) {
+//             toolbox::logger::StepMark::error("runPost: solveChunkedBody failed: CRLF not found after chunk data");
+//             throw HttpStatus::BAD_REQUEST;
+//         }
+//         pos += symbols::CRLF_SIZE;
 
-        unchunkedBody += chunkData;
-    }
-    recvBody = unchunkedBody;
-}
+//         unchunkedBody += chunkData;
+//     }
+//     recvBody = unchunkedBody;
+// }
 
 }  // namespace
 
@@ -281,11 +281,6 @@ void runPost(const std::string& uploadPath, std::string& recvBody,
             toolbox::logger::StepMark::error("runPost: checkFileAccess fail [" +
                 uploadPath + "] " + toolbox::to_string(status));
             throw status;
-        }
-
-        if (!fields.getFieldValue(fields::TRANSFER_ENCODING).empty() &&
-            fields.getFieldValue(fields::TRANSFER_ENCODING)[0] == "chunked") {
-            solveChunkedBody(recvBody);
         }
 
         HTTPFields::FieldValue contentType = fields.getFieldValue(fields::CONTENT_TYPE);
