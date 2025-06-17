@@ -119,14 +119,14 @@ bool Request::recvRequest() {
     _ioPendingState = REQUEST_READING;
 
     int parseStatus = _parsedRequest.run(receivedData);
-    
+
     if (parseStatus == BaseParser::P_ERROR) {
         _response.setStatus(_parsedRequest.get().httpStatus.get());
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: failed to parse request");
         return false;
     }
-    
+
     if (!isValidBodySize()) {
         if (_ioPendingState == RESPONSE_START) {
             return false;

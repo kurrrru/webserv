@@ -67,6 +67,7 @@ extern const char* COLON;
 extern const char* SEMICOLON;
 extern const char* COMMA;
 extern const char* COMMASP;
+extern const char* CHUNK_END;
 extern const std::size_t LF_SIZE;
 extern const std::size_t CRLF_SIZE;
 }  // namespace symbols

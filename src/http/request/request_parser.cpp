@@ -335,7 +335,6 @@ BaseParser::ParseStatus RequestParser::processBody() {
         if (status == P_COMPLETED || status == P_ERROR) {
             return status;
         }
-        getBuf()->clear();
         return P_NEED_MORE_DATA;
     }
     if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
@@ -368,58 +367,22 @@ bool RequestParser::isChunkedEncoding() {
 }
 
 BaseParser::ParseStatus RequestParser::parseChunkedEncoding() {
-    if (!_request.body.isChunked) {
-        _request.body.isChunked = true;
-        _request.body.lastChunk = false;
+    std::size_t receivedBufSize = getBuf()->size();
+    if (receivedBufSize < std::string(symbols::CHUNK_END).size()) {
+        receivedBufSize = 0;
+    } else {
+        receivedBufSize -= std::string(symbols::CHUNK_END).size();
     }
 
-    while (!getBuf()->empty() && !_request.body.lastChunk) {
-        std::size_t pos = getBuf()->find(symbols::CRLF);
-        if (pos == std::string::npos) {
-            return P_NEED_MORE_DATA;
-        }
+    _request.body.content += *getBuf();
+    getBuf()->clear();
 
-        std::string hexStr = getBuf()->substr(0, pos);
-        std::size_t chunkSize;
-        char* endPtr;
-        chunkSize = std::strtol(hexStr.c_str(), &endPtr, 16);
-        if (*endPtr != *http::symbols::CR) {
-            toolbox::logger::StepMark::error("RequestParser: invalid chunk size");
-            throw ParseException("");
-        }
-        if (chunkSize == 0) {
-            _request.body.lastChunk = true;
-            setBuf(getBuf()->substr(pos + symbols::CRLF_SIZE));
-
-            std::size_t finalCrlfPos = getBuf()->find(symbols::CRLF);
-            if (finalCrlfPos == std::string::npos) {
-                return P_NEED_MORE_DATA;
-            }
-            if (finalCrlfPos == 0) {
-                setBuf(getBuf()->substr(symbols::CRLF_SIZE));
-            } else {
-                std::string doubleCRLF = std::string(symbols::CRLF) + symbols::CRLF;
-                std::size_t emptyLinePos = getBuf()->find(doubleCRLF);
-                if (emptyLinePos == std::string::npos) {
-                    return P_NEED_MORE_DATA;
-                }
-                setBuf(getBuf()->substr(emptyLinePos + symbols::CRLF_SIZE * 2));
-            }
-            setValidatePos(V_COMPLETED);
-            return P_COMPLETED;
-        }
-        setBuf(getBuf()->substr(pos + symbols::CRLF_SIZE));
-
-        if (getBuf()->size() < chunkSize + symbols::CRLF_SIZE) {
-            return P_NEED_MORE_DATA;
-        }
-
-        std::string chunkData = getBuf()->substr(0, chunkSize);
-        _request.body.content.append(chunkData);
-        _request.body.receivedLength += chunkSize;
-        setBuf(getBuf()->substr(chunkSize + symbols::CRLF_SIZE));
+    if (_request.body.content.find(symbols::CHUNK_END, receivedBufSize) != std::string::npos) {
+        toolbox::logger::StepMark::critical(_request.body.content);
+        _request.body.lastChunk = true;
+        return P_COMPLETED;
     }
-    return P_IN_PROGRESS;
+    return P_NEED_MORE_DATA;
 }
 
 }  // namespace http
