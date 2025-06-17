@@ -33,6 +33,16 @@ std::string removeConsecutiveSpaces(const std::string& str) {
     return result;
 }
 
+bool parseChunkSize(const std::string& chunkSizeStr, std::size_t& chunkSize) {
+    if (chunkSizeStr.empty()) {
+        return false;
+    }
+
+    char* endPtr = NULL;
+    chunkSize = std::strtol(chunkSizeStr.c_str(), &endPtr, 16);
+    return (*endPtr == '\0');
+}
+
 }  // namespace
 
 BaseParser::ParseStatus RequestParser::processFieldLine() {
@@ -330,35 +340,35 @@ void RequestParser::verifySafePath() {
 }
 
 BaseParser::ParseStatus RequestParser::processBody() {
-        if (isChunkedEncoding()) {
-            _request.body.isChunked = true;
-            ParseStatus status = parseChunkedEncoding();
-            if (status == P_COMPLETED || status == P_ERROR) {
-                return status;
-            }
-            return P_NEED_MORE_DATA;
+    if (isChunkedEncoding()) {
+        _request.body.isChunked = true;
+        ParseStatus status = parseChunkedEncoding();
+        if (status == P_COMPLETED || status == P_ERROR) {
+            return status;
         }
-        if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
-            std::vector<std::string>& contentLen =
-                _request.fields.getFieldValue(fields::CONTENT_LENGTH);
-            if (contentLen.empty()) {
-                _request.body.contentLength = 0;
-            } else {
-                _request.body.contentLength = std::atoi(contentLen.front().c_str());
-            }
-        }
-        if (_request.body.contentLength > _request.body.receivedLength) {
-            std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
-    
-            _request.body.content += getBuf()->substr(0, remainLen);
-            _request.body.receivedLength = _request.body.content.size();
-        }
-        if (_request.body.contentLength <= _request.body.receivedLength) {
-            setValidatePos(V_COMPLETED);
-            return P_COMPLETED;
-        }
-        getBuf()->clear();
         return P_NEED_MORE_DATA;
+    }
+    if (_request.body.contentLength == std::numeric_limits<std::size_t>::max()) {
+        std::vector<std::string>& contentLen =
+            _request.fields.getFieldValue(fields::CONTENT_LENGTH);
+        if (contentLen.empty()) {
+            _request.body.contentLength = 0;
+        } else {
+            _request.body.contentLength = std::atoi(contentLen.front().c_str());
+        }
+    }
+    if (_request.body.contentLength > _request.body.receivedLength) {
+        std::size_t remainLen = _request.body.contentLength - _request.body.receivedLength;
+
+        _request.body.content += getBuf()->substr(0, remainLen);
+        _request.body.receivedLength = _request.body.content.size();
+    }
+    if (_request.body.contentLength <= _request.body.receivedLength) {
+        setValidatePos(V_COMPLETED);
+        return P_COMPLETED;
+    }
+    getBuf()->clear();
+    return P_NEED_MORE_DATA;
 }
 
 bool RequestParser::isChunkedEncoding() {
@@ -381,15 +391,8 @@ void RequestParser::solveChunkedBody(std::string& recvBody) {
 
         std::string chunkSizeStr = recvBody.substr(pos, chunkSizeEnd - pos);
 
-        if (chunkSizeStr.empty()) {
-            toolbox::logger::StepMark::error(
-                "runPost: solveChunkedBody failed: empty chunk size");
-            throw HttpStatus::BAD_REQUEST;
-        }
-
-        char* endPtr = NULL;
-        size_t chunkSize = std::strtol(chunkSizeStr.c_str(), &endPtr, 16);
-        if (*endPtr != '\0') {
+        std::size_t chunkSize;
+        if (!parseChunkSize(chunkSizeStr, chunkSize)) {
             toolbox::logger::StepMark::error(
                 "runPost: solveChunkedBody failed: invalid chunk size " +
                 chunkSizeStr);
@@ -425,19 +428,52 @@ void RequestParser::solveChunkedBody(std::string& recvBody) {
 }
 
 BaseParser::ParseStatus RequestParser::parseChunkedEncoding() {
-    std::size_t receivedBufSize = getBuf()->size();
-    if (receivedBufSize < std::string(symbols::CHUNK_END).size()) {
-        receivedBufSize = 0;
-    } else {
-        receivedBufSize -= std::string(symbols::CHUNK_END).size();
-    }
-
     _request.body.content += *getBuf();
     getBuf()->clear();
 
-    if (_request.body.content.find(symbols::CHUNK_END, receivedBufSize) != std::string::npos) {
-        solveChunkedBody(_request.body.content);
-        return P_COMPLETED;
+    std::string& body = _request.body.content;
+    std::size_t pos = _request.body.receivedLength;
+
+    while (pos < body.size()) {
+        std::size_t chunkSizeEnd = body.find(symbols::CRLF, pos);
+        if (chunkSizeEnd == std::string::npos) {
+            return P_NEED_MORE_DATA;
+        }
+
+        std::string chunkSizeStr = body.substr(pos, chunkSizeEnd - pos);
+        std::size_t chunkSize;
+        if (!parseChunkSize(chunkSizeStr, chunkSize)) {
+            _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+            toolbox::logger::StepMark::error("parseChunkedEncoding: invalid chunk size");
+            return P_ERROR;
+        }
+
+        if (chunkSize == 0) {
+            std::size_t finalCRLFPos = chunkSizeEnd + symbols::CRLF_SIZE;
+            if (finalCRLFPos + symbols::CRLF_SIZE <= body.size() &&
+                body.find(symbols::CRLF, finalCRLFPos) == finalCRLFPos) {
+                solveChunkedBody(_request.body.content);
+                return P_COMPLETED;
+            }
+            return P_NEED_MORE_DATA;
+        }
+
+        std::size_t chunkDataStart = chunkSizeEnd + symbols::CRLF_SIZE;
+        std::size_t chunkDataEnd = chunkDataStart + chunkSize;
+        std::size_t chunkEnd = chunkDataEnd + symbols::CRLF_SIZE;
+
+        if (chunkEnd > body.size()) {
+            return P_NEED_MORE_DATA;
+        }
+
+        if (body.substr(chunkDataEnd, symbols::CRLF_SIZE) != symbols::CRLF) {
+            _request.httpStatus.set(HttpStatus::BAD_REQUEST);
+            toolbox::logger::StepMark::error("parseChunkedEncoding: CRLF not found after chunk");
+            return P_ERROR;
+        }
+
+        pos = chunkEnd;
+        _request.body.receivedLength = pos;
     }
     return P_NEED_MORE_DATA;
 }

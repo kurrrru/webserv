@@ -92,8 +92,7 @@ int main(int argc, char* argv[]) {
                                 client->getRequest()->run();
                             }
 
-                            if (client->getRequest()->getIOPendingState() == http::END_RESPONSE
-                                || client->isBadRequest()) {
+                            if (client->getRequest()->getIOPendingState() == http::END_RESPONSE) {
                                 Epoll::del(client_sock);
                             }
                         } catch (std::exception& e) {
