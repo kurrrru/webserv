@@ -181,11 +181,11 @@ void CgiExecute::setRequestVariables(const HTTPRequest& request) {
             _environment[http::cgi::meta::CONTENT_LENGTH] =
                 toolbox::to_string(request.body.contentLength);
         }
-    } else if (request.body.contentLength > 0) {
+    } else if (request.body.isChunked) {
         _environment[http::cgi::meta::CONTENT_LENGTH] =
-            toolbox::to_string(request.body.contentLength);
+            toolbox::to_string(request.body.content.size());
     }
-    if (request.body.contentLength > 0) {
+    if (request.body.content.size() > 0) {
         const HTTPFields::FieldValue& typeValues =
             request.fields.getFieldValue(http::fields::CONTENT_TYPE);
         if (!typeValues.empty()) {
