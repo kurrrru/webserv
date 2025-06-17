@@ -181,9 +181,9 @@ void CgiExecute::setRequestVariables(const HTTPRequest& request) {
             _environment[http::cgi::meta::CONTENT_LENGTH] =
                 toolbox::to_string(request.body.contentLength);
         }
-    } else if (request.body.contentLength > 0) {
+    } else if (request.body.isChunked && request.body.contentLength > 0) {
         _environment[http::cgi::meta::CONTENT_LENGTH] =
-            toolbox::to_string(request.body.contentLength);
+            toolbox::to_string(request.body.content.size());
     }
     if (request.body.contentLength > 0) {
         const HTTPFields::FieldValue& typeValues =
@@ -199,6 +199,11 @@ void CgiExecute::setRequestVariables(const HTTPRequest& request) {
             _environment[http::cgi::meta::CONTENT_TYPE] = "";
         }
     }
+    if (request.body.isChunked) {
+        _environment[http::cgi::meta::TRANSFER_ENCODING] = "chunked";
+        } else {
+            _environment[http::cgi::meta::TRANSFER_ENCODING] = "";
+        }
 }
 
 void CgiExecute::setPathVariables(const HTTPRequest& request,

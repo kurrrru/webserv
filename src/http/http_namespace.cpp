@@ -88,6 +88,7 @@ namespace meta {
 const char* AUTH_TYPE = "AUTH_TYPE";
 const char* CONTENT_LENGTH = "CONTENT_LENGTH";
 const char* CONTENT_TYPE = "CONTENT_TYPE";
+const char* TRANSFER_ENCODING = "TRANSFER_ENCODING";
 const char* GATEWAY_INTERFACE = "GATEWAY_INTERFACE";
 const char* PATH_INFO = "PATH_INFO";
 const char* PATH_TRANSLATED = "PATH_TRANSLATED";

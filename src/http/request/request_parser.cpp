@@ -331,6 +331,7 @@ void RequestParser::verifySafePath() {
 
 BaseParser::ParseStatus RequestParser::processBody() {
     if (isChunkedEncoding()) {
+        _request.body.isChunked = true;
         ParseStatus status = parseChunkedEncoding();
         if (status == P_COMPLETED || status == P_ERROR) {
             return status;
