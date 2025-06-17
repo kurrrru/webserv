@@ -268,13 +268,23 @@ void solveChunkedBody(std::string& recvBody) {
 namespace serverMethod {
 void runPost(const std::string& uploadPath, std::string& recvBody,
     HTTPFields& fields, Response& response) {
+        struct stat st;
+
     try {
         if (uploadPath.empty()) {
             toolbox::logger::StepMark::error("runPost: uploadPath is empty");
             throw HttpStatus::NOT_IMPLEMENTED;
         }
-        if (!fields.getFieldValue(fields::TRANSFER_ENCODING).empty()
-            || fields.getFieldValue("TRANSFER_ENCODING")[0] == "chunked") {
+
+        HttpStatus::EHttpStatus status = checkFileAccess(uploadPath, st);
+        if (status != HttpStatus::OK) {
+            toolbox::logger::StepMark::error("runPost: checkFileAccess fail [" +
+                uploadPath + "] " + toolbox::to_string(status));
+            throw status;
+        }
+
+        if (!fields.getFieldValue(fields::TRANSFER_ENCODING).empty() &&
+            fields.getFieldValue(fields::TRANSFER_ENCODING)[0] == "chunked") {
             solveChunkedBody(recvBody);
         }
 

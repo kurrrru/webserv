@@ -378,8 +378,6 @@ BaseParser::ParseStatus RequestParser::parseChunkedEncoding() {
     getBuf()->clear();
 
     if (_request.body.content.find(symbols::CHUNK_END, receivedBufSize) != std::string::npos) {
-        toolbox::logger::StepMark::critical(_request.body.content);
-        _request.body.lastChunk = true;
         return P_COMPLETED;
     }
     return P_NEED_MORE_DATA;
