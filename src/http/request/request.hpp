@@ -91,6 +91,9 @@ class Request {
      */
     void setRedirectCount(size_t count);
 
+    bool isErrorInternalRedirect() const;
+    void setErrorInternalRedirect();
+
     /**
      * @brief Returns the upload path for the request.
      * @return A const reference to the upload path string.
@@ -106,6 +109,7 @@ class Request {
     IOPendingState _ioPendingState;
     toolbox::SharedPtr<http::Request> _errorPageRequest;
     CgiHandler _cgiHandler;
+    bool _isErrorInternalRedirect;
 
     Request();
     Request(const Request& other);
