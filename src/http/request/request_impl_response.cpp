@@ -52,10 +52,18 @@ namespace {
         ss << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "<head>\n"
-            << "<title>Error " << status << "</title>\n"
+            << "<title>" << status;
+        if (http::Response::getStatusMessage(status) != "Unknown Status") {
+            ss << " " << http::Response::getStatusMessage(status);
+        }
+        ss  << " - Ideal Broccoli</title>\n"
             << "</head>\n"
             << "<body>\n"
-            << "<p><strong>Error " << status << "</strong></p>\n"
+            << "<p><strong>" << status;
+        if (http::Response::getStatusMessage(status) != "Unknown Status") {
+            ss << " " << http::Response::getStatusMessage(status);
+        }
+        ss  << "</strong></p>\n"
             << "<p>\n"
             << "The essence you seek, in its most harmonious form, "
             << "resides within the realm of Ideals.<br>\n"
