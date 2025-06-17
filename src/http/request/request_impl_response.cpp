@@ -23,19 +23,9 @@ namespace {
         typedef std::string FieldName;
         typedef std::string FieldDefaultValue;
 
-        // [TODO] ここも後で確認します
-        // const std::pair<std::string, std::string> defaultHeadersArray[] = {
-        //     {http::fields::CONTENT_TYPE, "text/plain"},
-        //     {http::fields::CACHE_CONTROL, "no-cache"},
-        //     {http::fields::CONNECTION, "close"},
-        //     {http::fields::SERVER, "WebServer/1.0"}
-        // };
-
         const std::pair<std::string, std::string> defaultHeadersArray[] = {
             std::make_pair(http::fields::CONTENT_TYPE, "text/plain"),
-            std::make_pair(http::fields::CACHE_CONTROL, "no-cache"),
-            std::make_pair(http::fields::CONNECTION, "close"),
-            std::make_pair(http::fields::SERVER, "WebServer/1.0")
+            std::make_pair(http::fields::CACHE_CONTROL, "no-cache")
         };
 
         const std::vector<std::pair<FieldName, FieldDefaultValue> > defaultHeaders(
@@ -89,46 +79,86 @@ void http::Request::sendResponse() {
     }
     std::size_t status = _response.getStatus();
     if (_ioPendingState != http::RESPONSE_SENDING && 
+        _ioPendingState != http::RESPONSE_START &&
         status >= config::directive::MIN_ERROR_PAGE_CODE && 
         status <= config::directive::MAX_ERROR_PAGE_CODE) {
         if (_ioPendingState != http::ERROR_LOCAL_REDIRECT_IO_PENDING) {
             std::vector<config::ErrorPage> errorPages = _config.getErrorPages();
-            bool useDefaultErrorPage = true;
+            bool errorPageFound = false;
             for (std::size_t i = 0; i < errorPages.size(); ++i) {
                 if (std::find(errorPages[i].getCodes().begin(),
                         errorPages[i].getCodes().end(), status)
                     != errorPages[i].getCodes().end()) {
-                    // [TODO] Change the processing of the error page
-                    // depending on the prefix of the error page path
-                    // "/" - ngx_http_internal_redirect
-                    // "@" - ngx_http_named_location
-                    // otherwise - ngx_http_send_refresh or ngx_http_send_special_response
-
-                    // [TODO] この辺は後で書きます
-
-                    _errorPageRequest = toolbox::SharedPtr<http::Request>(
-                        new http::Request(_client, _requestDepth + 1));
-                    std::string method = http::method::GET;
+                    
+                    _response.setErrorPage(
+                        errorPages[i].isOverwrite(),
+                        errorPages[i].getNewStatusCode());
                     std::string path = errorPages[i].getPath();
-                    std::string host;
-                    if (_parsedRequest.get().fields.getFieldValue(
-                            http::fields::HOST).empty()) {
-                        host = _client->getServerIp();
+                    if (path.size() > 0 && (path[0] == '/' || path[0] == '@')) {
+                        _errorPageRequest = toolbox::SharedPtr<http::Request>(
+                            new http::Request(_client, _requestDepth + 1));
+                        std::string method;
+                        if (_parsedRequest.get().method == http::method::HEAD) {
+                            method = http::method::HEAD;
+                        } else {
+                            method = http::method::GET;
+                        }
+                        std::string host;
+                        if (_parsedRequest.get().fields.getFieldValue(
+                                http::fields::HOST).empty()) {
+                            host = _client->getServerIp();
+                        } else {
+                            host = _parsedRequest.get().fields.getFieldValue(
+                                http::fields::HOST)[0];
+                        }
+                        _errorPageRequest->setLocalRedirectInfo(method, path, host);
+                        if (path.size() > 0 && path[0] == '/') {
+                            _errorPageRequest->fetchConfig();
+                            _errorPageRequest->setErrorInternalRedirect();
+                        } else if (path.size() > 0 && path[0] == '@') {
+                            _errorPageRequest->_response.setStatus(0);
+                            _errorPageRequest->fetchConfig();
+                            if (_errorPageRequest->_response.getStatus() != 0) {
+                                if (_response.getErrorPageNewStatus() != -1) {
+                                    _response.setStatus(_response.getErrorPageNewStatus());
+                                } else if (_response.isErrorPageOverwrite()) {
+                                    _response.setStatus(_errorPageRequest->_response.getStatus());
+                                }
+                                _response.setHeader(
+                                    http::fields::CONTENT_TYPE,
+                                    _errorPageRequest->_response.getHeader(
+                                        http::fields::CONTENT_TYPE));
+                                _response.setHeader(
+                                    http::fields::CACHE_CONTROL,
+                                    _errorPageRequest->_response.getHeader(
+                                        http::fields::CACHE_CONTROL));
+                                _response.setBody(_errorPageRequest->_response.getBody());
+                            } else {
+                                setDefaultErrorPage(&_response, status);
+                            }
+                        }                    
                     } else {
-                        host = _parsedRequest.get().fields.getFieldValue(
-                            http::fields::HOST)[0];
+                        if (_response.getErrorPageNewStatus() == http::HttpStatus::MOVED_PERMANENTLY
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::FOUND
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::SEE_OTHER
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::TEMPORARY_REDIRECT
+                            || _response.getErrorPageNewStatus() == http::HttpStatus::PERMANENT_REDIRECT) {
+                            _response.setStatus(_response.getErrorPageNewStatus());
+                        } else {
+                            _response.setStatus(http::HttpStatus::FOUND);
+                        }
+                        _response.setHeader(http::fields::LOCATION, path);
+                        setDefaultErrorPage(&_response, _response.getStatus());
                     }
-                    _errorPageRequest->setLocalRedirectInfo(method, path, host);
-                    _errorPageRequest->fetchConfig();
-                    useDefaultErrorPage = false;
+                    errorPageFound = true;
                     break;
                 }
             }
-            if (useDefaultErrorPage) {
+            if (!errorPageFound) {
                 setDefaultErrorPage(&_response, status);
             }
         }
-        if (_errorPageRequest) {
+        if (_errorPageRequest && _errorPageRequest->isErrorInternalRedirect()) {
             _errorPageRequest->run();
             if (_errorPageRequest->getIOPendingState() == http::CGI_BODY_SENDING
                 || _errorPageRequest->getIOPendingState() == http::CGI_OUTPUT_READING
@@ -141,6 +171,11 @@ void http::Request::sendResponse() {
             const int MIN_SUCCESS_CODE = 200;
             const int MAX_SUCCESS_CODE = 399;
             if (errorStatus >= MIN_SUCCESS_CODE && errorStatus <= MAX_SUCCESS_CODE) {
+                if (_response.getErrorPageNewStatus() != -1) {
+                    _response.setStatus(_response.getErrorPageNewStatus());
+                } else if (_response.isErrorPageOverwrite()) {
+                    _response.setStatus(errorStatus);
+                }
                 propagateErrorPage(&_response, _errorPageRequest->getResponse());
             } else {
                 setDefaultErrorPage(&_response, status);
@@ -149,10 +184,10 @@ void http::Request::sendResponse() {
     }
 
     if (_ioPendingState != http::RESPONSE_SENDING) {
-        // access logはio_pending_stateがRESPONSE_SENDINGに変更すると同時に記録する
         std::string remote_addr = _client->getIp();
         std::string remote_user = "-";
         std::string request = _parsedRequest.get().originalRequestLine;
+        int finalStatus = _response.getStatus();
         std::size_t body_bytes_sent = _response.getContentLength();
         std::string http_referer = getFieldValue(
             _parsedRequest.get(), http::fields::REFERER);
@@ -163,7 +198,7 @@ void http::Request::sendResponse() {
             remote_addr,
             remote_user,
             request,
-            status,
+            finalStatus,
             body_bytes_sent,
             http_referer,
             http_user_agent
