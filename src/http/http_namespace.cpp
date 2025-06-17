@@ -101,6 +101,7 @@ const char* SERVER_NAME = "SERVER_NAME";
 const char* SERVER_PORT = "SERVER_PORT";
 const char* SERVER_PROTOCOL = "SERVER_PROTOCOL";
 const char* SERVER_SOFTWARE = "SERVER_SOFTWARE";
+const char* UPLOAD_DIR = "UPLOAD_DIR";
 }  // namespace meta
 }  // namespace cgi
 }  // namespace http

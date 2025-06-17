@@ -13,10 +13,6 @@ http::Request::Request(const toolbox::SharedPtr<Client>& client, std::size_t req
 http::Request::~Request() {
 }
 
-bool http::Request::isKeepAliveRequest() const {
-    return _parsedRequest.isKeepAlive();
-}
-
 void http::Request::setLocalRedirectInfo(const std::string& method,
                                         const std::string& path,
                                         const std::string& host) {
@@ -32,4 +28,8 @@ http::Response http::Request::getResponse() const {
 void http::Request::setRedirectCount(size_t count) {
     _requestDepth = count;
     _cgiHandler.setRedirectCount(count);
+}
+
+const std::string& http::Request::getUploadPath() const {
+    return _config.getUploadStore();
 }

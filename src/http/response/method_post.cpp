@@ -17,7 +17,6 @@ struct FormDataField {
 };
 
 const char* MULTIPART_FORM_DATA = "multipart/form-data";
-const char* URL_ENCODED = "application/x-www-form-urlencoded";
 const char* CONTENT_DISPOSITION = "Content-Disposition: form-data;";
 const char* const BOUNDARY_PREFIX = "boundary=";
 const size_t BOUNDARY_PREFIX_LEN = 9;
@@ -39,13 +38,13 @@ std::string getTimestamp() {
 
 void saveToFile(const std::string& filepath, const std::string& content) {
     std::ofstream ofs(filepath.c_str(), std::ios::binary);
-    if (!ofs) {
-        toolbox::logger::StepMark::error("runPost: saveToFile failed: " + filepath);
+    if (ofs.fail()) {
+        toolbox::logger::StepMark::error("runPost: saveToFile make ofs failed: " + filepath);
         throw HttpStatus::INTERNAL_SERVER_ERROR;
     }
     ofs.write(content.data(), content.size());
     if (ofs.fail()) {
-        toolbox::logger::StepMark::error("runPost: saveToFile failed: " + filepath);
+        toolbox::logger::StepMark::error("runPost: saveToFile write ofs failed: " + filepath);
         throw HttpStatus::INTERNAL_SERVER_ERROR;
     }
     toolbox::logger::StepMark::info("runPost: file created: " + filepath);
@@ -55,9 +54,6 @@ bool isMultipartFormData(HTTPFields::FieldValue& contentType) {
     return !contentType.empty() && startsWith(contentType[0], MULTIPART_FORM_DATA);
 }
 
-bool isUrlEncoded(HTTPFields::FieldValue& contentType) {
-    return !contentType.empty() && startsWith(contentType[0], URL_ENCODED);
-}
 
 std::string getBoundary(HTTPFields& fields) {
     HTTPFields::FieldValue contentType = fields.getFieldValue(fields::CONTENT_TYPE);
@@ -218,36 +214,6 @@ void handleMultipartFormData(const std::string& uploadPath, std::string& recvBod
     }
 }
 
-void handleUrlEncoded(const std::string& uploadPath, std::string& recvBody, HTTPFields& fields) {
-    std::string body;
-    while (!recvBody.empty()) {
-        std::string keyValue = toolbox::trim(&recvBody, symbols::AMPERSAND);
-        std::size_t equalPos = keyValue.find(symbols::EQUAL);
-        if (equalPos == std::string::npos) {
-            if (!utils::percentDecode(keyValue, &body)) {
-                toolbox::logger::StepMark::error("runPost: handleUrlEncoded failed: " + keyValue);
-                throw HttpStatus::BAD_REQUEST;
-            }
-            body += symbols::EQUAL;
-            body += symbols::LF;
-        } else {
-            std::string key = keyValue.substr(0, equalPos);
-            std::string value = keyValue.substr(equalPos + 1);
-            if (!utils::percentDecode(key, &body)) {
-                toolbox::logger::StepMark::error("runPost: handleUrlEncoded failed: " + key);
-                throw HttpStatus::BAD_REQUEST;
-            }
-            body += symbols::EQUAL;
-            if (!utils::percentDecode(value, &body)) {
-                toolbox::logger::StepMark::error("runPost: handleUrlEncoded failed: " + value);
-                throw HttpStatus::BAD_REQUEST;
-            }
-        }
-        body += symbols::LF;
-    }
-    handleCreateFile(uploadPath, "", body, fields);
-}
-
 }  // namespace
 
 namespace serverMethod {
@@ -262,8 +228,6 @@ void runPost(const std::string& uploadPath, std::string& recvBody,
         HTTPFields::FieldValue contentType = fields.getFieldValue(fields::CONTENT_TYPE);
         if (isMultipartFormData(contentType)) {
             handleMultipartFormData(uploadPath, recvBody, fields);
-        } else if (isUrlEncoded(contentType)) {
-            handleUrlEncoded(uploadPath, recvBody, fields);
         } else {
             handleCreateFile(uploadPath, "", recvBody, fields);
         }
