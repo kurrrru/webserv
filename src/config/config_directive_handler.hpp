@@ -35,6 +35,7 @@ class HttpConfig;
 class DirectiveParser {
  public:
     DirectiveParser();
+    ~DirectiveParser();
     bool parseDirective(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location);
     bool parseRootDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* root);
     bool parseIndexDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* index);
@@ -52,6 +53,9 @@ class DirectiveParser {
     bool handleDuplicateDirective(const std::string& directiveName, const std::vector<std::string>& tokens, size_t* pos, bool* shouldSkip);
 
  private:
+    DirectiveParser(const DirectiveParser& other);
+    DirectiveParser& operator=(const DirectiveParser& other);
+
     std::map<std::string, DirectiveInfo> _directiveInfo;
     void initDirectiveInfo();
     bool handleAllowedMethodsDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location);

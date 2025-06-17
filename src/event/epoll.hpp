@@ -15,10 +15,14 @@ class Epoll {
     class EpollException : public std::exception {
      public:
         explicit EpollException(const char* message) : _message(message) {}
+        EpollException(const EpollException& other);
+        virtual ~EpollException() throw();
         const char* what() const throw() { return _message; }
      private:
+        EpollException();
+        EpollException& operator=(const EpollException& other);
         const char* _message;
-     };
+    };
 
     static void addServer(int fd, toolbox::SharedPtr<Server> server);
     static void addClient(int fd, toolbox::SharedPtr<Client> client);

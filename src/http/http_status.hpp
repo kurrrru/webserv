@@ -62,6 +62,8 @@ class HttpStatus {
     EHttpStatus get() const { return _status; }
 
  private:
+    HttpStatus(const HttpStatus& other);
+    HttpStatus& operator=(const HttpStatus& other);
     EHttpStatus _status;
 };
 

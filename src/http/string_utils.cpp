@@ -56,12 +56,12 @@ bool isEqualCaseInsensitive(const std::string& str1, const std::string& str2) {
 }
 
 std::string decodeHex(const std::string& hexStr) {
-    if (hexStr.size() != 2 || !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
+    if (hexStr.size() != 2 || !std::isxdigit(hexStr[0]) || !std::isxdigit(hexStr[1])) {
         return "";
     }
 
     char* endptr = NULL;
-    std::size_t hex = strtoul(hexStr.c_str(), &endptr, 16);
+    std::size_t hex = std::strtoul(hexStr.c_str(), &endptr, 16);
     if (*endptr != '\0' || hex > 255) {
         return "";
     }

@@ -409,7 +409,7 @@ async function performCgiGetRequest() {
 }
 
 function performCgiPostRequest() {
-    const fileInput = document.getElementById('cgiFile');
+    const fileInput = document.getElementById('cgiFiles');
     const filenameInput = document.getElementById('cgiFilename');
     
     if (!fileInput.files.length) {
@@ -427,9 +427,9 @@ function performCgiPostRequest() {
             const formData = new FormData();
             if (customFilename) {
                 const blob = new Blob([file], { type: file.type });
-                formData.append('file', blob, customFilename);
+                formData.append('files', blob, customFilename);
             } else {
-                formData.append('file', file);
+                formData.append('files', file);
             }
             
             const response = await fetch('/script.py', {

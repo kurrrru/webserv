@@ -22,7 +22,6 @@ class RequestParser : public BaseParser {
     RequestParser() { setValidatePos(V_REQUEST_LINE); }
     ~RequestParser() {}
     HTTPRequest& get() { return _request; }
-    bool isKeepAlive() const;
 
  private:
     RequestParser(const RequestParser& other);
@@ -45,7 +44,7 @@ class RequestParser : public BaseParser {
     ParseStatus processFieldLine();
     ParseStatus processBody();
     bool isChunkedEncoding();
-    void parseChunkedEncoding();
+    ParseStatus parseChunkedEncoding();
 
     HTTPRequest _request;
     RequestFieldParser _fieldParser;

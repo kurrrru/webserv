@@ -87,15 +87,14 @@ int main(int argc, char* argv[]) {
                             if (isSocketDisconnected(events[i])) {
                                 Epoll::del(client_sock);
                                 continue;
-                            } else if ((events[i].events & EPOLLOUT && (client->isResponseSending() || client->isCgiProcessing())) ||
-                                (events[i].events & EPOLLIN && !client->isResponseSending())) {
+                            } else if ((events[i].events & EPOLLOUT && (client->isResponseSending() || client->isCgiProcessing()))
+                                || (events[i].events & EPOLLIN && !client->isResponseSending())) {
                                 client->getRequest()->run();
                             }
-                            // If the client is not keep-alive and the response is complete or bad request
-                            if (client->isOnceConnectionEnd() || client->isBadRequest()) {
+
+                            if (client->getRequest()->getIOPendingState() == http::END_RESPONSE
+                                || client->isBadRequest()) {
                                 Epoll::del(client_sock);
-                            } else if (client->getRequest()->getIOPendingState() == http::END_RESPONSE) {
-                                client->clearRequest(client);
                             }
                         } catch (std::exception& e) {
                             std::cerr << e.what() << std:: endl;

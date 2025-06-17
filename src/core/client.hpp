@@ -18,8 +18,12 @@ class Client {
     class ClientException : public std::exception {
      public:
         explicit ClientException(const char* message);
+        ClientException(const ClientException& other);
+        virtual ~ClientException() throw();
         const char* what() const throw();
      private:
+        ClientException();
+        ClientException& operator=(const ClientException& other);
         const char* _message;
     };
     Client(int fd, const struct sockaddr_in& client_addr,
@@ -35,11 +39,9 @@ class Client {
 
     toolbox::SharedPtr<http::Request> getRequest() const;
     void setRequest(const toolbox::SharedPtr<http::Request> request);
-    bool isOnceConnectionEnd() const;
     bool isBadRequest() const;
     bool isResponseSending() const;
     bool isCgiProcessing() const;
-    void clearRequest(const toolbox::SharedPtr<Client> client);
 
  private:
     Client();

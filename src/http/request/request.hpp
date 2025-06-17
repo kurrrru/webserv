@@ -78,12 +78,6 @@ class Request {
     }
 
     /**
-     * @brief Checks if the request is a keep-alive request.
-     * @return True if the request is a keep-alive request, false otherwise.
-     */
-    bool isKeepAliveRequest() const;
-
-    /**
      * @brief Returns the prepared HTTP response.
      * @return A copy of the Response object.
      */
@@ -97,8 +91,16 @@ class Request {
      */
     void setRedirectCount(size_t count);
 
+
     bool isErrorInternalRedirect() const;
     void setErrorInternalRedirect();
+
+    /**
+     * @brief Returns the upload path for the request.
+     * @return A const reference to the upload path string.
+     */
+    const std::string& getUploadPath() const;
+
 
  private:
     http::RequestParser _parsedRequest;

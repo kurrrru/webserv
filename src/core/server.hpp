@@ -18,9 +18,12 @@ class Server {
      public:
         explicit ServerException(const char* message);
         explicit ServerException(const std::string& message);
+        ServerException(const ServerException& other);
         virtual ~ServerException() throw();
         const char* what() const throw();
      private:
+        ServerException();
+        ServerException& operator=(const ServerException& other);
         std::string _message;
     };
     Server();

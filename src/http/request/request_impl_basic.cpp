@@ -14,10 +14,6 @@ http::Request::Request(const toolbox::SharedPtr<Client>& client, std::size_t req
 http::Request::~Request() {
 }
 
-bool http::Request::isKeepAliveRequest() const {
-    return _parsedRequest.isKeepAlive();
-}
-
 void http::Request::setLocalRedirectInfo(const std::string& method,
                                         const std::string& path,
                                         const std::string& host) {
@@ -41,4 +37,8 @@ bool http::Request::isErrorInternalRedirect() const {
 
 void http::Request::setErrorInternalRedirect() {
     _isErrorInternalRedirect = true;
+}
+
+const std::string& http::Request::getUploadPath() const {
+    return _config.getUploadStore();
 }

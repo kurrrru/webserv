@@ -14,6 +14,9 @@ DirectiveParser::DirectiveParser() {
     initDirectiveInfo();
 }
 
+DirectiveParser::~DirectiveParser() {
+}
+
 void DirectiveParser::initDirectiveInfo() {
     DirectiveInfo info;
 

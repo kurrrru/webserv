@@ -4,6 +4,7 @@
 #include <numeric>
 #include <cstdlib>
 #include <limits>
+#include <sstream>
 
 #include "request_parser.hpp"
 
@@ -32,29 +33,7 @@ std::string removeConsecutiveSpaces(const std::string& str) {
     return result;
 }
 
-bool hasLastChunk(const std::string* buf) {
-    std::stringstream ss(*buf);
-    std::string line;
-    bool prevLineSizeZero = false;
-    while (std::getline(ss, line)) {
-        if (line == "0") {
-            prevLineSizeZero = true;
-        } else if (prevLineSizeZero && line.empty()) {
-            return true;  // Found the last chunk
-        } else {
-            prevLineSizeZero = false;  // Reset if we find a non-empty line
-        }
-    }
-    return false;
-}
-
 }  // namespace
-
-bool RequestParser::isKeepAlive() const {
-    HTTPFields::FieldValue value =
-        _request.fields.getFieldValue(fields::CONNECTION);
-    return value.empty() || utils::isEqualCaseInsensitive(value[0], "keep-alive");
-}
 
 BaseParser::ParseStatus RequestParser::processFieldLine() {
     while (true) {
@@ -161,9 +140,9 @@ bool RequestParser::isValidFormat() {
     }
     char* endptr = NULL;
     std::size_t majorVersion =
-        strtol(_request.version.substr(5, dotPos).c_str(), &endptr, 10);
+        std::strtol(_request.version.substr(5, dotPos).c_str(), &endptr, 10);
     std::size_t minorVersion =
-        strtol(_request.version.substr(dotPos + 1).c_str(), &endptr, 10);
+        std::strtol(_request.version.substr(dotPos + 1).c_str(), &endptr, 10);
     if (majorVersion < uri::HTTP_MAJOR_VERSION ||
         minorVersion > uri::HTTP_MINOR_VERSION_MAX) {
         _request.httpStatus.set(HttpStatus::BAD_REQUEST);
@@ -272,11 +251,11 @@ void RequestParser::percentDecode(std::string& line) {
 
 bool RequestParser::decodeHex(std::string& hexStr, std::string& decodedStr) {
     if (hexStr.size() != parser::HEX_DIGIT_LENGTH ||
-        !isxdigit(hexStr[0]) || !isxdigit(hexStr[1])) {
+        !std::isxdigit(hexStr[0]) || !std::isxdigit(hexStr[1])) {
         return false;
     }
     char* endptr = NULL;
-    std::size_t hex = strtol(hexStr.c_str(), &endptr, 16);
+    std::size_t hex = std::strtol(hexStr.c_str(), &endptr, 16);
     decodedStr = static_cast<char>(hex);
     if (*endptr != '\0' || hex == '\0') {
         return false;
@@ -352,11 +331,9 @@ void RequestParser::verifySafePath() {
 
 BaseParser::ParseStatus RequestParser::processBody() {
     if (isChunkedEncoding()) {
-        _request.body.content += *getBuf();
-        _request.body.receivedLength += getBuf()->size();
-        if (hasLastChunk(getBuf())) {
-            parseChunkedEncoding();
-            return P_COMPLETED;
+        ParseStatus status = parseChunkedEncoding();
+        if (status == P_COMPLETED || status == P_ERROR) {
+            return status;
         }
         getBuf()->clear();
         return P_NEED_MORE_DATA;
@@ -390,38 +367,59 @@ bool RequestParser::isChunkedEncoding() {
     return !value.empty() && value[0] == "chunked";
 }
 
-void RequestParser::parseChunkedEncoding() {
+BaseParser::ParseStatus RequestParser::parseChunkedEncoding() {
     if (!_request.body.isChunked) {
         _request.body.isChunked = true;
         _request.body.lastChunk = false;
     }
+
     while (!getBuf()->empty() && !_request.body.lastChunk) {
         std::size_t pos = getBuf()->find(symbols::CRLF);
         if (pos == std::string::npos) {
-            return;
+            return P_NEED_MORE_DATA;
         }
-        std::string hexStr = getBuf()->substr(0, pos + 1);
+
+        std::string hexStr = getBuf()->substr(0, pos);
         std::size_t chunkSize;
         char* endPtr;
-        chunkSize = strtol(hexStr.c_str(), &endPtr, 16);
+        chunkSize = std::strtol(hexStr.c_str(), &endPtr, 16);
         if (*endPtr != *http::symbols::CR) {
             toolbox::logger::StepMark::error("RequestParser: invalid chunk size");
             throw ParseException("");
         }
         if (chunkSize == 0) {
             _request.body.lastChunk = true;
+            setBuf(getBuf()->substr(pos + symbols::CRLF_SIZE));
+
+            std::size_t finalCrlfPos = getBuf()->find(symbols::CRLF);
+            if (finalCrlfPos == std::string::npos) {
+                return P_NEED_MORE_DATA;
+            }
+            if (finalCrlfPos == 0) {
+                setBuf(getBuf()->substr(symbols::CRLF_SIZE));
+            } else {
+                std::string doubleCRLF = std::string(symbols::CRLF) + symbols::CRLF;
+                std::size_t emptyLinePos = getBuf()->find(doubleCRLF);
+                if (emptyLinePos == std::string::npos) {
+                    return P_NEED_MORE_DATA;
+                }
+                setBuf(getBuf()->substr(emptyLinePos + symbols::CRLF_SIZE * 2));
+            }
             setValidatePos(V_COMPLETED);
-            return;
+            return P_COMPLETED;
         }
-        setBuf(getBuf()->substr(pos + parser::HEX_DIGIT_LENGTH));
-        if (getBuf()->size() < chunkSize + parser::HEX_DIGIT_LENGTH) {
-            return;
+        setBuf(getBuf()->substr(pos + symbols::CRLF_SIZE));
+
+        if (getBuf()->size() < chunkSize + symbols::CRLF_SIZE) {
+            return P_NEED_MORE_DATA;
         }
+
         std::string chunkData = getBuf()->substr(0, chunkSize);
         _request.body.content.append(chunkData);
         _request.body.receivedLength += chunkSize;
-        setBuf(getBuf()->substr(chunkSize + parser::HEX_DIGIT_LENGTH));
+        setBuf(getBuf()->substr(chunkSize + symbols::CRLF_SIZE));
     }
+    return P_IN_PROGRESS;
 }
 
 }  // namespace http
