@@ -181,9 +181,9 @@ void CgiExecute::setRequestVariables(const HTTPRequest& request) {
             _environment[http::cgi::meta::CONTENT_LENGTH] =
                 toolbox::to_string(request.body.contentLength);
         }
-    } else if (request.body.isChunked) {
+    } else if (request.body.contentLength > 0) {
         _environment[http::cgi::meta::CONTENT_LENGTH] =
-            toolbox::to_string(request.body.content.size());
+            toolbox::to_string(request.body.contentLength);
     }
     if (request.body.contentLength > 0) {
         const HTTPFields::FieldValue& typeValues =
