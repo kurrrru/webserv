@@ -67,6 +67,14 @@
                         </code>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/empty.html'" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 空ファイル取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /empty.html
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="window.location.href='/invalid'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             ❌ 存在しないファイル
                         </button>
@@ -148,6 +156,14 @@
                         </button>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
                             HEAD /index.html
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/empty.html')" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 空ファイル取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /empty.html
                         </code>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
