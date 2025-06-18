@@ -91,7 +91,6 @@ class Request {
      */
     void setRedirectCount(size_t count);
 
-
     bool isErrorInternalRedirect() const;
     void setErrorInternalRedirect();
 
@@ -100,7 +99,6 @@ class Request {
      * @return A const reference to the upload path string.
      */
     const std::string& getUploadPath() const;
-
 
  private:
     http::RequestParser _parsedRequest;

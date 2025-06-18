@@ -45,6 +45,7 @@ class RequestParser : public BaseParser {
     ParseStatus processBody();
     bool isChunkedEncoding();
     ParseStatus parseChunkedEncoding();
+    void solveChunkedBody(std::string& recvBody);
 
     HTTPRequest _request;
     RequestFieldParser _fieldParser;

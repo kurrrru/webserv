@@ -26,9 +26,13 @@ def sendResponse(status, headers=None, body=None):
 def sanitizeFilename(filename):
     """
     Sanitize filename to prevent security issues
-    - Remove path components
-    - Replace special characters with underscore
-    - Ensure filename is safe for filesystem
+    - Remove directory path components using os.path.basename
+    - Replace dangerous characters with underscore
+    - Ensure filename is safe for filesystem operations
+    Args:
+        filename: Original filename to sanitize
+    Returns:
+        filename: Sanitized filename safe for filesystem use
     """
     filename = os.path.basename(filename)
     filename = re.sub(r'[<>:"/\\|?*\x00-\x1f]', '_', filename)
@@ -36,9 +40,13 @@ def sanitizeFilename(filename):
 
 def validateFilename(filename):
     """
-    Validate filename length and content
-    - Check if filename is empty or too long
-    - Check if filename contains invalid characters
+    Validate filename length and content for security
+    - Check if filename is empty or exceeds 255 characters
+    - Apply sanitization rules to ensure filesystem safety
+    Args:
+        filename: Original filename to validate
+    Returns:
+        safeFilename: Sanitized filename, or empty string if invalid
     """
     if not filename or len(filename) > 255:
         return ""
@@ -48,7 +56,15 @@ def validateFilename(filename):
 def generateUniqueFullPath(uploadDir, filename):
     """
     Generate a unique full path for the given filename
-    - Check if file exists and append timestamp if necessary
+    - Combine upload directory with filename
+    - Check if file already exists
+    - If exists, append timestamp to create unique filename
+    - Return the full path with unique filename
+    Args:
+        uploadDir: Directory where file will be saved
+        filename: Original filename
+    Returns:
+        fullPath: Unique full path for the file
     """
     fullPath = os.path.join(uploadDir, filename)
     if os.path.exists(fullPath):
@@ -60,8 +76,14 @@ def generateUniqueFullPath(uploadDir, filename):
 
 def getUploadDirectory():
     """
-    Get and validate upload directory
-    Returns the upload directory path or None if invalid
+    Get and validate upload directory from environment variables
+    - Read UPLOAD_DIR environment variable
+    - Check if directory exists and is writable
+    - Return appropriate status codes for error conditions
+    Returns:
+        uploadDir: Upload directory path (success case)
+        500: Internal Server Error (UPLOAD_DIR not set)
+        403: Forbidden (directory doesn't exist or not writable)
     """
     uploadDir = os.getenv("UPLOAD_DIR")
     # 500 Internal Server Error
@@ -77,15 +99,16 @@ def handleMultipartUpload(uploadDir):
     """
     Handle multipart file upload
     - Use cgi.FieldStorage to parse the form data
-    - Check if file exists and handle duplicates
-    - Read data from uploaded files
-    - Write files to upload directory
+    - Validate and sanitize filename for security
+    - Generate unique filepath to avoid duplicates
+    - Write uploaded files to upload directory
     - Return success response with uploaded file names
     Args:
         uploadDir: Directory to save the uploaded files
     """
     try:
         form = cgi.FieldStorage()
+
         uploaded_files = []
 
         for field in form:
@@ -111,17 +134,20 @@ def handleMultipartUpload(uploadDir):
 
 def handleRawUpload(uploadDir):
     """
-    Handle raw file upload
-    - Get filename from query string
-    - Check if file exists and handle duplicates
-    - Read data from stdin using CONTENT_LENGTH
-    - Write to file
-    - Return location in response
+    Handle raw file upload via POST body
+    - Get filename from query string parameter
+    - Read CONTENT_LENGTH to determine data size
+    - Validate file size against MAX_FILE_SIZE limit
+    - Read raw data from stdin buffer
+    - Validate and sanitize filename for security
+    - Generate unique filepath to avoid duplicates
+    - Write raw data to file
     Args:
         uploadDir: Directory to save the uploaded file
     """
     try:
         MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
         contentLength = int(os.getenv("CONTENT_LENGTH") or 0)
 
         if contentLength > MAX_FILE_SIZE:
@@ -131,6 +157,8 @@ def handleRawUpload(uploadDir):
         if contentLength <= 0:
             sendResponse(400, {"Content-Type": "text/plain"}, "No content to upload")
             return
+
+        rawData = sys.stdin.buffer.read(contentLength)
 
         query = os.getenv("QUERY_STRING")
         queryDict = urllib.parse.parse_qs(query or "")
@@ -142,13 +170,11 @@ def handleRawUpload(uploadDir):
             return
 
         fullPath = generateUniqueFullPath(uploadDir, safeFilename)
-        rawData = sys.stdin.buffer.read(contentLength)
 
         with open(fullPath, 'wb') as f:
             f.write(rawData)
 
-        location = f"/uploads/{safeFilename}"
-        sendResponse(201, {"Location": location, "Content-Type": "text/plain"}, f"File uploaded: {location}")
+        sendResponse(201, {"Content-Type": "text/plain"}, f"File uploaded")
     except Exception as e:
         sendResponse(500, {"Content-Type": "text/plain"}, f"Error: {str(e)}")
 
@@ -162,16 +188,19 @@ def handleGetRequest():
 
 def handlePostRequest():
     """
-    Handle POST request
-    - Get upload directory and validate it
-    - Check Content-Type to determine upload method
-    - Route to multipart or raw upload handler
+    Handle POST request for file uploads
+    - Get and validate upload directory
+    - Return appropriate error responses for invalid directory
+    - Check Content-Type header to determine upload method
+    - Route to multipart upload handler for form-data
+    - Route to raw upload handler for other content types
     """
     uploadDir = getUploadDirectory()
     if uploadDir == 500:
         return sendResponse(500, {"Content-Type": "text/plain"}, "Internal Server Error")
     elif uploadDir == 403:
         return sendResponse(403, {"Content-Type": "text/plain"}, "Forbidden")
+
     contentType = os.getenv("CONTENT_TYPE")
     if contentType and "multipart/form-data" in contentType.lower():
         handleMultipartUpload(uploadDir)
@@ -187,8 +216,11 @@ def handleOtherRequest():
 
 def main():
     """
-    Main entry point
-    Routes request to appropriate handler based on HTTP method
+    Main entry point for CGI script
+    - Read REQUEST_METHOD environment variable
+    - Route GET requests to timestamp handler
+    - Route POST requests to file upload handler
+    - Return 501 Not Implemented for other HTTP methods
     """
     requestMethod = os.getenv("REQUEST_METHOD")
 

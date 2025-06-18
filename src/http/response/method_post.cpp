@@ -219,10 +219,19 @@ void handleMultipartFormData(const std::string& uploadPath, std::string& recvBod
 namespace serverMethod {
 void runPost(const std::string& uploadPath, std::string& recvBody,
     HTTPFields& fields, Response& response) {
+        struct stat st;
+
     try {
         if (uploadPath.empty()) {
             toolbox::logger::StepMark::error("runPost: uploadPath is empty");
             throw HttpStatus::NOT_IMPLEMENTED;
+        }
+
+        HttpStatus::EHttpStatus status = checkFileAccess(uploadPath, st);
+        if (status != HttpStatus::OK) {
+            toolbox::logger::StepMark::error("runPost: checkFileAccess fail [" +
+                uploadPath + "] " + toolbox::to_string(status));
+            throw status;
         }
 
         HTTPFields::FieldValue contentType = fields.getFieldValue(fields::CONTENT_TYPE);

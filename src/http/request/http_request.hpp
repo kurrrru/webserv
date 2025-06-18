@@ -14,12 +14,10 @@ class HTTPRequest {
     struct Body {
         Body() :
             isChunked(false),
-            lastChunk(false),
             contentLength(std::numeric_limits<std::size_t>::max()),
             receivedLength(0) {
             }
         bool isChunked;
-        bool lastChunk;
         std::string content;
         std::size_t contentLength;
         std::size_t receivedLength;
