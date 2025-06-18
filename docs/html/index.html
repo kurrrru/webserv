@@ -9,41 +9,107 @@
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
+            background: linear-gradient(135deg, 
+                rgba(154, 255, 154, 0.15), 
+                rgba(204, 255, 204, 0.2), 
+                rgba(178, 255, 178, 0.12));
+            min-height: 100vh;
+            color: #2d5a2d;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(144, 238, 144, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 70%, rgba(178, 255, 178, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background-color: white;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.25), 
+                rgba(255, 255, 255, 0.15));
             padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(105, 190, 105, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(144, 238, 144, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1) 0%, 
+                transparent 50%, 
+                rgba(144, 238, 144, 0.05) 100%);
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        
+        /* コンテナのレスポンシブデザイン */
+        @media (max-width: 768px) {
+            .container {
+                margin: 0 10px;
+                padding: 20px;
+            }
+            body {
+                padding: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                margin: 0 5px;
+                padding: 15px;
+            }
+            body {
+                padding: 5px;
+            }
         }
         h1 {
-            color: #2c3e50;
+            color: #2d5a2d;
             text-align: center;
             margin-bottom: 30px;
+            text-shadow: 0 2px 4px rgba(105, 190, 105, 0.2);
         }
         h2 {
-            color: #3498db;
+            color: #4a7c4a;
             margin-top: 30px;
         }
         .info-box {
-            background-color: #e8f4f8;
-            border-left: 4px solid #3498db;
+            background: linear-gradient(135deg, rgba(178, 255, 178, 0.2), rgba(204, 255, 204, 0.25));
+            border-left: 4px solid rgba(105, 190, 105, 0.8);
             padding: 15px;
             margin: 20px 0;
-            border-radius: 0 4px 4px 0;
+            border-radius: 0 8px 8px 0;
+            backdrop-filter: blur(5px);
         }
         .success-message {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border-radius: 4px;
+            background: linear-gradient(135deg, rgba(144, 238, 144, 0.3), rgba(178, 255, 178, 0.35));
+            color: #2d5a2d;
+            padding: 12px;
+            border-radius: 8px;
             margin-top: 20px;
             text-align: center;
             font-weight: bold;
+            border: 1px solid rgba(105, 190, 105, 0.3);
+            backdrop-filter: blur(5px);
         }
         footer {
             margin-top: 40px;
@@ -51,22 +117,133 @@
             font-size: 0.9em;
             color: #777;
         }
+        .tab-navigation {
+            display: flex;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.3), 
+                rgba(204, 255, 204, 0.15));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            border-radius: 15px 15px 0 0;
+            backdrop-filter: blur(15px);
+            flex-wrap: wrap;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 2px 10px rgba(105, 190, 105, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom: none;
+        }
+        .tab-button {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.1), 
+                rgba(255, 255, 255, 0.05));
+            border: none;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            color: #4a7c4a;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            position: relative;
+        }
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.2) 0%, 
+                transparent 50%, 
+                rgba(144, 238, 144, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .tab-button:hover {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.2), 
+                rgba(144, 238, 144, 0.15));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+        .tab-button:hover::before {
+            opacity: 1;
+        }
+        .tab-button.active {
+            color: #2d5a2d;
+            border-bottom-color: rgba(105, 190, 105, 0.8);
+            font-weight: bold;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.3), 
+                rgba(178, 255, 178, 0.2));
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(105, 190, 105, 0.2);
+        }
+        
+        /* レスポンシブデザイン */
+        @media (max-width: 768px) {
+            .tab-button {
+                font-size: 14px;
+                padding: 10px 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tab-navigation {
+                flex-direction: column;
+            }
+            .tab-button {
+                flex: none;
+                width: 100%;
+                font-size: 16px;
+                padding: 12px 16px;
+                border-bottom: none;
+                border-left: 3px solid transparent;
+            }
+            .tab-button.active {
+                border-bottom: none;
+                border-left-color: rgba(105, 190, 105, 0.8);
+            }
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
         .test-links {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.2), 
+                rgba(204, 255, 204, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 20px;
-            border-radius: 4px;
+            border-radius: 15px;
             margin: 20px 0;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 4px 20px rgba(105, 190, 105, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(144, 238, 144, 0.1);
         }
         .test-links h3 {
-            color: #495057;
+            color: #4a7c4a;
             margin-top: 0;
         }
         .test-links a {
-            color: #007bff;
+            color: #2d5a2d;
             text-decoration: none;
+            transition: color 0.3s ease;
         }
         .test-links a:hover {
+            color: #1a4a1a;
             text-decoration: underline;
         }
     </style>
@@ -79,181 +256,409 @@
         <div style="text-align: center; margin: 30px 0;">
             <img src="/images/broccoli.jpg" alt="Broccoli Image" style="max-width: 50%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
         </div>
-        
-        <div class="success-message">
-            http://localhost:8080<br>
-            サーバーが正常に動作しています！
-        </div>
-        
-        <div class="info-box">
-            このページはWebservプロジェクトの動作確認用テストページです。
-            このページが表示されていれば、HTTPサーバーが正常にHTMLファイルを配信できていることを意味します。
-        </div>
-        
-        <h2>サーバー情報</h2>
-        <ul>
-            <li>プロジェクト: Webserv</li>
-            <li>言語: C++ 98</li>
-            <li>プロトコル: HTTP/1.1</li>
-        </ul>
-        
-        <h2>Webservの主な機能</h2>
-        <ul>
-            <li>複数ポートでのリッスン</li>
-            <li>GET, HEAD(option), POST, DELETEメソッドの対応</li>
-            <li>設定ファイルによるルーティング</li>
-            <li>ディレクトリリスティング</li>
-            <li>CGIスクリプトの実行GET, POST</li>
-            <li>ファイルアップロード</li>
-        </ul>
 
-        <h2>テスト用リンク</h2>
-        <div class="test-links">
-            <h3>GETリクエストテスト</h3>
-            <ul>
-                <li><a href="/index.html">index.html ページへのリンク</a></li>
-                <li><a href="/autoindex/">ディレクトリリスティングテスト</a></li>
-                <li><a href="/404test">404エラーテスト</a></li>
-                <li><a href="/408teapot">teapot</a></li>
-                <li><a href="http://localhost:5000">localhost:5000</a></li>
-            </ul>
+        <div class="tab-navigation">
+            <button class="tab-button active" onclick="openTab('home')">ホーム</button>
+            <button class="tab-button" onclick="openTab('get')">GET</button>
+            <button class="tab-button" onclick="openTab('head')">HEAD</button>
+            <button class="tab-button" onclick="openTab('post')">POST</button>
+            <button class="tab-button" onclick="openTab('delete')">DELETE</button>
+            <button class="tab-button" onclick="openTab('cgi')">CGI</button>
+        </div>
 
-            <h3>HEADリクエストテスト</h3>
-            <p>HEADリクエストはGETと同じヘッダーを返しますが、レスポンスボディは返しません。</p>
-            <div style="margin: 15px 0;">
-                <div style="margin-bottom: 10px;">
-                    <label for="headUrl">テスト対象URL:</label>
-                    <select id="headUrl" style="margin-left: 10px; width: 250px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                        <option value="/">/ (index.html)</option>
-                        <option value="/autoindex/">/autoindex/ (allowディレクトリ)</option>
-                        <option value="/uploads/">/uploads/ (not allowディレクトリ)</option>
-                        <option value="/404test">/404test (存在しないページ)</option>
-                    </select>
-                    <button onclick="performHeadRequest()" style="background-color: #6f42c1; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">HEAD送信</button>
-                </div>
-                <div id="headResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none;">
-                    <h5 style="margin-top: 0; color: #495057;">HEADレスポンス結果:</h5>
-                    <div id="headResponseContent"></div>
-                </div>
+        <div id="home" class="tab-content active">
+            
+            <div class="success-message">
+                http://localhost:8080<br>
+                サーバーが正常に動作しています！
             </div>
             
-            <h3>POSTリクエストテスト（サーバー直接）</h3>
-            <p>Webサーバーの内蔵機能による直接的なファイルアップロードとデータ送信のテストです。</p>
-            <h4>ファイルアップロード</h4>
-            <form action="/uploads" method="POST" enctype="multipart/form-data" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0;">
-                <div style="margin-bottom: 10px;">
-                    <label for="file">ファイルを選択:</label>
-                    <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
-                </div>
-                <button type="submit" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">アップロード</button>
-            </form>
-            <h4>メッセージ送信</h4>
-            <form action="/uploads" method="post" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0;">
-                <div style="margin-bottom: 10px;">
-                    <label for="username">ユーザー名:</label>
-                    <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label for="message">メッセージ:</label>
-                    <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;"></textarea>
-                </div>
-                <button type="submit" style="background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">送信</button>
-            </form>
+            <div class="info-box">
+                このページはWebservプロジェクトの動作確認用テストページです。
+                このページが表示されていれば、HTTPサーバーが正常にHTMLファイルを配信できていることを意味します。
+            </div>
+            
+            <h2>サーバー情報</h2>
+            <ul>
+                <li>プロジェクト: Webserv</li>
+                <li>言語: C++ 98</li>
+                <li>プロトコル: HTTP/1.1</li>
+            </ul>
+            
+            <h2>Webservの主な機能</h2>
+            <ul>
+                <li>複数ポートでのリッスン</li>
+                <li>GET, HEAD(option), POST, DELETEメソッドの対応</li>
+                <li>設定ファイルによるルーティング</li>
+                <li>ディレクトリリスティング</li>
+                <li>CGIスクリプトの実行GET, POST</li>
+                <li>ファイルアップロード</li>
+            </ul>
+        </div>
 
-            <h3>DELETEリクエストテスト</h3>
-            <div style="margin: 15px 0;">
-                <h4>アップロードされたファイル一覧</h4>
-                <div id="fileList" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 10px 0;">
-                    <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 10px;">ファイル一覧を更新</button>
-                    <div id="files">
-                        <p style="color: #666; font-style: italic;">「ファイル一覧を更新」ボタンをクリックしてファイルを表示</p>
+        <div id="get" class="tab-content">
+            <h2>GETリクエストテスト</h2>
+            <div class="test-links">
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/index.html'" style="background-color: #28a745; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📄 index.html ページ
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /index.html
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/autoindex/'" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📁 ディレクトリリスティング
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /autoindex/
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/404test'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            ❌ 404エラーテスト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /404test
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/408teapot'" style="background-color: #6f42c1; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            🫖 teapot
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /408teapot
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='http://localhost:5000'" style="background-color: #fd7e14; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            🌐 localhost:5000
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET http://localhost:5000
+                        </code>
                     </div>
                 </div>
-                <div style="margin-top: 10px;">
-                    <h4>手動削除テスト</h4>
-                    <input type="text" id="manualDeletePath" placeholder="/uploads/8080/filename.txt" style="width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                    <button onclick="deleteManualFile()" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">削除</button>
-                    <small style="display: block; color: #666; margin-top: 5px;">※ ファイルパスを入力して手動削除</small>
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 各ボタンをクリックすると同じタブでGETリクエストを送信します
+                </p>
+            </div>
+        </div>
+
+        <div id="head" class="tab-content">
+            <h2>HEADリクエストテスト</h2>
+            <div class="test-links">
+                <p>HEADリクエストはGETと同じヘッダーを返しますが、レスポンスボディは返しません。</p>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/')" style="background-color: #6f42c1; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📄 / (index.html)
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/autoindex/')" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📁 /autoindex/ (allow)
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /autoindex/
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/uploads/')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📂 /uploads/ (not allow)
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /uploads/
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/404test')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            ❌ /404test (存在しない)
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /404test
+                        </code>
+                    </div>
                 </div>
+                <div id="headResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">HEADレスポンス結果:</h5>
+                    <div id="headResponseContent"></div>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 各ボタンをクリックするとHEADリクエストを送信してヘッダー情報を表示します
+                </p>
             </div>
+        </div>
 
-            <h3>CGIスクリプトテスト</h3>
-            <p>CGIスクリプト（script.py）を使用したテストです。サーバーの直接処理ではなく、外部スクリプトによる動的処理をテストします。</p>
+        <div id="post" class="tab-content">
+            <h2>POSTリクエストテスト（サーバー直接）</h2>
+            <div class="test-links">
+                <p>Webサーバーの内蔵機能による直接的なファイルアップロードとデータ送信のテストです。</p>
+                
+                <h3>ファイルアップロード</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <form id="fileUploadForm" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="file">ファイルを選択:</label>
+                            <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+                        </div>
+                        <button type="button" onclick="performFileUpload()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 220px;">
+                            📤 ファイルアップロード
+                        </button>
+                    </form>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        POST /uploads<br>
+                        Content-Type: multipart/form-data
+                    </code>
+                </div>
 
-            <h4>現在時刻取得</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/script.py', 'GET')" style="background-color: #7dadd8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻</button>
+                <h3>メッセージ送信</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <form id="messageForm" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="username">ユーザー名:</label>
+                            <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="message">メッセージ:</label>
+                            <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;"></textarea>
+                        </div>
+                        <button type="button" onclick="performMessageSubmit()" style="background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 220px;">
+                            💬 メッセージ送信
+                        </button>
+                    </form>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        POST /uploads<br>
+                        Content-Type: application/x-www-form-urlencoded
+                    </code>
+                </div>
+
+                <div id="postResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">POSTレスポンス結果:</h5>
+                    <div id="postResponseContent"></div>
+                </div>
+                
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 フォームを使ってPOSTリクエストでデータを送信します
+                </p>
             </div>
+        </div>
 
-            <h4>環境変数テスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/env_test.py', 'GET')" style="background-color: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">env_test.py - CGI環境変数を表示</button>
-            </div>
-
-            <h4>ドキュメントレスポンステスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/document.py', 'GET')" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">document.py - 標準HTMLレスポンス</button>
-            </div>
-
-            <h4>リダイレクトテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/client_redirect.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">client_redirect.py - 外部リダイレクト</button>
-                <button onclick="testCgiScript('/redirect_to_static.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">redirect_to_static.py - 静的ファイルへ</button>
-                <button onclick="testCgiScript('/redirect1.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">redirect1.py - リダイレクトチェーン</button>
-            </div>
-
-            <h4>リダイレクトループテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/loop1.py', 'GET')" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">loop1.py - 無限ループテスト</button>
-                <small style="display: block; color: #666; margin-top: 5px;">※ サーバーが無限ループを検出してエラーを返すことを確認</small>
-            </div>
-
-            <h4>大容量データテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testLargeOutput()" style="background-color: #20c997; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">large_output_test.py - 64KB出力</button>
-                <button onclick="testCgiLargePost()" style="background-color: #20c997; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">large_post_test.py - 大容量POST</button>
-            </div>
-
-            <h4>タイムアウトテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/read_timeout_test.py', 'GET')" style="background-color: #6610f2; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">read_timeout_test.py - 読み取りタイムアウト</button>
-                <button onclick="testCgiWriteTimeout()" style="background-color: #6610f2; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">write_timeout_test.py - 書き込みタイムアウト</button>
-                <small style="display: block; color: #666; margin-top: 5px;">※ タイムアウトは30秒で設定</small>
-            </div>
-
-            <div id="cgiTestResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 20px; font-family: monospace; white-space: pre-wrap; display: none;">
-                <h5 style="margin-top: 0; color: #495057;">CGI テスト結果:</h5>
-                <div id="cgiTestContent"></div>
-            </div>
-
-            <h4>CGI POST - ファイルアップロード</h4>
-            <div style="margin: 15px 0;">
-                <form method="post" action="/uploads/script.py" enctype="multipart/form-data" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 10px 0;">
-                    <div style="margin-bottom: 10px;">
-                        <label for="cgiFiles">ファイルを選択:</label>
-                        <input type="file" id="cgiFiles" name="files" multiple accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+        <div id="delete" class="tab-content">
+            <h2>DELETEリクエストテスト</h2>
+            <div class="test-links">
+                <h3>アップロードされたファイル一覧</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <div id="fileList" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 10px; width: 220px;">
+                            🔄 ファイル一覧を更新
+                        </button>
+                        <div id="files">
+                            <p style="color: #666; font-style: italic;">「ファイル一覧を更新」ボタンをクリックしてファイルを表示</p>
+                        </div>
                     </div>
-                    <div style="margin-bottom: 10px;">
-                        <label for="cgiFilename">保存ファイル名:</label>
-                        <input type="text" id="cgiFilename" placeholder="カスタムファイル名 (オプション)" style="margin-left: 10px; width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                        <small style="display: block; color: #666; margin-top: 5px; margin-left: 100px;">※ 空の場合は元のファイル名を使用</small>
-                    </div>
-                    <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
-                </form>
-                <small style="display: block; color: #666; margin-top: 5px;">※ CGIスクリプト（script.py）を経由してファイルをアップロード</small>
-            </div>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        GET /uploads/8080/<br>
+                        (ファイル一覧取得)
+                    </code>
+                </div>
 
+                <h3>手動削除テスト</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="manualDeletePath">ファイルパス:</label>
+                            <input type="text" id="manualDeletePath" placeholder="/uploads/8080/filename.txt" style="width: 100%; max-width: 250px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; margin-top: 5px;">
+                        </div>
+                        <button onclick="deleteManualFile()" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; width: 220px;">
+                            🗑️ ファイル削除
+                        </button>
+                        <small style="display: block; color: #666; margin-top: 5px;">※ ファイルパスを入力して手動削除</small>
+                    </div>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        DELETE /uploads/8080/filename.txt<br>
+                        (指定ファイル削除)
+                    </code>
+                </div>
+                
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 アップロードされたファイルをDELETEリクエストで削除します
+                </p>
+            </div>
+        </div>
+
+        <div id="cgi" class="tab-content">
+            <h2>CGIスクリプトテスト</h2>
+            <div class="test-links">
+                <p>CGIスクリプト（script.py）を使用したテストです。サーバーの直接処理ではなく、外部スクリプトによる動的処理をテストします。</p>
+
+                <h3>基本的なCGIテスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/script.py', 'GET')" style="background-color: #7dadd8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            🕒 現在時刻取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /script.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/env_test.py', 'GET')" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            🌍 CGI環境変数
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /env_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/document.py', 'GET')" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📄 HTMLレスポンス
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /document.py
+                        </code>
+                    </div>
+                </div>
+
+                <h3>リダイレクトテスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/client_redirect.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            🔗 外部リダイレクト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /client_redirect.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/redirect_to_static.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📄 静的ファイルへ
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /redirect_to_static.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/redirect1.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            🔄 リダイレクトチェーン
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /redirect1.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/loop1.py', 'GET')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            ⚠️ 無限ループテスト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /loop1.py
+                        </code>
+                    </div>
+                </div>
+
+                <h3>パフォーマンステスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testLargeOutput()" style="background-color: #20c997; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📊 大容量出力 (64KB)
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /large_output_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiLargePost()" style="background-color: #20c997; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            📤 大容量POST送信
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            POST /large_post_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/read_timeout_test.py', 'GET')" style="background-color: #6610f2; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            ⏱️ 読み取りタイムアウト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /read_timeout_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiWriteTimeout()" style="background-color: #6610f2; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 220px;">
+                            ✍️ 書き込みタイムアウト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            POST /write_timeout_test.py
+                        </code>
+                    </div>
+                </div>
+
+                <div id="cgiTestResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 20px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">CGI テスト結果:</h5>
+                    <div id="cgiTestContent"></div>
+                </div>
+
+                <h3>CGI POST - ファイルアップロード</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <form method="post" action="/uploads/script.py" enctype="multipart/form-data" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="cgiFiles">ファイルを選択:</label>
+                            <input type="file" id="cgiFiles" name="files" multiple accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="cgiFilename">保存ファイル名:</label>
+                            <input type="text" id="cgiFilename" placeholder="カスタムファイル名 (オプション)" style="margin-left: 10px; width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
+                            <small style="display: block; color: #666; margin-top: 5px; margin-left: 100px;">※ 空の場合は元のファイル名を使用</small>
+                        </div>
+                        <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 220px;">
+                            📤 CGI経由でアップロード
+                        </button>
+                    </form>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        POST /uploads/script.py<br>
+                        Content-Type: multipart/form-data
+                    </code>
+                </div>
+                
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 CGIスクリプトを使用して外部プログラムと連携したテストを実行します
+                </p>
+            </div>
         </div>
 
         <script>
+            function openTab(tabName) {
+                const contents = document.querySelectorAll('.tab-content');
+                const buttons = document.querySelectorAll('.tab-button');
+                
+                contents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                buttons.forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                document.getElementById(tabName).classList.add('active');
+                event.target.classList.add('active');
+            }
+
+            // Rest of the existing JavaScript code
             // Auto-load file list when page loads
             document.addEventListener('DOMContentLoaded', function() {
                 loadFileList();
             });
 
             // HEAD request function (for preset URLs)
-            function performHeadRequest() {
-                const url = document.getElementById('headUrl').value;
+            function performHeadRequest(url) {
+                if (!url) {
+                    const urlSelect = document.getElementById('headUrl');
+                    url = urlSelect ? urlSelect.value : '/';
+                }
                 executeHeadRequest(url);
             }
 
@@ -431,6 +836,209 @@
                     return;
                 }
                 deleteFile(filepath);
+            }
+
+            // File upload with fetch API
+            async function performFileUpload() {
+                const fileInput = document.getElementById('file');
+                const responseDiv = document.getElementById('postResponse');
+                const contentDiv = document.getElementById('postResponseContent');
+                
+                if (!fileInput.files.length) {
+                    alert('ファイルを選択してください');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append('uploadFile', file);
+                
+                // Show response display area
+                responseDiv.style.display = 'block';
+                contentDiv.innerHTML = `ファイル "${file.name}" をアップロード中...`;
+                contentDiv.style.color = '#4a7c4a';
+                
+                const startTime = Date.now();
+                
+                try {
+                    const response = await fetch('/uploads', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    const responseText = await response.text();
+                    
+                    let responseInfo = '';
+                    responseInfo += '=== POSTリクエスト結果（ファイルアップロード） ===\n';
+                    responseInfo += 'URL: /uploads\n';
+                    responseInfo += 'メソッド: POST\n';
+                    responseInfo += 'Content-Type: multipart/form-data\n';
+                    responseInfo += 'レスポンス時間: ' + responseTime + 'ms\n\n';
+                    
+                    // Upload info
+                    responseInfo += '=== アップロード情報 ===\n';
+                    responseInfo += 'ファイル名: ' + file.name + '\n';
+                    responseInfo += 'ファイルサイズ: ' + file.size + ' bytes\n';
+                    responseInfo += 'ファイルタイプ: ' + (file.type || 'unknown') + '\n\n';
+                    
+                    // Status info
+                    responseInfo += '=== ステータス ===\n';
+                    responseInfo += 'ステータスコード: ' + response.status + '\n';
+                    responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
+                    responseInfo += 'OK: ' + response.ok + '\n\n';
+                    
+                    if (response.ok) {
+                        responseInfo += '=== レスポンス内容 ===\n';
+                        responseInfo += responseText + '\n\n';
+                        contentDiv.style.color = '#4a7c4a';
+                        // Clear file input on successful upload
+                        fileInput.value = '';
+                        // Update file list in DELETE tab
+                        loadFileList();
+                    } else {
+                        responseInfo += '=== エラー内容 ===\n';
+                        responseInfo += responseText + '\n\n';
+                        contentDiv.style.color = '#dc3545';
+                    }
+                    
+                    // Header info
+                    responseInfo += '=== レスポンスヘッダー ===\n';
+                    const headers = [];
+                    for (let [key, value] of response.headers.entries()) {
+                        headers.push(key + ': ' + value);
+                    }
+                    
+                    if (headers.length > 0) {
+                        headers.sort();
+                        responseInfo += headers.join('\n');
+                    } else {
+                        responseInfo += '(ヘッダーが見つかりません)';
+                    }
+                    
+                    contentDiv.innerHTML = responseInfo;
+                } catch (error) {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    let errorInfo = '';
+                    errorInfo += '=== POSTリクエストエラー（ファイルアップロード） ===\n';
+                    errorInfo += 'URL: /uploads\n';
+                    errorInfo += 'メソッド: POST\n';
+                    errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
+                    errorInfo += 'エラー内容: ' + error.message + '\n\n';
+                    errorInfo += '考えられる原因:\n';
+                    errorInfo += '- ネットワーク接続エラー\n';
+                    errorInfo += '- サーバーが応答しない\n';
+                    errorInfo += '- ファイルサイズが上限を超えている\n';
+                    errorInfo += '- アップロードディレクトリに書き込み権限がない';
+                    
+                    contentDiv.innerHTML = errorInfo;
+                    contentDiv.style.color = '#dc3545';
+                }
+            }
+
+            // Message submit with fetch API
+            async function performMessageSubmit() {
+                const username = document.getElementById('username').value.trim();
+                const message = document.getElementById('message').value.trim();
+                const responseDiv = document.getElementById('postResponse');
+                const contentDiv = document.getElementById('postResponseContent');
+                
+                if (!username && !message) {
+                    alert('ユーザー名またはメッセージを入力してください');
+                    return;
+                }
+                
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('message', message);
+                
+                // Show response display area
+                responseDiv.style.display = 'block';
+                contentDiv.innerHTML = 'メッセージを送信中...';
+                contentDiv.style.color = '#4a7c4a';
+                
+                const startTime = Date.now();
+                
+                try {
+                    const response = await fetch('/uploads', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    const responseText = await response.text();
+                    
+                    let responseInfo = '';
+                    responseInfo += '=== POSTリクエスト結果（メッセージ送信） ===\n';
+                    responseInfo += 'URL: /uploads\n';
+                    responseInfo += 'メソッド: POST\n';
+                    responseInfo += 'Content-Type: application/x-www-form-urlencoded\n';
+                    responseInfo += 'レスポンス時間: ' + responseTime + 'ms\n\n';
+                    
+                    // Message info
+                    responseInfo += '=== メッセージ情報 ===\n';
+                    responseInfo += 'ユーザー名: ' + (username || '(空)') + '\n';
+                    responseInfo += 'メッセージ: ' + (message || '(空)') + '\n\n';
+                    
+                    // Status info
+                    responseInfo += '=== ステータス ===\n';
+                    responseInfo += 'ステータスコード: ' + response.status + '\n';
+                    responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
+                    responseInfo += 'OK: ' + response.ok + '\n\n';
+                    
+                    if (response.ok) {
+                        responseInfo += '=== レスポンス内容 ===\n';
+                        responseInfo += responseText + '\n\n';
+                        contentDiv.style.color = '#4a7c4a';
+                        // Clear form on successful submit
+                        document.getElementById('username').value = '';
+                        document.getElementById('message').value = '';
+                    } else {
+                        responseInfo += '=== エラー内容 ===\n';
+                        responseInfo += responseText + '\n\n';
+                        contentDiv.style.color = '#dc3545';
+                    }
+                    
+                    // Header info
+                    responseInfo += '=== レスポンスヘッダー ===\n';
+                    const headers = [];
+                    for (let [key, value] of response.headers.entries()) {
+                        headers.push(key + ': ' + value);
+                    }
+                    
+                    if (headers.length > 0) {
+                        headers.sort();
+                        responseInfo += headers.join('\n');
+                    } else {
+                        responseInfo += '(ヘッダーが見つかりません)';
+                    }
+                    
+                    contentDiv.innerHTML = responseInfo;
+                } catch (error) {
+                    const endTime = Date.now();
+                    const responseTime = endTime - startTime;
+                    
+                    let errorInfo = '';
+                    errorInfo += '=== POSTリクエストエラー（メッセージ送信） ===\n';
+                    errorInfo += 'URL: /uploads\n';
+                    errorInfo += 'メソッド: POST\n';
+                    errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
+                    errorInfo += 'エラー内容: ' + error.message + '\n\n';
+                    errorInfo += '考えられる原因:\n';
+                    errorInfo += '- ネットワーク接続エラー\n';
+                    errorInfo += '- サーバーが応答しない\n';
+                    errorInfo += '- データ形式が正しくない\n';
+                    errorInfo += '- サーバーの処理でエラーが発生';
+                    
+                    contentDiv.innerHTML = errorInfo;
+                    contentDiv.style.color = '#dc3545';
+                }
             }
         </script>
         <footer>
