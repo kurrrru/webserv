@@ -35,23 +35,27 @@ bool CgiHandler::isCgiRequest(const std::string& targetPath,
     if (cgiPath.empty()) {
         return false;
     }
-    std::size_t pos = 0;
-    while (pos < targetPath.length()) {
-        std::size_t dotPos = targetPath.find('.', pos);
-        if (dotPos == std::string::npos) {
-            break;
+    std::size_t componentStart = 0;
+    while (componentStart < targetPath.length()) {
+        std::size_t componentEnd = targetPath.find('/', componentStart);
+        if (componentEnd == std::string::npos) {
+            componentEnd = targetPath.length();
         }
-        std::size_t endPos = targetPath.find('/', dotPos);
-        if (endPos == std::string::npos) {
-            endPos = targetPath.length();
-        }
-        std::string extension = targetPath.substr(dotPos, endPos - dotPos);
-        for (std::size_t i = 0; i < cgiExtension.size(); ++i) {
-            if (extension == cgiExtension[i]) {
-                return true;
+        std::string component =
+            targetPath.substr(componentStart, componentEnd - componentStart);
+        std::size_t lastDot = component.find_last_of('.');
+        if (lastDot != std::string::npos) {
+            std::string extension = component.substr(lastDot);
+            for (std::size_t i = 0; i < cgiExtension.size(); ++i) {
+                if (extension == cgiExtension[i]) {
+                    return true;
+                }
             }
         }
-        pos = dotPos + 1;
+        if (componentEnd == targetPath.length()) {
+            break;
+        }
+        componentStart = componentEnd + 1;
     }
     return false;
 }
@@ -379,18 +383,31 @@ bool CgiHandler::validateParameters(const std::string& scriptPath,
 std::string CgiHandler::buildScriptPath(const std::string& root,
                         const std::string& uriPath,
                         const std::vector<std::string>& cgiExtensions) const {
-    std::string actualScriptPath = uriPath;
-    for (std::size_t i = 0; i < cgiExtensions.size(); ++i) {
-        std::size_t pos = uriPath.find(cgiExtensions[i]);
-        if (pos != std::string::npos) {
-            std::size_t extEnd = pos + cgiExtensions[i].length();
-            if (extEnd == uriPath.length() || uriPath[extEnd] == '/') {
-                actualScriptPath = uriPath.substr(0, extEnd);
-                break;
+    std::size_t componentStart = 0;
+    while (componentStart < uriPath.length()) {
+        std::size_t componentEnd = uriPath.find('/', componentStart);
+        if (componentEnd == std::string::npos) {
+            componentEnd = uriPath.length();
+        }
+        std::string component =
+            uriPath.substr(componentStart, componentEnd - componentStart);
+        for (std::size_t i = 0; i < cgiExtensions.size(); ++i) {
+            if (component.length() >= cgiExtensions[i].length()) {
+                std::string componentSuffix =
+                    component.substr(
+                    component.length() - cgiExtensions[i].length());
+                if (componentSuffix == cgiExtensions[i]) {
+                    return
+                    http::joinPath(root, uriPath.substr(0, componentEnd));
+                }
             }
         }
+        if (componentEnd == uriPath.length()) {
+            break;
+        }
+        componentStart = componentEnd + 1;
     }
-    return http::joinPath(root, actualScriptPath);
+    return http::joinPath(root, uriPath);
 }
 
 }  // namespace http
