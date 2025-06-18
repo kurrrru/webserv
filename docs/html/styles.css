@@ -1,0 +1,241 @@
+body {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, 
+        rgba(154, 255, 154, 0.15), 
+        rgba(204, 255, 204, 0.2), 
+        rgba(178, 255, 178, 0.12));
+    min-height: 100vh;
+    color: #2d5a2d;
+    position: relative;
+}
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(144, 238, 144, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 70%, rgba(178, 255, 178, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.25), 
+        rgba(255, 255, 255, 0.15));
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 
+        0 8px 32px rgba(105, 190, 105, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(144, 238, 144, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+.container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        transparent 50%, 
+        rgba(144, 238, 144, 0.05) 100%);
+    border-radius: 20px;
+    pointer-events: none;
+}
+
+/* コンテナのレスポンシブデザイン */
+@media (max-width: 768px) {
+    .container {
+        margin: 0 10px;
+        padding: 20px;
+    }
+    body {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 0 5px;
+        padding: 15px;
+    }
+    body {
+        padding: 5px;
+    }
+}
+h1 {
+    color: #2d5a2d;
+    text-align: center;
+    margin-bottom: 30px;
+    text-shadow: 0 2px 4px rgba(105, 190, 105, 0.2);
+}
+h2 {
+    color: #4a7c4a;
+    margin-top: 30px;
+}
+.info-box {
+    background: linear-gradient(135deg, rgba(178, 255, 178, 0.2), rgba(204, 255, 204, 0.25));
+    border-left: 4px solid rgba(105, 190, 105, 0.8);
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    backdrop-filter: blur(5px);
+}
+.success-message {
+    background: linear-gradient(135deg, rgba(144, 238, 144, 0.3), rgba(178, 255, 178, 0.35));
+    color: #2d5a2d;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid rgba(105, 190, 105, 0.3);
+    backdrop-filter: blur(5px);
+}
+footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 0.9em;
+    color: #777;
+}
+.tab-navigation {
+    display: flex;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.3), 
+        rgba(204, 255, 204, 0.15));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px;
+    border-radius: 15px 15px 0 0;
+    backdrop-filter: blur(15px);
+    flex-wrap: wrap;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        0 2px 10px rgba(105, 190, 105, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: none;
+}
+.tab-button {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.1), 
+        rgba(255, 255, 255, 0.05));
+    border: none;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    color: #4a7c4a;
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+}
+.tab-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        transparent 50%, 
+        rgba(144, 238, 144, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.tab-button:hover {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2), 
+        rgba(144, 238, 144, 0.15));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.tab-button:hover::before {
+    opacity: 1;
+}
+.tab-button.active {
+    color: #2d5a2d;
+    border-bottom-color: rgba(105, 190, 105, 0.8);
+    font-weight: bold;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.3), 
+        rgba(178, 255, 178, 0.2));
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.4),
+        inset 0 -1px 0 rgba(105, 190, 105, 0.2);
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 768px) {
+    .tab-button {
+        font-size: 14px;
+        padding: 10px 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .tab-navigation {
+        flex-direction: column;
+    }
+    .tab-button {
+        flex: none;
+        width: 100%;
+        font-size: 16px;
+        padding: 12px 16px;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+    }
+    .tab-button.active {
+        border-bottom: none;
+        border-left-color: rgba(105, 190, 105, 0.8);
+    }
+}
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
+.test-links {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2), 
+        rgba(204, 255, 204, 0.1));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    backdrop-filter: blur(15px);
+    box-shadow: 
+        0 4px 20px rgba(105, 190, 105, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -1px 0 rgba(144, 238, 144, 0.1);
+}
+.test-links h3 {
+    color: #4a7c4a;
+    margin-top: 0;
+}
+.test-links a {
+    color: #2d5a2d;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+.test-links a:hover {
+    color: #1a4a1a;
+    text-decoration: underline;
+}
