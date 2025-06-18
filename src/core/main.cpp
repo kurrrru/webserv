@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
                             }
                             std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
-                            client->setRequest(toolbox::SharedPtr<http::Request>(new http::Request(client)));
+                            client->setRequest(toolbox::SharedPtr<http::Request>(new http::Request(client.get())));
                             Epoll::addClient(client_sock, client); // this func will throw exception
                         } catch(std::exception& e) {
                             std::cerr << e.what() << std:: endl;

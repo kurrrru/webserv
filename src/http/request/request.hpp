@@ -18,11 +18,11 @@ class Request {
  public:
     /**
      * @brief Constructs a Request object with the given client.
-     * @param client A shared pointer to the Client object
+     * @param client A pointer to the Client object
      * @param requestDepth The depth of the request, used to track local redirects
      * associated with this request.
      */
-    Request(const toolbox::SharedPtr<Client>& client, std::size_t requestDepth = 0);
+    Request(Client* client, std::size_t requestDepth = 0);
 
     /**
      * @brief Destructor for the Request object.
@@ -102,7 +102,7 @@ class Request {
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;
     http::Response _response;
-    toolbox::SharedPtr<Client> _client;
+    Client* _client;
     std::size_t _requestDepth;
     IOPendingState _ioPendingState;
     toolbox::SharedPtr<http::Request> _errorPageRequest;

@@ -13,7 +13,7 @@ namespace {
 
 int handleRecvResult(int receivedSize,
                       BaseParser::ValidatePos validatePos,
-                      const toolbox::SharedPtr<Client>& client) {
+                      Client* client) {
     int statusCode = 200;
     if (receivedSize == 0) {
         toolbox::logger::StepMark::info("Request: recvRequest: client "

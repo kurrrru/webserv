@@ -70,14 +70,14 @@ void CgiExecute::reset() {
     _outputPipe[1] = -1;
     _environment.clear();
     _envStrings.clear();
-    _client.reset();
+    _client = NULL;
 }
 
 CgiExecute::ExecuteResult CgiExecute::execute(
                                 const std::string& scriptPath,
                                 const std::string& interpreter,
                                 const HTTPRequest& request,
-                                const toolbox::SharedPtr<Client>& client,
+                                Client* client,
                                 const config::LocationConfig& locationConfig) {
     _client = client;
     if (!validateScriptPath(scriptPath)) {
@@ -123,7 +123,7 @@ bool CgiExecute::validateScriptPath(const std::string& scriptPath) const {
 
 void CgiExecute::setupEnvironmentVariables(const HTTPRequest& request,
                                 const std::string& scriptPath,
-                                const toolbox::SharedPtr<Client>& client,
+                                Client* client,
                                 const config::LocationConfig& locationConfig) {
     _environment.clear();
     _environment[http::cgi::meta::AUTH_TYPE] = "";
@@ -135,7 +135,7 @@ void CgiExecute::setupEnvironmentVariables(const HTTPRequest& request,
 }
 
 void CgiExecute::setServerVariables(const HTTPRequest& request,
-                                    const toolbox::SharedPtr<Client>& client) {
+                                    Client* client) {
     _environment[http::cgi::meta::SERVER_SOFTWARE] = http::cgi::SERVER_SOFTWARE;
     const HTTPFields::FieldValue& hostValues =
                         request.fields.getFieldValue(http::fields::HOST);
@@ -156,7 +156,7 @@ void CgiExecute::setServerVariables(const HTTPRequest& request,
                                         http::cgi::GATEWAY_INTERFACE;
 }
 
-void CgiExecute::setClientVariables(const toolbox::SharedPtr<Client>& client) {
+void CgiExecute::setClientVariables(Client* client) {
     _environment[http::cgi::meta::REMOTE_ADDR] = client->getIp();
     _environment[http::cgi::meta::REMOTE_HOST] = "";
     _environment[http::cgi::meta::REMOTE_IDENT] = "";
