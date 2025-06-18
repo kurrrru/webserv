@@ -39,10 +39,8 @@ class Request {
      * @brief recieve and parses the raw HTTP request string.
      * @note fetchConfig() is called inside this method to retrieve
      * the configuration for the request.
-     * @return True if the request was fully received and parsed,
-     * false otherwise.
      */
-    bool recvRequest();
+    void recvRequest();
 
     /**
      * @brief Sets the local redirect information for the request.
