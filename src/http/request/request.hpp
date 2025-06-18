@@ -42,7 +42,7 @@ class Request {
      * @return True if the request was fully received and parsed,
      * false otherwise.
      */
-    bool recvRequest();
+    void recvRequest();
 
     /**
      * @brief Sets the local redirect information for the request.

@@ -103,17 +103,17 @@ bool Request::isValidBodySize() {
     return true;
 }
 
-bool Request::recvRequest() {
+void Request::recvRequest() {
     std::string receivedData;
 
     if (!performRecv(receivedData)) {
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: failed to receive data");
-        return false;
+        return;
     }
 
     if (_ioPendingState == START_READING && (receivedData == symbols::CRLF || receivedData == symbols::LF)) {
-        return true;
+        return;
     }
 
     _ioPendingState = REQUEST_READING;
@@ -124,26 +124,25 @@ bool Request::recvRequest() {
         _response.setStatus(_parsedRequest.get().httpStatus.get());
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: failed to parse request");
-        return false;
+        return;
     }
     
     if (!isValidBodySize()) {
         if (_ioPendingState == RESPONSE_START) {
-            return false;
+            return;
         }
         _response.setStatus(HttpStatus::PAYLOAD_TOO_LARGE);
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error("Request: recvRequest: request have "
             "invalid body/content size");
-            return false;
-        }
+        return;
+    }
 
     if (parseStatus == BaseParser::P_COMPLETED) {
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::info("Request: recvRequest: request "
             "received and parsed successfully");
     }
-    return true;
 }
 
 }  // namespace http
