@@ -29,21 +29,29 @@ void CgiHandler::reset() {
 bool CgiHandler::isCgiRequest(const std::string& targetPath,
                             const std::vector<std::string>& cgiExtension,
                             const std::string& cgiPath) const {
-    size_t lastDot = targetPath.find_last_of('.');
-    if (lastDot == std::string::npos) {
-        return false;
-    }
     if (cgiExtension.empty()) {
         return false;
     }
     if (cgiPath.empty()) {
         return false;
     }
-    std::string fileExtension = targetPath.substr(lastDot);
-    for (size_t i = 0; i < cgiExtension.size(); ++i) {
-        if (fileExtension == cgiExtension[i]) {
-            return true;
+    std::size_t pos = 0;
+    while (pos < targetPath.length()) {
+        std::size_t dotPos = targetPath.find('.', pos);
+        if (dotPos == std::string::npos) {
+            break;
         }
+        std::size_t endPos = targetPath.find('/', dotPos);
+        if (endPos == std::string::npos) {
+            endPos = targetPath.length();
+        }
+        std::string extension = targetPath.substr(dotPos, endPos - dotPos);
+        for (std::size_t i = 0; i < cgiExtension.size(); ++i) {
+            if (extension == cgiExtension[i]) {
+                return true;
+            }
+        }
+        pos = dotPos + 1;
     }
     return false;
 }
@@ -76,7 +84,9 @@ IOPendingState CgiHandler::executeInitialCgiRequest(
                         Response& response,
                         const config::LocationConfig& locationConfig) {
     std::string scriptPath =
-                http::joinPath(locationConfig.getRoot(), request.uri.path);
+                buildScriptPath(locationConfig.getRoot(),
+                                request.uri.path,
+                                locationConfig.getCgiExtensions());
     std::string interpreter = locationConfig.getCgiPath();
     if (!validateParameters(scriptPath, interpreter,
                             locationConfig.getCgiExtensions(), response)) {
@@ -364,6 +374,23 @@ bool CgiHandler::validateParameters(const std::string& scriptPath,
         return false;
     }
     return true;
+}
+
+std::string CgiHandler::buildScriptPath(const std::string& root,
+                        const std::string& uriPath,
+                        const std::vector<std::string>& cgiExtensions) const {
+    std::string actualScriptPath = uriPath;
+    for (std::size_t i = 0; i < cgiExtensions.size(); ++i) {
+        std::size_t pos = uriPath.find(cgiExtensions[i]);
+        if (pos != std::string::npos) {
+            std::size_t extEnd = pos + cgiExtensions[i].length();
+            if (extEnd == uriPath.length() || uriPath[extEnd] == '/') {
+                actualScriptPath = uriPath.substr(0, extEnd);
+                break;
+            }
+        }
+    }
+    return http::joinPath(root, actualScriptPath);
 }
 
 }  // namespace http

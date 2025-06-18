@@ -63,6 +63,9 @@ class CgiHandler {
                      size_t redirectCount);
     void copyCgiResponseToResponse(const CgiResponse& cgiResponse,
                             Response& response);
+    std::string buildScriptPath(const std::string& root,
+                               const std::string& uriPath,
+                               const std::vector<std::string>& cgiExtensions) const;
     CgiExecute _execute;
     size_t _redirectCount;
     toolbox::SharedPtr<Client> _client;
