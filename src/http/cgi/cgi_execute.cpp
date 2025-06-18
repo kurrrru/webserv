@@ -77,7 +77,7 @@ CgiExecute::ExecuteResult CgiExecute::execute(
                                 const std::string& scriptPath,
                                 const std::string& interpreter,
                                 const HTTPRequest& request,
-                                Client* client,
+                                const Client* client,
                                 const config::LocationConfig& locationConfig) {
     _client = client;
     if (!validateScriptPath(scriptPath)) {
@@ -123,7 +123,7 @@ bool CgiExecute::validateScriptPath(const std::string& scriptPath) const {
 
 void CgiExecute::setupEnvironmentVariables(const HTTPRequest& request,
                                 const std::string& scriptPath,
-                                Client* client,
+                                const Client* client,
                                 const config::LocationConfig& locationConfig) {
     _environment.clear();
     _environment[http::cgi::meta::AUTH_TYPE] = "";
@@ -135,7 +135,7 @@ void CgiExecute::setupEnvironmentVariables(const HTTPRequest& request,
 }
 
 void CgiExecute::setServerVariables(const HTTPRequest& request,
-                                    Client* client) {
+                                    const Client* client) {
     _environment[http::cgi::meta::SERVER_SOFTWARE] = http::cgi::SERVER_SOFTWARE;
     const HTTPFields::FieldValue& hostValues =
                         request.fields.getFieldValue(http::fields::HOST);
@@ -156,7 +156,7 @@ void CgiExecute::setServerVariables(const HTTPRequest& request,
                                         http::cgi::GATEWAY_INTERFACE;
 }
 
-void CgiExecute::setClientVariables(Client* client) {
+void CgiExecute::setClientVariables(const Client* client) {
     _environment[http::cgi::meta::REMOTE_ADDR] = client->getIp();
     _environment[http::cgi::meta::REMOTE_HOST] = "";
     _environment[http::cgi::meta::REMOTE_IDENT] = "";

@@ -22,7 +22,7 @@ class Request {
      * @param requestDepth The depth of the request, used to track local redirects
      * associated with this request.
      */
-    Request(Client* client, std::size_t requestDepth = 0);
+    Request(const Client* client, std::size_t requestDepth = 0);
 
     /**
      * @brief Destructor for the Request object.
@@ -102,7 +102,7 @@ class Request {
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;
     http::Response _response;
-    Client* _client;
+    const Client* _client;
     std::size_t _requestDepth;
     IOPendingState _ioPendingState;
     toolbox::SharedPtr<http::Request> _errorPageRequest;
