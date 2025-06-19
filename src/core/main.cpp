@@ -52,7 +52,8 @@ int main(int argc, char* argv[]) {
         struct epoll_event events[1000];
         while (1) {
             try {
-                int nfds = Epoll::wait(events, 1000, -1);
+                int nfds = Epoll::wait(events, 1000, 1000);
+                Epoll::checkClientTimeouts();
                 if (nfds == -1) {
                     throw std::runtime_error("epoll_wait failed");
                 }
@@ -89,6 +90,7 @@ int main(int argc, char* argv[]) {
                                 continue;
                             } else if ((events[i].events & EPOLLOUT && (client->isResponseSending() || client->isCgiProcessing()))
                                 || (events[i].events & EPOLLIN && !client->isResponseSending())) {
+                                client->setLastAccessTime();
                                 client->getRequest()->run();
                             }
 

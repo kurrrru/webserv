@@ -92,6 +92,17 @@ int Epoll::wait(struct epoll_event* events, int maxevents, int timeout) {
     return epoll_wait(epollInstance._epfd, events, maxevents, timeout);
 }
 
+void Epoll::checkClientTimeouts() {
+    Epoll& epollInstance = getInstance();
+    for (std::map<int, struct epoll_event*>::iterator it = epollInstance._events.begin();
+            it != epollInstance._events.end(); ++it) {
+        taggedEventData* tagged = static_cast<taggedEventData*>(it->second->data.ptr);
+        if (tagged->client && tagged->client->isClientTimedOut()) {
+            Epoll::del(tagged->client->getFd());
+        }
+    }
+}
+
 Epoll& Epoll::getInstance() {
     static Epoll instance;
     return instance;
