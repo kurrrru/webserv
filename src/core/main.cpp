@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <sstream>
 #include <cstring>
+#include <set>
+#include <utility>
 
 #include "server.hpp"
 #include "client.hpp"
@@ -35,17 +37,23 @@ int main(int argc, char* argv[]) {
         toolbox::SharedPtr<config::HttpConfig> httpConfig =
                                         config::Config::getHttpConfig();
         std::vector<toolbox::SharedPtr<Server> > servers;
+        std::set<std::pair<std::string, int> > boundAddresses;
         for (size_t i = 0; i < httpConfig->getServers().size(); ++i) {
             toolbox::SharedPtr<config::ServerConfig> serverConfig =
                                                     httpConfig->getServers()[i];
             for (size_t j = 0; j < serverConfig->getListens().size(); ++j) {
                 int port = serverConfig->getListens()[j].getPort();
                 std::string ip = serverConfig->getListens()[j].getIp();
-                    toolbox::SharedPtr<Server> server(new Server(port, ip));
-                    server->setName(
-                        serverConfig->getServerNames()[0].getName());
-                    Epoll::addServer(server->getFd(), server);
-                    servers.push_back(server);
+                std::pair<std::string, int> address(ip, port);
+                if (boundAddresses.find(address) != boundAddresses.end()) {
+                    continue;
+                }
+                toolbox::SharedPtr<Server> server(new Server(port, ip));
+                server->setName(
+                    serverConfig->getServerNames()[0].getName());
+                Epoll::addServer(server->getFd(), server);
+                servers.push_back(server);
+                boundAddresses.insert(address);
             }
         }
         int cnt = 0;  // for debug
