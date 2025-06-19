@@ -57,6 +57,7 @@
         <div id="get" class="tab-content">
             <h2>GETリクエストテスト</h2>
             <div class="test-links">
+                <h3>📄 通常ファイルアクセス</h3>
                 <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="window.location.href='/index.html'" style="background-color: #28a745; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
@@ -74,14 +75,22 @@
                             GET /empty.html
                         </code>
                     </div>
+                </div>
+
+                <h3>🚫 権限制限ファイル</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                        <button onclick="window.location.href='/invalid'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
-                            ❌ 存在しないファイル
+                        <button onclick="window.location.href='/no_perm.html'" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🚫 権限なしファイル
                         </button>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            GET /invalid
+                            GET /no_perm.html
                         </code>
                     </div>
+                </div>
+
+                <h3>📁 ディレクトリアクセス</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="window.location.href='/'" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             📁 ディレクトリインデックス
@@ -99,14 +108,6 @@
                         </code>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                        <button onclick="window.location.href='/noperm.html'" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
-                            🚫 権限なしファイル
-                        </button>
-                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            GET /noperm.html
-                        </code>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="window.location.href='/empty_dir/'" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             📂 空ディレクトリ自動表示
                         </button>
@@ -114,12 +115,28 @@
                             GET /empty_dir/
                         </code>
                     </div>
+                </div>
+
+                <h3>🔒 権限制限ディレクトリ</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="window.location.href='/no_perm_dir/'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             🔒 権限なしディレクトリ
                         </button>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
                             GET /no_perm_dir/
+                        </code>
+                    </div>
+                </div>
+
+                <h3>❌ エラー・例外テスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/non_exist'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ❌ 存在しないファイル
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /non_exist
                         </code>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
@@ -130,9 +147,13 @@
                             GET /408teapot
                         </code>
                     </div>
+                </div>
+
+                <h3>🔗 複数ポート対応テスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="window.location.href='http://localhost:5000'" style="background-color: #fd7e14; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
-                            🌐 localhost:5000
+                            🔗 localhost:5000
                         </button>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
                             GET http://localhost:5000
@@ -149,6 +170,7 @@
             <h2>HEADリクエストテスト</h2>
             <div class="test-links">
                 <p>HEADリクエストはGETと同じヘッダーを返しますが、レスポンスボディは返しません。</p>
+                <h3>📄 通常ファイルアクセス</h3>
                 <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="performHeadRequest('/index.html')" style="background-color: #28a745; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
@@ -166,14 +188,22 @@
                             HEAD /empty.html
                         </code>
                     </div>
+                </div>
+
+                <h3>🚫 権限制限ファイル</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                        <button onclick="performHeadRequest('/invalid')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
-                            ❌ 存在しないファイル
+                        <button onclick="performHeadRequest('/no_perm.html')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🚫 権限なしファイル
                         </button>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            HEAD /invalid
+                            HEAD /no_perm.html
                         </code>
                     </div>
+                </div>
+
+                <h3>📁 ディレクトリアクセス</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="performHeadRequest('/')" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             📁 ディレクトリインデックス
@@ -191,14 +221,6 @@
                         </code>
                     </div>
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                        <button onclick="performHeadRequest('/noperm.html')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
-                            🚫 権限なしファイル
-                        </button>
-                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            HEAD /noperm.html
-                        </code>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="performHeadRequest('/empty_dir/')" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             📂 空ディレクトリ自動表示
                         </button>
@@ -206,12 +228,28 @@
                             HEAD /empty_dir/
                         </code>
                     </div>
+                </div>
+
+                <h3>🔒 権限制限ディレクトリ</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
                     <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
                         <button onclick="performHeadRequest('/no_perm_dir/')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
                             🔒 権限なしディレクトリ
                         </button>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
                             HEAD /no_perm_dir/
+                        </code>
+                    </div>
+                </div>
+
+                <h3>❌ エラー・例外テスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/non_exist')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ❌ 存在しないファイル
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /non_exist
                         </code>
                     </div>
                 </div>
@@ -251,7 +289,7 @@
                             POST /uploads
                         </code>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            POST /no_perm_dir/
+                            POST /no_perm_uploads/
                         </code>
                     </div>
                 </div>
@@ -293,7 +331,7 @@
                 <h3>アップロードされたファイル一覧</h3>
                 <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
                     <div id="fileList" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
-                        <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 10px; width: 230px;">
+                        <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; width: 230px; font-size: 14px; transition: background-color 0.3s ease;">
                             🔄 ファイル一覧を更新
                         </button>
                         <div id="files">
@@ -301,35 +339,43 @@
                         </div>
                     </div>
                     <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
-                        GET /uploads/8080/
+                        DELETE /uploads/8080/filename.txt
                     </code>
                 </div>
 
-                <h3>手動削除テスト</h3>
+                <h3>権限制限ファイル削除テスト</h3>
                 <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
                     <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
-                        <div style="margin-bottom: 10px;">
-                            <label for="manualDeletePath">ファイルパス:</label>
-                            <input type="text" id="manualDeletePath" placeholder="/uploads/8080/filename.txt" style="width: 100%; max-width: 250px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px; margin-top: 5px;">
-                        </div>
-                        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px;">
-                            <button onclick="deleteManualFile()" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; width: 230px;">
-                                🗑️ ファイル削除
-                            </button>
-                            <button onclick="deleteEmptyDir()" style="background-color: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; width: 230px;">
-                                📂 空ディレクトリ削除
-                            </button>
-                        </div>
-                        <small style="display: block; color: #666; margin-top: 5px;">※ ファイルパスを入力して手動削除 / 空ディレクトリテスト</small>
+                        <button onclick="deleteNoPermFile()" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; width: 230px; margin-bottom: 10px; font-size: 14px; transition: background-color 0.3s ease;">
+                            🔒 権限なしディレクトリ内<br>ファイル削除
+                        </button>
+                        <small style="display: block; color: #666;">※ no_perm_dir内のファイルの削除テスト</small>
+                        <button onclick="deleteNoPermFileItself()" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; width: 230px; margin-top: 10px; font-size: 14px; transition: background-color 0.3s ease;">
+                            🚫 権限なしファイル削除
+                        </button>
+                        <small style="display: block; color: #666;">※ no_perm.htmlファイル自体の削除テスト</small>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            DELETE /uploads/8080/filename.txt
+                            DELETE /no_perm_dir/sample.html
                         </code>
                         <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
-                            DELETE /empty_dir/
+                            DELETE /no_perm.html
                         </code>
                     </div>
+                </div>
+
+                <h3>ディレクトリ削除テスト</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <button onclick="deleteEmptyDir()" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; width: 230px; margin-bottom: 10px; font-size: 14px; transition: background-color 0.3s ease;">
+                            📂 ディレクトリ削除
+                        </button>
+                        <small style="display: block; color: #666;">※ deleteディレクトリの削除テスト</small>
+                    </div>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        DELETE /delete/
+                    </code>
                 </div>
 
                 <div id="deleteResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">

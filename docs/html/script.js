@@ -93,12 +93,7 @@ function executeHeadRequest(url) {
         errorInfo += 'URL: ' + url + '\n';
         errorInfo += 'メソッド: HEAD\n';
         errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
-        errorInfo += 'エラー内容: ' + error.message + '\n\n';
-        errorInfo += '考えられる原因:\n';
-        errorInfo += '- ネットワーク接続エラー\n';
-        errorInfo += '- サーバーが応答しない\n';
-        errorInfo += '- CORSポリシー違反\n';
-        errorInfo += '- URLが存在しない';
+        errorInfo += 'エラー内容: ' + error.message;
         
         contentDiv.innerHTML = errorInfo;
         contentDiv.style.color = '#dc3545'; // Red color for errors
@@ -270,7 +265,7 @@ function deleteManualFile() {
 }
 
 function deleteEmptyDir() {
-    const dirpath = '/empty_dir/';
+    const dirpath = '/delete/';
     if (confirm('本当にディレクトリ "' + dirpath + '" を削除しますか？')) {
         const responseDiv = document.getElementById('deleteResponse');
         const contentDiv = document.getElementById('deleteResponseContent');
@@ -344,12 +339,7 @@ function deleteEmptyDir() {
             errorInfo += 'URL: ' + dirpath + '\n';
             errorInfo += 'メソッド: DELETE\n';
             errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
-            errorInfo += 'エラー内容: ' + error.message + '\n\n';
-            errorInfo += '考えられる原因:\n';
-            errorInfo += '- ネットワーク接続エラー\n';
-            errorInfo += '- サーバーが応答しない\n';
-            errorInfo += '- ディレクトリが存在しない\n';
-            errorInfo += '- ディレクトリ削除が許可されていない (405 Method Not Allowed)';
+            errorInfo += 'エラー内容: ' + error.message;
             
             contentDiv.innerHTML = errorInfo;
             contentDiv.style.color = '#dc3545';
@@ -447,12 +437,7 @@ async function performFileUpload() {
         errorInfo += 'URL: /uploads\n';
         errorInfo += 'メソッド: POST\n';
         errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
-        errorInfo += 'エラー内容: ' + error.message + '\n\n';
-        errorInfo += '考えられる原因:\n';
-        errorInfo += '- ネットワーク接続エラー\n';
-        errorInfo += '- サーバーが応答しない\n';
-        errorInfo += '- ファイルサイズが上限を超えている\n';
-        errorInfo += '- アップロードディレクトリに書き込み権限がない';
+        errorInfo += 'エラー内容: ' + error.message;
         
         contentDiv.innerHTML = errorInfo;
         contentDiv.style.color = '#dc3545';
@@ -551,12 +536,7 @@ async function performMessageSubmit() {
         errorInfo += 'URL: /uploads\n';
         errorInfo += 'メソッド: POST\n';
         errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
-        errorInfo += 'エラー内容: ' + error.message + '\n\n';
-        errorInfo += '考えられる原因:\n';
-        errorInfo += '- ネットワーク接続エラー\n';
-        errorInfo += '- サーバーが応答しない\n';
-        errorInfo += '- データ形式が正しくない\n';
-        errorInfo += '- サーバーの処理でエラーが発生';
+        errorInfo += 'エラー内容: ' + error.message;
         
         contentDiv.innerHTML = errorInfo;
         contentDiv.style.color = '#dc3545';
@@ -586,7 +566,7 @@ async function performFileUploadToNoPermDir() {
     const startTime = Date.now();
     
     try {
-        const response = await fetch('/no_perm_dir/', {
+        const response = await fetch('/no_perm_uploads', {
             method: 'POST',
             body: formData
         });
@@ -598,7 +578,7 @@ async function performFileUploadToNoPermDir() {
         
         let responseInfo = '';
         responseInfo += '=== POSTリクエスト結果（権限なしディレクトリ） ===\n';
-        responseInfo += 'URL: /no_perm_dir/\n';
+        responseInfo += 'URL: /no_perm_uploads/\n';
         responseInfo += 'メソッド: POST\n';
         responseInfo += 'Content-Type: multipart/form-data\n';
         responseInfo += 'レスポンス時間: ' + responseTime + 'ms\n\n';
@@ -624,7 +604,6 @@ async function performFileUploadToNoPermDir() {
         } else {
             responseInfo += '=== エラー内容（権限エラーの可能性） ===\n';
             responseInfo += responseText + '\n\n';
-            responseInfo += '想定される結果: 403 Forbidden (権限なし)\n\n';
             contentDiv.style.color = '#dc3545';
         }
         
@@ -652,14 +631,181 @@ async function performFileUploadToNoPermDir() {
         errorInfo += 'URL: /no_perm_dir/\n';
         errorInfo += 'メソッド: POST\n';
         errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
-        errorInfo += 'エラー内容: ' + error.message + '\n\n';
-        errorInfo += '考えられる原因:\n';
-        errorInfo += '- ネットワーク接続エラー\n';
-        errorInfo += '- サーバーが応答しない\n';
-        errorInfo += '- ディレクトリの権限がない (403 Forbidden)\n';
-        errorInfo += '- パスが存在しない';
+        errorInfo += 'エラー内容: ' + error.message;
         
         contentDiv.innerHTML = errorInfo;
         contentDiv.style.color = '#dc3545';
+    }
+}
+
+// Delete file from no permission directory (file in no-perm directory)
+function deleteNoPermFile() {
+    const filepath = '/no_perm_dir/sample.html';
+    if (confirm('本当にファイル "' + filepath + '" を削除しますか？（権限なしディレクトリ内のファイル）')) {
+        const responseDiv = document.getElementById('deleteResponse');
+        const contentDiv = document.getElementById('deleteResponseContent');
+        
+        // Show response display area
+        responseDiv.style.display = 'block';
+        contentDiv.innerHTML = 'DELETEリクエスト送信中...\nファイル: ' + filepath;
+        contentDiv.style.color = '#4a7c4a';
+
+        const startTime = Date.now();
+        
+        fetch(filepath, {
+            method: 'DELETE'
+        })
+        .then(async response => {
+            const endTime = Date.now();
+            const responseTime = endTime - startTime;
+            
+            const responseText = await response.text();
+            
+            let responseInfo = '';
+            responseInfo += '=== DELETEリクエスト結果（権限なしディレクトリ） ===\n';
+            responseInfo += 'URL: ' + filepath + '\n';
+            responseInfo += 'メソッド: DELETE\n';
+            responseInfo += 'レスポンス時間: ' + responseTime + 'ms\n\n';
+            
+            // Status info
+            responseInfo += '=== ステータス ===\n';
+            responseInfo += 'ステータスコード: ' + response.status + '\n';
+            responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
+            responseInfo += 'OK: ' + response.ok + '\n\n';
+            
+            if (response.ok) {
+                responseInfo += '=== レスポンス内容 ===\n';
+                responseInfo += responseText + '\n\n';
+                responseInfo += '✅ ファイルが正常に削除されました\n\n';
+                contentDiv.style.color = '#4a7c4a';
+            } else {
+                responseInfo += '=== エラー内容（権限エラーの可能性） ===\n';
+                responseInfo += responseText + '\n\n';
+                if (response.status === 403) {
+                    responseInfo += '⚠️ 403 Forbidden: ファイル削除の権限がありません\n\n';
+                } else if (response.status === 404) {
+                    responseInfo += '⚠️ 404 Not Found: ファイルが見つかりません\n\n';
+                } else {
+                    responseInfo += '❌ 削除に失敗しました\n\n';
+                }
+                contentDiv.style.color = '#dc3545';
+            }
+            
+            // Header info
+            responseInfo += '=== レスポンスヘッダー ===\n';
+            const headers = [];
+            for (let [key, value] of response.headers.entries()) {
+                headers.push(key + ': ' + value);
+            }
+            
+            if (headers.length > 0) {
+                headers.sort();
+                responseInfo += headers.join('\n');
+            } else {
+                responseInfo += '(ヘッダーが見つかりません)';
+            }
+            
+            contentDiv.innerHTML = responseInfo;
+        })
+        .catch(error => {
+            const endTime = Date.now();
+            const responseTime = endTime - startTime;
+            
+            let errorInfo = '';
+            errorInfo += '=== DELETEリクエストエラー（権限なしディレクトリ） ===\n';
+            errorInfo += 'URL: ' + filepath + '\n';
+            errorInfo += 'メソッド: DELETE\n';
+            errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
+            errorInfo += 'エラー内容: ' + error.message;
+            
+            contentDiv.innerHTML = errorInfo;
+            contentDiv.style.color = '#dc3545';
+        });
+    }
+}
+
+// Delete file with no permission (file itself has no permission)
+function deleteNoPermFileItself() {
+    const filepath = '/no_perm.html';
+    if (confirm('本当にファイル "' + filepath + '" を削除しますか？（権限なしファイル）')) {
+        const responseDiv = document.getElementById('deleteResponse');
+        const contentDiv = document.getElementById('deleteResponseContent');
+        
+        // Show response display area
+        responseDiv.style.display = 'block';
+        contentDiv.innerHTML = 'DELETEリクエスト送信中...\nファイル: ' + filepath;
+        contentDiv.style.color = '#4a7c4a';
+
+        const startTime = Date.now();
+        
+        fetch(filepath, {
+            method: 'DELETE'
+        })
+        .then(async response => {
+            const endTime = Date.now();
+            const responseTime = endTime - startTime;
+            
+            const responseText = await response.text();
+            
+            let responseInfo = '';
+            responseInfo += '=== DELETEリクエスト結果（権限なしファイル自体） ===\n';
+            responseInfo += 'URL: ' + filepath + '\n';
+            responseInfo += 'メソッド: DELETE\n';
+            responseInfo += 'レスポンス時間: ' + responseTime + 'ms\n\n';
+            
+            // Status info
+            responseInfo += '=== ステータス ===\n';
+            responseInfo += 'ステータスコード: ' + response.status + '\n';
+            responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
+            responseInfo += 'OK: ' + response.ok + '\n\n';
+            
+            if (response.ok) {
+                responseInfo += '=== レスポンス内容 ===\n';
+                responseInfo += responseText + '\n\n';
+                responseInfo += '✅ ファイルが正常に削除されました\n\n';
+                contentDiv.style.color = '#4a7c4a';
+            } else {
+                responseInfo += '=== エラー内容（権限エラーの可能性） ===\n';
+                responseInfo += responseText + '\n\n';
+                if (response.status === 403) {
+                    responseInfo += '⚠️ 403 Forbidden: ファイル削除の権限がありません\n\n';
+                } else if (response.status === 404) {
+                    responseInfo += '⚠️ 404 Not Found: ファイルが見つかりません\n\n';
+                } else {
+                    responseInfo += '❌ 削除に失敗しました\n\n';
+                }
+                contentDiv.style.color = '#dc3545';
+            }
+            
+            // Header info
+            responseInfo += '=== レスポンスヘッダー ===\n';
+            const headers = [];
+            for (let [key, value] of response.headers.entries()) {
+                headers.push(key + ': ' + value);
+            }
+            
+            if (headers.length > 0) {
+                headers.sort();
+                responseInfo += headers.join('\n');
+            } else {
+                responseInfo += '(ヘッダーが見つかりません)';
+            }
+            
+            contentDiv.innerHTML = responseInfo;
+        })
+        .catch(error => {
+            const endTime = Date.now();
+            const responseTime = endTime - startTime;
+            
+            let errorInfo = '';
+            errorInfo += '=== DELETEリクエストエラー（権限なしファイル自体） ===\n';
+            errorInfo += 'URL: ' + filepath + '\n';
+            errorInfo += 'メソッド: DELETE\n';
+            errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
+            errorInfo += 'エラー内容: ' + error.message;
+            
+            contentDiv.innerHTML = errorInfo;
+            contentDiv.style.color = '#dc3545';
+        });
     }
 }
