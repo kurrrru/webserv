@@ -82,7 +82,7 @@ const size_t TIMEOUT = 30;
 const size_t READ_BUFFER_SIZE = 4096;
 const size_t READ_TIMEOUT_SEC = 1;
 const char* GATEWAY_INTERFACE = "CGI/1.1";
-const char* SERVER_SOFTWARE = "WebServ/1.0";
+const char* SERVER_SOFTWARE = "WebServ-Ideal Broccoli/1.0";
 const char* ENV_PREFIX = "HTTP_";
 namespace meta {
 const char* AUTH_TYPE = "AUTH_TYPE";

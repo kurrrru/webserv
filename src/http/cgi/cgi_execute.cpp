@@ -166,11 +166,10 @@ void CgiExecute::setClientVariables(const Client* client) {
 void CgiExecute::setRequestVariables(const HTTPRequest& request) {
     _environment[http::cgi::meta::REQUEST_METHOD] = request.method;
     std::string query = request.uri.fullQuery;
-    if (!query.empty()) {
-        _environment[http::cgi::meta::QUERY_STRING] = query;
-    } else {
-        _environment[http::cgi::meta::QUERY_STRING] = "";
+    if (!query.empty() && query[0] == '?') {
+        query = query.substr(1);
     }
+    _environment[http::cgi::meta::QUERY_STRING] = query;
     const HTTPFields::FieldValue& lengthValues =
         request.fields.getFieldValue(http::fields::CONTENT_LENGTH);
     if (!lengthValues.empty()) {
