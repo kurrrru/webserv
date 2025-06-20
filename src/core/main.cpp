@@ -60,8 +60,8 @@ int main(int argc, char* argv[]) {
         struct epoll_event events[1000];
         while (1) {
             try {
-                int nfds = Epoll::wait(events, 1000, 1000);
                 Epoll::checkClientTimeouts();
+                int nfds = Epoll::wait(events, 1000, 1000);
                 if (nfds == -1) {
                     throw std::runtime_error("epoll_wait failed");
                 }
