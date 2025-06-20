@@ -65,12 +65,11 @@ int main(int argc, char* argv[]) {
                             socklen_t addr_len = sizeof(client_addr);
                             int client_sock = accept(server->getFd(), (struct sockaddr*)&client_addr, &addr_len);
                             if (client_sock == -1) {
-                                //continue?
                                 throw std::runtime_error("accept failed");
                             }
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
                             client->setRequest(toolbox::SharedPtr<http::Request>(new http::Request(client.get())));
-                            Epoll::addClient(client_sock, client); // this func will throw exception
+                            Epoll::addClient(client_sock, client);
                         } catch(std::exception& e) {
                             toolbox::logger::StepMark::error("Main: server: " + std::string(e.what()));
                         }
