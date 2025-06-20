@@ -51,7 +51,7 @@ bool CgiHandler::isCgiRequest(const std::string& targetPath,
 http::IOPendingState CgiHandler::handleRequest(
                         const HTTPRequest& request,
                         Response& response,
-                        const toolbox::SharedPtr<Client>& client,
+                        const Client* client,
                         const config::LocationConfig& locationConfig,
                         const IOPendingState ioPendingState) {
     _client = client;

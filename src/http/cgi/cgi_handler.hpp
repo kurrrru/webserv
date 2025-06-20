@@ -28,7 +28,7 @@ class CgiHandler {
                       const std::string& cgiPath) const;
     IOPendingState handleRequest(const HTTPRequest& request,
                        Response& Response,
-                       const toolbox::SharedPtr<Client>& client,
+                       const Client* client,
                        const config::LocationConfig& config,
                        const http::IOPendingState ioPendingState);
     void setRedirectCount(size_t count) { _redirectCount = count; }
@@ -65,7 +65,7 @@ class CgiHandler {
                             Response& response);
     CgiExecute _execute;
     size_t _redirectCount;
-    toolbox::SharedPtr<Client> _client;
+    const Client* _client;
 };
 
 }  // namespace http

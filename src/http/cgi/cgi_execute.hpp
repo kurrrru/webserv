@@ -47,7 +47,7 @@ class CgiExecute {
     ExecuteResult execute(const std::string& scriptPath,
                         const std::string& interpreter,
                         const HTTPRequest& request,
-                        const toolbox::SharedPtr<Client>& client,
+                        const Client* client,
                         const config::LocationConfig& locationConfig);
     bool initWriteRequestBody(const HTTPRequest& request);
     bool continueWriteRequestBody();
@@ -74,11 +74,11 @@ class CgiExecute {
 
     void setupEnvironmentVariables(const HTTPRequest& request,
                                 const std::string& scriptPath,
-                                const toolbox::SharedPtr<Client>& client,
+                                const Client* client,
                                 const config::LocationConfig& locationConfig);
     void setServerVariables(const HTTPRequest& request,
-                        const toolbox::SharedPtr<Client>& client);
-    void setClientVariables(const toolbox::SharedPtr<Client>& client);
+                        const Client* client);
+    void setClientVariables(const Client* client);
     void setRequestVariables(const HTTPRequest& request);
     void setPathVariables(const HTTPRequest& request,
                         const std::string& scriptPath,
@@ -129,7 +129,7 @@ class CgiExecute {
     time_t _readStartTime;
     time_t _lastReadTime;
     time_t _lastWriteTime;
-    toolbox::SharedPtr<Client> _client;
+    const Client* _client;
 };
 
 }  // namespace http
