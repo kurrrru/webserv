@@ -51,9 +51,7 @@ void Request::handleRequest() {
         default:
             break;
     }
-    const std::string& targetPath =
-                    http::joinPath(_config.getRoot(), httpRequest.uri.path);
-    bool isCgi = _cgiHandler.isCgiRequest(targetPath,
+    bool isCgi = _cgiHandler.isCgiRequest(httpRequest.uri.path,
                                 _config.getCgiExtensions(),
                                 _config.getCgiPath());
     if (isCgi) {
