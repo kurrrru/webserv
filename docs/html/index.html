@@ -4,72 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webserv テストページ</title>
-    <style>
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #3498db;
-            margin-top: 30px;
-        }
-        .info-box {
-            background-color: #e8f4f8;
-            border-left: 4px solid #3498db;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 4px 4px 0;
-        }
-        .success-message {
-            background-color: #d4edda;
-            color: #155724;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 20px;
-            text-align: center;
-            font-weight: bold;
-        }
-        footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #777;
-        }
-        .test-links {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            padding: 20px;
-            border-radius: 4px;
-            margin: 20px 0;
-        }
-        .test-links h3 {
-            color: #495057;
-            margin-top: 0;
-        }
-        .test-links a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .test-links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
     <script src="cgi-test.js"></script>
 </head>
 <body>
@@ -79,360 +14,506 @@
         <div style="text-align: center; margin: 30px 0;">
             <img src="/images/broccoli.jpg" alt="Broccoli Image" style="max-width: 50%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
         </div>
-        
-        <div class="success-message">
-            http://localhost:8080<br>
-            サーバーが正常に動作しています！
-        </div>
-        
-        <div class="info-box">
-            このページはWebservプロジェクトの動作確認用テストページです。
-            このページが表示されていれば、HTTPサーバーが正常にHTMLファイルを配信できていることを意味します。
-        </div>
-        
-        <h2>サーバー情報</h2>
-        <ul>
-            <li>プロジェクト: Webserv</li>
-            <li>言語: C++ 98</li>
-            <li>プロトコル: HTTP/1.1</li>
-        </ul>
-        
-        <h2>Webservの主な機能</h2>
-        <ul>
-            <li>複数ポートでのリッスン</li>
-            <li>GET, HEAD(option), POST, DELETEメソッドの対応</li>
-            <li>設定ファイルによるルーティング</li>
-            <li>ディレクトリリスティング</li>
-            <li>CGIスクリプトの実行GET, POST</li>
-            <li>ファイルアップロード</li>
-        </ul>
 
-        <h2>テスト用リンク</h2>
-        <div class="test-links">
-            <h3>GETリクエストテスト</h3>
-            <ul>
-                <li><a href="/index.html">index.html ページへのリンク</a></li>
-                <li><a href="/autoindex/">ディレクトリリスティングテスト</a></li>
-                <li><a href="/404test">404エラーテスト</a></li>
-                <li><a href="/408teapot">teapot</a></li>
-                <li><a href="http://localhost:5000">localhost:5000</a></li>
-            </ul>
+        <div class="tab-navigation">
+            <button class="tab-button active" onclick="openTab('home')">ホーム</button>
+            <button class="tab-button" onclick="openTab('get')">GET</button>
+            <button class="tab-button" onclick="openTab('head')">HEAD</button>
+            <button class="tab-button" onclick="openTab('post')">POST</button>
+            <button class="tab-button" onclick="openTab('delete')">DELETE</button>
+            <button class="tab-button" onclick="openTab('cgi')">CGI</button>
+        </div>
 
-            <h3>HEADリクエストテスト</h3>
-            <p>HEADリクエストはGETと同じヘッダーを返しますが、レスポンスボディは返しません。</p>
-            <div style="margin: 15px 0;">
-                <div style="margin-bottom: 10px;">
-                    <label for="headUrl">テスト対象URL:</label>
-                    <select id="headUrl" style="margin-left: 10px; width: 250px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                        <option value="/">/ (index.html)</option>
-                        <option value="/autoindex/">/autoindex/ (allowディレクトリ)</option>
-                        <option value="/uploads/">/uploads/ (not allowディレクトリ)</option>
-                        <option value="/404test">/404test (存在しないページ)</option>
-                    </select>
-                    <button onclick="performHeadRequest()" style="background-color: #6f42c1; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">HEAD送信</button>
-                </div>
-                <div id="headResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none;">
-                    <h5 style="margin-top: 0; color: #495057;">HEADレスポンス結果:</h5>
-                    <div id="headResponseContent"></div>
-                </div>
+        <div id="home" class="tab-content active">
+            
+            <div class="success-message">
+                http://localhost:8080<br>
+                サーバーが正常に動作しています！
             </div>
             
-            <h3>POSTリクエストテスト（サーバー直接）</h3>
-            <p>Webサーバーの内蔵機能による直接的なファイルアップロードとデータ送信のテストです。</p>
-            <h4>ファイルアップロード</h4>
-            <form action="/uploads" method="POST" enctype="multipart/form-data" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0;">
-                <div style="margin-bottom: 10px;">
-                    <label for="file">ファイルを選択:</label>
-                    <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
-                </div>
-                <button type="submit" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">アップロード</button>
-            </form>
-            <h4>メッセージ送信</h4>
-            <form action="/uploads" method="post" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 15px 0;">
-                <div style="margin-bottom: 10px;">
-                    <label for="username">ユーザー名:</label>
-                    <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label for="message">メッセージ:</label>
-                    <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;"></textarea>
-                </div>
-                <button type="submit" style="background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">送信</button>
-            </form>
-
-            <h3>DELETEリクエストテスト</h3>
-            <div style="margin: 15px 0;">
-                <h4>アップロードされたファイル一覧</h4>
-                <div id="fileList" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 10px 0;">
-                    <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-bottom: 10px;">ファイル一覧を更新</button>
-                    <div id="files">
-                        <p style="color: #666; font-style: italic;">「ファイル一覧を更新」ボタンをクリックしてファイルを表示</p>
-                    </div>
-                </div>
-                <div style="margin-top: 10px;">
-                    <h4>手動削除テスト</h4>
-                    <input type="text" id="manualDeletePath" placeholder="/uploads/8080/filename.txt" style="width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                    <button onclick="deleteManualFile()" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">削除</button>
-                    <small style="display: block; color: #666; margin-top: 5px;">※ ファイルパスを入力して手動削除</small>
-                </div>
+            <div class="info-box">
+                このページはWebservプロジェクトの動作確認用テストページです。
+                このページが表示されていれば、HTTPサーバーが正常にHTMLファイルを配信できていることを意味します。
             </div>
-
-            <h3>CGIスクリプトテスト</h3>
-            <p>CGIスクリプト（script.py）を使用したテストです。サーバーの直接処理ではなく、外部スクリプトによる動的処理をテストします。</p>
-
-            <h4>現在時刻取得</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/script.py', 'GET')" style="background-color: #7dadd8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">現在時刻</button>
-            </div>
-
-            <h4>環境変数テスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/env_test.py', 'GET')" style="background-color: #6c757d; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">env_test.py - CGI環境変数を表示</button>
-            </div>
-
-            <h4>ドキュメントレスポンステスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/document.py', 'GET')" style="background-color: #17a2b8; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">document.py - 標準HTMLレスポンス</button>
-            </div>
-
-            <h4>リダイレクトテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/client_redirect.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">client_redirect.py - 外部リダイレクト</button>
-                <button onclick="testCgiScript('/redirect_to_static.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">redirect_to_static.py - 静的ファイルへ</button>
-                <button onclick="testCgiScript('/redirect1.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">redirect1.py - リダイレクトチェーン</button>
-            </div>
-
-            <h4>リダイレクトループテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/loop1.py', 'GET')" style="background-color: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">loop1.py - 無限ループテスト</button>
-                <small style="display: block; color: #666; margin-top: 5px;">※ サーバーが無限ループを検出してエラーを返すことを確認</small>
-            </div>
-
-            <h4>大容量データテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testLargeOutput()" style="background-color: #20c997; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">large_output_test.py - 64KB出力</button>
-                <button onclick="testCgiLargePost()" style="background-color: #20c997; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">large_post_test.py - 大容量POST</button>
-            </div>
-
-            <h4>タイムアウトテスト</h4>
-            <div style="margin: 15px 0;">
-                <button onclick="testCgiScript('/read_timeout_test.py', 'GET')" style="background-color: #6610f2; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">read_timeout_test.py - 読み取りタイムアウト</button>
-                <button onclick="testCgiWriteTimeout()" style="background-color: #6610f2; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-left: 5px;">write_timeout_test.py - 書き込みタイムアウト</button>
-                <small style="display: block; color: #666; margin-top: 5px;">※ タイムアウトは30秒で設定</small>
-            </div>
-
-            <div id="cgiTestResponse" style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 4px; margin-top: 20px; font-family: monospace; white-space: pre-wrap; display: none;">
-                <h5 style="margin-top: 0; color: #495057;">CGI テスト結果:</h5>
-                <div id="cgiTestContent"></div>
-            </div>
-
-            <h4>CGI POST - ファイルアップロード</h4>
-            <div style="margin: 15px 0;">
-                <form method="post" action="/uploads/script.py" enctype="multipart/form-data" style="background-color: #fff; border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin: 10px 0;">
-                    <div style="margin-bottom: 10px;">
-                        <label for="cgiFiles">ファイルを選択:</label>
-                        <input type="file" id="cgiFiles" name="files" multiple accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <label for="cgiFilename">保存ファイル名:</label>
-                        <input type="text" id="cgiFilename" placeholder="カスタムファイル名 (オプション)" style="margin-left: 10px; width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
-                        <small style="display: block; color: #666; margin-top: 5px; margin-left: 100px;">※ 空の場合は元のファイル名を使用</small>
-                    </div>
-                    <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">CGI経由でアップロード</button>
-                </form>
-                <small style="display: block; color: #666; margin-top: 5px;">※ CGIスクリプト（script.py）を経由してファイルをアップロード</small>
-            </div>
-
+            
+            <h2>サーバー情報</h2>
+            <ul>
+                <li>プロジェクト: Webserv</li>
+                <li>言語: C++ 98</li>
+                <li>プロトコル: HTTP/1.1</li>
+            </ul>
+            
+            <h2>Webservの主な機能</h2>
+            <ul>
+                <li>複数ポートでのリッスン</li>
+                <li>GET, HEAD(option), POST, DELETEメソッドの対応</li>
+                <li>設定ファイルによるルーティング</li>
+                <li>ディレクトリリスティング</li>
+                <li>CGIスクリプトの実行GET, POST</li>
+                <li>ファイルアップロード</li>
+            </ul>
         </div>
 
-        <script>
-            // Auto-load file list when page loads
-            document.addEventListener('DOMContentLoaded', function() {
-                loadFileList();
-            });
+        <div id="get" class="tab-content">
+            <h2>GETリクエストテスト</h2>
+            <div class="test-links">
+                <h3>📄 通常ファイルアクセス</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/index.html'" style="background-color: #28a745; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 通常ファイル取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /index.html
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/empty.html'" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 空ファイル取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /empty.html
+                        </code>
+                    </div>
+                </div>
 
-            // HEAD request function (for preset URLs)
-            function performHeadRequest() {
-                const url = document.getElementById('headUrl').value;
-                executeHeadRequest(url);
-            }
+                <h3>🚫 権限制限ファイル</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/no_perm.html'" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🚫 権限なしファイル
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /no_perm.html
+                        </code>
+                    </div>
+                </div>
 
-            // HEAD request function (for custom URLs)
-            function performCustomHeadRequest() {
-                const url = document.getElementById('customHeadUrl').value.trim();
-                if (!url) {
-                    alert('URLを入力してください');
-                    return;
-                }
-                executeHeadRequest(url);
-            }
+                <h3>📁 ディレクトリアクセス</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/'" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📁 ディレクトリインデックス
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/autoindex/'" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📁 自動インデックス表示
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /autoindex/
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/empty_dir/'" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📂 空ディレクトリ自動表示
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /empty_dir/
+                        </code>
+                    </div>
+                </div>
 
-            // Execute HEAD request and display response
-            function executeHeadRequest(url) {
-                const responseDiv = document.getElementById('headResponse');
-                const contentDiv = document.getElementById('headResponseContent');
+                <h3>🔒 権限制限ディレクトリ</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/no_perm_dir/'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🔒 権限なしディレクトリ
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /no_perm_dir/
+                        </code>
+                    </div>
+                </div>
+
+                <h3>❌ エラー・例外テスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/non_exist'" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ❌ 存在しないファイル
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /non_exist
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='/408teapot'" style="background-color: #6f42c1; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🫖 teapot
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /408teapot
+                        </code>
+                    </div>
+                </div>
+
+                <h3>🔗 複数ポート対応テスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="window.location.href='http://localhost:5000'" style="background-color: #fd7e14; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🔗 localhost:5000
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET http://localhost:5000
+                        </code>
+                    </div>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 各ボタンをクリックすると同じタブでGETリクエストを送信します
+                </p>
+            </div>
+        </div>
+
+        <div id="head" class="tab-content">
+            <h2>HEADリクエストテスト</h2>
+            <div class="test-links">
+                <p>HEADリクエストはGETと同じヘッダーを返しますが、レスポンスボディは返しません。</p>
+                <h3>📄 通常ファイルアクセス</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/index.html')" style="background-color: #28a745; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 通常ファイル取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /index.html
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/empty.html')" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 空ファイル取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /empty.html
+                        </code>
+                    </div>
+                </div>
+
+                <h3>🚫 権限制限ファイル</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/no_perm.html')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🚫 権限なしファイル
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /no_perm.html
+                        </code>
+                    </div>
+                </div>
+
+                <h3>📁 ディレクトリアクセス</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/')" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📁 ディレクトリインデックス
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/autoindex/')" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📁 自動インデックス表示
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /autoindex/
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/empty_dir/')" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📂 空ディレクトリ自動表示
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /empty_dir/
+                        </code>
+                    </div>
+                </div>
+
+                <h3>🔒 権限制限ディレクトリ</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/no_perm_dir/')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🔒 権限なしディレクトリ
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /no_perm_dir/
+                        </code>
+                    </div>
+                </div>
+
+                <h3>❌ エラー・例外テスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="performHeadRequest('/non_exist')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ❌ 存在しないファイル
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            HEAD /non_exist
+                        </code>
+                    </div>
+                </div>
+                <div id="headResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">HEADレスポンス結果:</h5>
+                    <div id="headResponseContent"></div>
+                </div>
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 各ボタンをクリックするとHEADリクエストを送信してヘッダー情報を表示します
+                </p>
+            </div>
+        </div>
+
+        <div id="post" class="tab-content">
+            <h2>POSTリクエストテスト（サーバー直接）</h2>
+            <div class="test-links">
+                <p>Webサーバーの内蔵機能による直接的なファイルアップロードとデータ送信のテストです。</p>
                 
-                // Show response display area
-                responseDiv.style.display = 'block';
-                contentDiv.innerHTML = 'HEADリクエスト送信中...\nURL: ' + url;
+                <h3>ファイルアップロード</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <form id="fileUploadForm" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="file">ファイルを選択:</label>
+                            <input type="file" id="file" name="uploadFile" accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+                        </div>
+                        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                            <button type="button" onclick="performFileUpload()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 230px;">
+                                📤 通常アップロード
+                            </button>
+                            <button type="button" onclick="performFileUploadToNoPermDir()" style="background-color: #dc3545; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 230px;">
+                                🔒 権限なしディレクトリ送信
+                            </button>
+                        </div>
+                    </form>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            POST /uploads
+                        </code>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            POST /no_perm_uploads/
+                        </code>
+                    </div>
+                </div>
 
-                const startTime = Date.now();
+                <h3>メッセージ送信</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <form id="messageForm" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="username">ユーザー名:</label>
+                            <input type="text" id="username" name="username" style="margin-left: 10px; width: 150px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="message">メッセージ:</label>
+                            <textarea id="message" name="message" rows="3" cols="30" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;"></textarea>
+                        </div>
+                        <button type="button" onclick="performMessageSubmit()" style="background-color: #007bff; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 230px;">
+                            💬 メッセージ送信
+                        </button>
+                    </form>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        POST /uploads
+                    </code>
+                </div>
+
+                <div id="postResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">POSTレスポンス結果:</h5>
+                    <div id="postResponseContent"></div>
+                </div>
                 
-                fetch(url, {
-                    method: 'HEAD'
-                })
-                .then(response => {
-                    const endTime = Date.now();
-                    const responseTime = endTime - startTime;
-                    
-                    // Build response info
-                    let responseInfo = '';
-                    responseInfo += '=== HEADリクエスト結果 ===\n';
-                    responseInfo += 'URL: ' + url + '\n';
-                    responseInfo += 'メソッド: HEAD\n';
-                    responseInfo += 'レスポンス時間: ' + responseTime + 'ms\n\n';
-                    
-                    // Status info
-                    responseInfo += '=== ステータス ===\n';
-                    responseInfo += 'ステータスコード: ' + response.status + '\n';
-                    responseInfo += 'ステータステキスト: ' + response.statusText + '\n';
-                    responseInfo += 'OK: ' + response.ok + '\n\n';
-                    
-                    // Header info
-                    responseInfo += '=== レスポンスヘッダー ===\n';
-                    const headers = [];
-                    for (let [key, value] of response.headers.entries()) {
-                        headers.push(key + ': ' + value);
-                    }
-                    
-                    if (headers.length > 0) {
-                        headers.sort(); // Sort headers alphabetically
-                        responseInfo += headers.join('\n');
-                    } else {
-                        responseInfo += '(ヘッダーが見つかりません)';
-                    }
-                    contentDiv.innerHTML = responseInfo;
-                })
-                .catch(error => {
-                    const endTime = Date.now();
-                    const responseTime = endTime - startTime;
-                    
-                    let errorInfo = '';
-                    errorInfo += '=== HEADリクエストエラー ===\n';
-                    errorInfo += 'URL: ' + url + '\n';
-                    errorInfo += 'メソッド: HEAD\n';
-                    errorInfo += 'エラー時間: ' + responseTime + 'ms\n\n';
-                    errorInfo += 'エラー内容: ' + error.message + '\n\n';
-                    errorInfo += '考えられる原因:\n';
-                    errorInfo += '- ネットワーク接続エラー\n';
-                    errorInfo += '- サーバーが応答しない\n';
-                    errorInfo += '- CORSポリシー違反\n';
-                    errorInfo += '- URLが存在しない';
-                    
-                    contentDiv.innerHTML = errorInfo;
-                    contentDiv.style.color = '#dc3545'; // Red color for errors
-                });
-            }
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 フォームを使ってPOSTリクエストでデータを送信します
+                </p>
+            </div>
+        </div>
 
-            function deleteFile(filepath) {
-                if (confirm('本当にファイル "' + filepath + '" を削除しますか？')) {
-                    fetch(filepath, {
-                        method: 'DELETE'
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('ファイルが正常に削除されました');
-                            loadFileList(); // Update file list
-                        } else {
-                            alert('削除に失敗しました: ' + response.status);
-                        }
-                    })
-                    .catch(error => {
-                        alert('エラーが発生しました: ' + error.message);
-                    });
-                }
-            }
+        <div id="delete" class="tab-content">
+            <h2>DELETEリクエストテスト</h2>
+            <div class="test-links">
+                <h3>アップロードされたファイル一覧</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <div id="fileList" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <button onclick="loadFileList()" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; width: 230px; font-size: 14px; transition: background-color 0.3s ease;">
+                            🔄 ファイル一覧を更新
+                        </button>
+                        <div id="files">
+                            <p style="color: #666; font-style: italic;">「ファイル一覧を更新」ボタンをクリックしてファイルを表示</p>
+                        </div>
+                    </div>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        DELETE /uploads/8080/filename.txt
+                    </code>
+                </div>
 
-            function loadFileList() {
-                // Show loading message
-                document.getElementById('files').innerHTML = '<p style="color: #666; font-style: italic;">読み込み中...</p>';
+                <h3>権限制限ファイル削除テスト</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <div style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <button onclick="deleteNoPermFile()" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; width: 230px; margin-bottom: 10px; font-size: 14px; transition: background-color 0.3s ease;">
+                            🔒 権限なしディレクトリ内<br>ファイル削除
+                        </button>
+                        <small style="display: block; color: #666;">※ no_perm_dir内のファイルの削除テスト</small>
+                        <button onclick="deleteNoPermFileItself()" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; width: 230px; margin-top: 10px; font-size: 14px; transition: background-color 0.3s ease;">
+                            🚫 権限なしファイル削除
+                        </button>
+                        <small style="display: block; color: #666;">※ no_perm.htmlファイル自体の削除テスト</small>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            DELETE /no_perm_dir/sample.html
+                        </code>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            DELETE /no_perm.html
+                        </code>
+                    </div>
+                </div>
+
+                <div id="deleteResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 15px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">DELETEレスポンス結果:</h5>
+                    <div id="deleteResponseContent"></div>
+                </div>
                 
-                fetch('/uploads/8080/', {
-                    method: 'GET'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        // Check if response is JSON
-                        const contentType = response.headers.get('content-type');
-                        if (contentType && contentType.includes('application/json')) {
-                            return response.json();
-                        } else {
-                            // Parse HTML directory listing
-                            return response.text().then(html => {
-                                const parser = new DOMParser();
-                                const doc = parser.parseFromString(html, 'text/html');
-                                const links = doc.querySelectorAll('a');
-                                const files = [];
-                                links.forEach(link => {
-                                    const href = link.getAttribute('href');
-                                    // Skip parent directory, subdirectories, and hidden files
-                                    if (href && href !== '../' && href !== '.' && href !== '..' && 
-                                        !href.endsWith('/') && !href.startsWith('.')) {
-                                        // Remove URL encoding if present
-                                        const decodedHref = decodeURIComponent(href);
-                                        // Also check decoded name for hidden files
-                                        const filename = decodedHref.split('/').pop();
-                                        if (!filename.startsWith('.')) {
-                                            files.push('uploads/8080/' + filename);
-                                        }
-                                    }
-                                });
-                                return files;
-                            });
-                        }
-                    }
-                    throw new Error('ファイル一覧の取得に失敗しました (Status: ' + response.status + ')');
-                })
-                .then(files => {
-                    displayFileList(files);
-                })
-                .catch(error => {
-                    document.getElementById('files').innerHTML = '<p style="color: #dc3545;">エラー: ' + error.message + '</p>';
-                });
-            }
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 アップロードされたファイルをDELETEリクエストで削除します
+                </p>
+            </div>
+        </div>
 
-            function displayFileList(files) {
-                const filesDiv = document.getElementById('files');
-                if (files.length === 0) {
-                    filesDiv.innerHTML = '<p style="color: #666; font-style: italic;">アップロードされたファイルはありません</p>';
-                    return;
-                }
+        <div id="cgi" class="tab-content">
+            <h2>CGIスクリプトテスト</h2>
+            <div class="test-links">
+                <p>CGIスクリプト（script.py）を使用したテストです。サーバーの直接処理ではなく、外部スクリプトによる動的処理をテストします。</p>
 
-                let html = '<table style="width: 100%; border-collapse: collapse;">';
-                html += '<tr style="background-color: #f8f9fa; border-bottom: 1px solid #dee2e6;"><th style="padding: 8px; text-align: left;">ファイル名</th><th style="padding: 8px; text-align: center;">操作</th></tr>';
+                <h3>基本的なCGIテスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/script.py', 'GET')" style="background-color: #7dadd8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🕒 現在時刻取得
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /script.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/env_test.py', 'GET')" style="background-color: #6c757d; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🌍 CGI環境変数
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /env_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/document.py', 'GET')" style="background-color: #17a2b8; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 HTMLレスポンス
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /document.py
+                        </code>
+                    </div>
+                </div>
+
+                <h3>リダイレクトテスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/client_redirect.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🔗 外部リダイレクト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /client_redirect.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/redirect_to_static.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📄 静的ファイルへ
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /redirect_to_static.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/redirect1.py', 'GET')" style="background-color: #ffc107; color: #212529; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            🔄 リダイレクトチェーン
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /redirect1.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/loop1.py', 'GET')" style="background-color: #dc3545; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ⚠️ 無限ループテスト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /loop1.py
+                        </code>
+                    </div>
+                </div>
+
+                <h3>パフォーマンステスト</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin: 20px 0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testLargeOutput()" style="background-color: #20c997; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📊 大容量出力 (64KB)
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /large_output_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiLargePost()" style="background-color: #20c997; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            📤 大容量POST送信
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            POST /large_post_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiScript('/read_timeout_test.py', 'GET')" style="background-color: #6610f2; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ⏱️ 読み取りタイムアウト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            GET /read_timeout_test.py
+                        </code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <button onclick="testCgiWriteTimeout()" style="background-color: #6610f2; color: white; padding: 12px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease; width: 230px;">
+                            ✍️ 書き込みタイムアウト
+                        </button>
+                        <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px);">
+                            POST /write_timeout_test.py
+                        </code>
+                    </div>
+                </div>
+
+                <div id="cgiTestResponse" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; margin-top: 20px; font-family: monospace; white-space: pre-wrap; display: none; backdrop-filter: blur(10px);">
+                    <h5 style="margin-top: 0; color: #4a7c4a;">CGI テスト結果:</h5>
+                    <div id="cgiTestContent"></div>
+                </div>
+
+                <h3>CGI POST - ファイルアップロード</h3>
+                <div style="display: flex; align-items: flex-start; gap: 15px; flex-wrap: wrap; margin: 20px 0;">
+                    <form method="post" action="/script.py" enctype="multipart/form-data" style="background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); padding: 15px; border-radius: 8px; backdrop-filter: blur(10px); flex: 1; min-width: 300px;">
+                        <div style="margin-bottom: 10px;">
+                            <label for="cgiFiles">ファイルを選択:</label>
+                            <input type="file" id="cgiFiles" name="files" multiple accept="*/*" style="margin-left: 10px; border: 1px solid #ccc; padding: 4px 8px; border-radius: 3px;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label for="cgiFilename">保存ファイル名:</label>
+                            <input type="text" id="cgiFilename" placeholder="カスタムファイル名 (オプション)" style="margin-left: 10px; width: 200px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 3px;">
+                            <small style="display: block; color: #666; margin-top: 5px; margin-left: 100px;">※ 空の場合は元のファイル名を使用</small>
+                        </div>
+                        <button type="button" onclick="performCgiPostRequest()" style="background-color: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; width: 230px;">
+                            📤 CGI経由でアップロード
+                        </button>
+                    </form>
+                    <code style="background: rgba(255, 255, 255, 0.3); padding: 8px 12px; border-radius: 4px; font-family: 'Courier New', monospace; font-size: 13px; color: #2d5a2d; border: 1px solid rgba(105, 190, 105, 0.3); backdrop-filter: blur(5px); align-self: flex-start;">
+                        POST /script.py
+                    </code>
+                </div>
                 
-                files.forEach(file => {
-                    const filepath = file;
-                    const filename = file.split('/').pop(); // Extract only the filename
-                    html += '<tr style="border-bottom: 1px solid #dee2e6;">';
-                    html += '<td style="padding: 8px;"><a href="' + filepath + '" target="_blank" style="color: #007bff; text-decoration: none;">' + filename + '</a></td>';
-                    html += '<td style="padding: 8px; text-align: center;"><button onclick="deleteFile(\'' + filepath + '\')" style="background-color: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 3px; cursor: pointer; font-size: 12px;">削除</button></td>';
-                    html += '</tr>';
-                });
-                
-                html += '</table>';
-                filesDiv.innerHTML = html;
-            }
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                    💡 CGIスクリプトを使用して外部プログラムと連携したテストを実行します
+                </p>
+            </div>
+        </div>
 
-            function deleteManualFile() {
-                const filepath = document.getElementById('manualDeletePath').value.trim();
-                if (!filepath) {
-                    alert('ファイルパスを入力してください');
-                    return;
-                }
-                deleteFile(filepath);
-            }
-        </script>
+        <script src="script.js"></script>
         <footer>
             &copy; 2025 Webserv Project
         </footer>
