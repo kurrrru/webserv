@@ -1,6 +1,5 @@
 NAME = webserv
 
-
 # sources
 SRCS = $(wildcard toolbox/*.cpp) $(wildcard src/*/*.cpp) $(wildcard src/*/*/*.cpp)
 
@@ -24,4 +23,12 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+setup-test:
+	chmod +x setup.sh
+	./setup.sh
+
+clean-test:
+	chmod +x clean.sh
+	./clean.sh
+
+.PHONY: all clean fclean re setup-test clean-test
