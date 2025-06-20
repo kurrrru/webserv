@@ -48,7 +48,6 @@ int main(int argc, char* argv[]) {
                     servers.push_back(server);
             }
         }
-        int cnt = 0;  // for debug
         struct epoll_event events[1000];
         while (1) {
             try {
@@ -61,7 +60,6 @@ int main(int argc, char* argv[]) {
                         static_cast<taggedEventData*>(events[i].data.ptr);
                     if (tagged->server) {
                         try {
-                            std::cout <<"---------------   server   ---------------" <<std::endl;
                             toolbox::SharedPtr<Server> server = tagged->server;
                             struct sockaddr_in client_addr;
                             socklen_t addr_len = sizeof(client_addr);
@@ -70,19 +68,16 @@ int main(int argc, char* argv[]) {
                                 //continue?
                                 throw std::runtime_error("accept failed");
                             }
-                            std::cout << server->getName() << " accepted client fd: " << client_sock << std::endl;
                             toolbox::SharedPtr<Client> client(new Client(client_sock, client_addr, addr_len));
                             client->setRequest(toolbox::SharedPtr<http::Request>(new http::Request(client.get())));
                             Epoll::addClient(client_sock, client); // this func will throw exception
                         } catch(std::exception& e) {
-                            std::cerr << e.what() << std:: endl;
+                            toolbox::logger::StepMark::error("Main: server: " + std::string(e.what()));
                         }
                     } else {
                         try {
-                            std::cout << "--------------- client " << ++cnt << " ---------------" <<std::endl;
                             toolbox::SharedPtr<Client> client = tagged->client;
                             int client_sock = client->getFd();
-                            std::cout << "send response to client fd: " << client_sock << std::endl;
 
                             if (isSocketDisconnected(events[i])) {
                                 Epoll::del(client_sock);
@@ -96,19 +91,19 @@ int main(int argc, char* argv[]) {
                                 Epoll::del(client_sock);
                             }
                         } catch (std::exception& e) {
-                            std::cerr << e.what() << std:: endl;
+                            toolbox::logger::StepMark::error("Main: client: " + std::string(e.what()));
                         }
                     }
                 }
             } catch (std::exception& e) {
-                std::cerr << e.what() << std::endl;
+                toolbox::logger::StepMark::error("Main: whileloop: " + std::string(e.what()));
             }
         }
         for (size_t i = 0; i < servers.size(); ++i) {
             Epoll::del(servers[i]->getFd());
         }
     } catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
+        toolbox::logger::StepMark::critical("Main: " + std::string(e.what()));
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
