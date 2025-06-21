@@ -26,6 +26,15 @@ void CgiHandler::reset() {
     _execute.reset();
 }
 
+void CgiHandler::forceTerminate() {
+    if (_execute.hasActiveChild()) {
+        if (!_execute.waitForChildProcess()) {
+            _execute.terminateChildProcess();
+        }
+        _execute.cleanupPipes();
+    }
+}
+
 bool CgiHandler::isCgiRequest(const std::string& targetPath,
                             const std::vector<std::string>& cgiExtension,
                             const std::string& cgiPath) const {
@@ -106,6 +115,7 @@ IOPendingState CgiHandler::executeInitialCgiRequest(
 IOPendingState CgiHandler::continueCgiBodySending(Response& response) {
     _execute.continueWriteRequestBody();
     if (_execute.hasWriteError()) {
+        forceTerminate();
         if (_execute.hasTimedOut()) {
             toolbox::logger::StepMark::error(
                 "CGI handler result: Write EXECUTE_TIMEOUT");
@@ -127,6 +137,7 @@ IOPendingState CgiHandler::continueCgiOutputReading(Response& response) {
     if (_execute.getReadState() == CgiExecute::READ_IDLE) {
         if (!_execute.initReadOutput()) {
             if (_execute.hasReadError()) {
+                forceTerminate();
                 if (_execute.hasTimedOut()) {
                     toolbox::logger::StepMark::error(
                         "CGI execute result: EXECUTE_TIMEOUT");
@@ -142,6 +153,7 @@ IOPendingState CgiHandler::continueCgiOutputReading(Response& response) {
         _execute.continueReadOutput();
     }
     if (_execute.hasReadError()) {
+        forceTerminate();
         if (_execute.hasTimedOut()) {
             toolbox::logger::StepMark::error(
                 "CGI execute result: read EXECUTE_TIMEOUT");
@@ -152,9 +164,9 @@ IOPendingState CgiHandler::continueCgiOutputReading(Response& response) {
         return NO_IO_PENDING;
     }
     if (_execute.isReadComplete()) {
+        forceTerminate();
         IOPendingState result =
         processCgiResponse(_execute.getResponse(), response);
-        _execute.cleanupPipes();
         return result;
     }
     return CGI_OUTPUT_READING;
@@ -165,12 +177,14 @@ IOPendingState CgiHandler::handleExecuteResult(
                         Response& response) {
     switch (result) {
         case CgiExecute::EXECUTE_SUCCESS:
+            forceTerminate();
             return processCgiResponse(_execute.getResponse(), response);
         case CgiExecute::EXECUTE_WRITE_PENDING:
             return CGI_BODY_SENDING;
         case CgiExecute::EXECUTE_READ_PENDING:
             return CGI_OUTPUT_READING;
         case CgiExecute::EXECUTE_TIMEOUT:
+            forceTerminate();
             response.setStatus(HttpStatus::GATEWAY_TIMEOUT);
             return NO_IO_PENDING;
         case CgiExecute::EXECUTE_PATH_ERROR:
@@ -180,12 +194,15 @@ IOPendingState CgiHandler::handleExecuteResult(
             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
             return NO_IO_PENDING;
         case CgiExecute::EXECUTE_EXEC_ERROR:
+            forceTerminate();
             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
             return NO_IO_PENDING;
         case CgiExecute::EXECUTE_IO_ERROR:
+            forceTerminate();
             response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
             return NO_IO_PENDING;
         default:
+            forceTerminate();
             toolbox::logger::StepMark::error(
                 "Unknown CGI execute result: " +
                 toolbox::to_string(static_cast<int>(result)));
@@ -211,10 +228,12 @@ IOPendingState CgiHandler::processCgiResponse(const CgiResponse& cgiResponse,
                 return NO_IO_PENDING;
             case CgiResponse::INVALID:
             default:
+                forceTerminate();
                 response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
                 return NO_IO_PENDING;
         }
     } catch (const std::exception& e) {
+        forceTerminate();
         toolbox::logger::StepMark::error(
             std::string("CGI response processing exception: ") + e.what());
         response.setStatus(HttpStatus::INTERNAL_SERVER_ERROR);
@@ -264,6 +283,7 @@ bool CgiHandler::handleClientRedirectDocument(Response& response,
 IOPendingState CgiHandler::handleLocalRedirect(Response& response,
                                     const CgiResponse& cgiResponse) {
     if (!validateRedirectRequest(response, cgiResponse)) {
+        forceTerminate();
         return NO_IO_PENDING;
     }
     RedirectInfo redirectInfo = extractRedirectInfo(cgiResponse);

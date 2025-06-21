@@ -684,4 +684,8 @@ std::string CgiExecute::extractScriptName(const std::string& requestPath,
     return requestPath;
 }
 
+bool CgiExecute::hasActiveChild() const {
+    return _childPid > 0;
+}
+
 }  // namespace http

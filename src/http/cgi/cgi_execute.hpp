@@ -63,6 +63,9 @@ class CgiExecute {
     void reset();
     void cleanupPipes();
     bool hasTimedOut() const;
+    bool waitForChildProcess();
+    void terminateChildProcess();
+    bool hasActiveChild() const;
 
  private:
     CgiExecute(const CgiExecute& other);
@@ -103,10 +106,8 @@ class CgiExecute {
     bool isChildProcessEnded();
     std::string extractScriptName(const std::string& requestPath,
                                 const std::string& scriptPath) const;
-    bool waitForChildProcess();
     bool handleProcessExit(int status);
     bool validateScriptPath(const std::string& scriptPath) const;
-    void terminateChildProcess();
     void wrapClose(int& fd);
     bool setNonBlocking(int fd);
 

@@ -88,6 +88,9 @@ int main(int argc, char* argv[]) {
                             int client_sock = client->getFd();
 
                             if (isSocketDisconnected(events[i])) {
+                                if (client->isCgiProcessing()) {
+                                    client->getRequest()->terminateActiveCgiProcesses();
+                                }
                                 Epoll::del(client_sock);
                                 continue;
                             } else if ((events[i].events & EPOLLOUT && (client->isResponseSending() || client->isCgiProcessing()))
