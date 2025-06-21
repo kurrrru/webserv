@@ -38,7 +38,7 @@ std::string readFile(const std::string& path) {
 void buildFileInfoRow(FileInfo& info, std::stringstream& ss) {
     std::string size = info.isDir ? "-" : toolbox::to_string(info.size);
     ss << "<tr>\n"
-       << "  <td><a href=\"" << info.path << "\">"
+       << "  <td><a href=\"" << info.name << "\">"
        << info.name << "</a></td>\n"
        << "  <td>" << size << "</td>\n"
        << "  <td>" << info.time << "</td>\n"
