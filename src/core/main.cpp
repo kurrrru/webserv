@@ -102,7 +102,7 @@ int main(int argc, char* argv[]) {
             Epoll::del(servers[i]->getFd());
         }
     } catch (std::exception& e) {
-        toolbox::logger::StepMark::critical("Main: " + std::string(e.what()));
+        std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
