@@ -25,7 +25,7 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("allowed_methods")) {
         std::cout << prefix << "allowed_methods: ";
         const std::vector<std::string>& allowedMethods = conf.getAllowedMethods();
-        for (size_t i = 0; i < allowedMethods.size(); ++i) {
+        for (std::size_t i = 0; i < allowedMethods.size(); ++i) {
             std::cout << allowedMethods[i];
             if (i < allowedMethods.size() - 1) std::cout << ", ";
         }
@@ -37,7 +37,7 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("cgi_extension")) {
         std::cout << prefix << "cgi_extension: ";
         const std::vector<std::string>& cgiExtensions = conf.getCgiExtensions();
-        for (size_t i = 0; i < cgiExtensions.size(); ++i) {
+        for (std::size_t i = 0; i < cgiExtensions.size(); ++i) {
             std::cout << cgiExtensions[i];
             if (i < cgiExtensions.size() - 1) std::cout << ", ";
         }
@@ -52,9 +52,9 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("error_page")) {
         std::cout << prefix << "error_page: ";
         const std::vector<config::ErrorPage>& errorPages = conf.getErrorPages();
-        for (size_t i = 0; i < errorPages.size(); ++i) {
+        for (std::size_t i = 0; i < errorPages.size(); ++i) {
             std::cout << "[";
-            for (size_t j = 0; j < errorPages[i].getCodes().size(); ++j) {
+            for (std::size_t j = 0; j < errorPages[i].getCodes().size(); ++j) {
                 std::cout << errorPages[i].getCodes()[j];
                 if (j < errorPages[i].getCodes().size() - 1) std::cout << ", ";
             }
@@ -66,7 +66,7 @@ void printSettings(const std::string& prefix, const config::ConfigBase& conf) {
     if (shouldPrintDirective("index")) {
         std::cout << prefix << "index: ";
         const std::vector<std::string>& indices = conf.getIndices();
-        for (size_t i = 0; i < indices.size(); ++i) {
+        for (std::size_t i = 0; i < indices.size(); ++i) {
             std::cout << indices[i];
             if (i < indices.size() - 1) std::cout << ", ";
         }
@@ -87,7 +87,7 @@ void printLocationRecursively(const toolbox::SharedPtr<config::LocationConfig>& 
     std::cout << "===== LOCATION (depth: " << depth << ") =====" << std::endl;
     std::cout << "location path: " << location->getPath() << std::endl;
     std::cout << "# Child locations: " << location->getLocations().size() << std::endl;
-    for (size_t i = 0; i < location->getLocations().size(); ++i) {
+    for (std::size_t i = 0; i < location->getLocations().size(); ++i) {
         std::cout << "# Child " << i << " path: " << location->getLocations()[i]->getPath() << std::endl;
     }
     if (shouldPrintDirective("return") && location->getReturnValue().hasReturnValue()) {
@@ -97,7 +97,7 @@ void printLocationRecursively(const toolbox::SharedPtr<config::LocationConfig>& 
         }
     }
     printSettings("", *location);
-    for (size_t i = 0; i < location->getLocations().size(); ++i) {
+    for (std::size_t i = 0; i < location->getLocations().size(); ++i) {
         printLocationRecursively(location->getLocations()[i], depth + 1);
     }
 }
@@ -126,12 +126,12 @@ int main(int argc, char* argv[]) {
         }
         std::cout << "===== HTTP =====" << std::endl;
         printSettings("", *http);
-        for (size_t i = 0; i < http->getServers().size(); ++i) {
+        for (std::size_t i = 0; i < http->getServers().size(); ++i) {
             std::cout << "===== SERVER =====" << std::endl;
             std::cout << "server #" << (i + 1) << std::endl;
             if (shouldPrintDirective("listen")) {
                 std::cout << "listen: ";
-                for (size_t listenIdx = 0; listenIdx < http->getServers()[i]->getListens().size(); ++listenIdx) {
+                for (std::size_t listenIdx = 0; listenIdx < http->getServers()[i]->getListens().size(); ++listenIdx) {
                     const config::Listen& listenConfig = http->getServers()[i]->getListens()[listenIdx];
                     std::cout << listenConfig.getIp() << ":" << listenConfig.getPort();
                     if (listenConfig.isDefaultServer()) {
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
             }
             if (shouldPrintDirective("server_name")) {
                 std::cout << "server_name: ";
-                for (size_t j = 0; j < http->getServers()[i]->getServerNames().size(); ++j) {
+                for (std::size_t j = 0; j < http->getServers()[i]->getServerNames().size(); ++j) {
                     const config::ServerName& serverName = http->getServers()[i]->getServerNames()[j];
                     if (serverName.getType() == config::ServerName::WILDCARD_START) {
                         std::cout << "*" << serverName.getName();
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             printSettings("", *http->getServers()[i]);
-            for (size_t j = 0; j < http->getServers()[i]->getLocations().size(); ++j) {
+            for (std::size_t j = 0; j < http->getServers()[i]->getLocations().size(); ++j) {
                 printLocationRecursively(http->getServers()[i]->getLocations()[j]);
             }
             std::cout << std::endl;

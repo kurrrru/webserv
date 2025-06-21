@@ -16,7 +16,7 @@ bool isCaseInsensitiveIdentical(const std::string& str1, const std::string& str2
     if (str1.size() != str2.size()) {
         return false;
     }
-    for (size_t i = 0; i < str1.size(); ++i) {
+    for (std::size_t i = 0; i < str1.size(); ++i) {
         char c1 = std::tolower(static_cast<unsigned char>(str1[i]));
         char c2 = std::tolower(static_cast<unsigned char>(str2[i]));
         if (c1 != c2) {
@@ -26,7 +26,7 @@ bool isCaseInsensitiveIdentical(const std::string& str1, const std::string& str2
     return true;
 }
 
-bool stringToSizeT(const std::string& str, size_t* result) {
+bool stringToSizeT(const std::string& str, std::size_t* result) {
     if (!result) {
         toolbox::logger::StepMark::error("Invalid result pointer");
         return false;
@@ -36,17 +36,17 @@ bool stringToSizeT(const std::string& str, size_t* result) {
         return false;
     }
     // off_t is max
-    const size_t max_value = std::numeric_limits<off_t>::max();
-    const size_t cutoff = max_value / 10;
-    const size_t cutlim = max_value % 10;
-    size_t value = 0;
-    for (size_t i = 0; i < str.size(); i++) {
+    const std::size_t max_value = std::numeric_limits<off_t>::max();
+    const std::size_t cutoff = max_value / 10;
+    const std::size_t cutlim = max_value % 10;
+    std::size_t value = 0;
+    for (std::size_t i = 0; i < str.size(); i++) {
         char c = str[i];
         if (!std::isdigit(c)) {
             toolbox::logger::StepMark::debug("Invalid character in numeric value: " + str);
             return false;
         }
-        if (value > cutoff || (value == cutoff && static_cast<size_t>(c - '0') > cutlim)) {
+        if (value > cutoff || (value == cutoff && static_cast<std::size_t>(c - '0') > cutlim)) {
             toolbox::logger::StepMark::error("Numeric value too large: " + str);
             return false;
         }
@@ -60,8 +60,8 @@ int pathCmp(const std::string& s1, const std::string& s2) {
     if (s1.length() > s2.length()) {
         return 0;
     }
-    size_t n = s1.length();
-    for (size_t i = 0; i < n; ++i) {
+    std::size_t n = s1.length();
+    for (std::size_t i = 0; i < n; ++i) {
         char c1 = s1[i];
         char c2 = s2[i];
         if (c1 == c2) {
@@ -80,8 +80,8 @@ void throwConfigError(const std::string& message) {
     throw ConfigException(message);
 }
 
-bool isInAllowedTokens(const std::string& token, const std::string allowedTokens[], size_t tokenCount) {
-    for (size_t i = 0; i < tokenCount; i++) {
+bool isInAllowedTokens(const std::string& token, const std::string allowedTokens[], std::size_t tokenCount) {
+    for (std::size_t i = 0; i < tokenCount; i++) {
         if (token == allowedTokens[i]) {
             return true;
         }
@@ -95,7 +95,7 @@ bool isContextToken(const std::string& token) {
         config::context::SERVER,
         config::context::LOCATION
     };
-    const size_t contextCount = sizeof(contexts) / sizeof(contexts[0]);
+    const std::size_t contextCount = sizeof(contexts) / sizeof(contexts[0]);
     return isInAllowedTokens(token, contexts, contextCount);
 }
 
@@ -114,7 +114,7 @@ bool isDirectiveToken(const std::string& token) {
         config::directive::SERVER_NAME,
         config::directive::UPLOAD_STORE
     };
-    const size_t directiveCount = sizeof(directives) / sizeof(directives[0]);
+    const std::size_t directiveCount = sizeof(directives) / sizeof(directives[0]);
     return isInAllowedTokens(token, directives, directiveCount);
 }
 

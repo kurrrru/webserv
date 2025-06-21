@@ -46,15 +46,15 @@ const char* SEMICOLON = ";";
 const char EQUAL = '=';
 const char* ON = "on";
 const char* OFF = "off";
-const size_t MIN_ERROR_PAGE_CODE = 300;
-const size_t MAX_ERROR_PAGE_CODE = 599;
-const size_t MIN_NEW_STATUS_CODE = 200;
-const size_t MAX_NEW_STATUS_CODE = 599;
+const std::size_t MIN_ERROR_PAGE_CODE = 300;
+const std::size_t MAX_ERROR_PAGE_CODE = 599;
+const std::size_t MIN_NEW_STATUS_CODE = 200;
+const std::size_t MAX_NEW_STATUS_CODE = 599;
 const char* ASTERISK = "*";
-const size_t MIN_PORT = 1;
-const size_t MAX_PORT = 65535;
+const std::size_t MIN_PORT = 1;
+const std::size_t MAX_PORT = 65535;
 const char* LISTEN_DEFAULT_SERVER = "default_server";
-const size_t MAX_RETURN_CODE = 999;
+const std::size_t MAX_RETURN_CODE = 999;
 }  // namespace directive
 
 namespace method {
@@ -62,12 +62,12 @@ const char* GET = "GET";
 const char* HEAD = "HEAD";
 const char* POST = "POST";
 const char* DELETE = "DELETE";
-const size_t ALLOWED_METHODS_COUNT = 4;
+const std::size_t ALLOWED_METHODS_COUNT = 4;
 const char* ALLOWED_METHODS[ALLOWED_METHODS_COUNT] = {GET, HEAD, POST, DELETE};
 }  // namespace method
 
 const bool DEFAULT_AUTOINDEX = false;
-const size_t DEFAULT_CLIENT_MAX_BODY_SIZE = 1024 * 1024;
+const std::size_t DEFAULT_CLIENT_MAX_BODY_SIZE = 1024 * 1024;
 const char* DEFAULT_CGI_PATH = "cgi";
 const char* DEFAULT_FILE = "conf/default.conf";
 const int DEFAULT_PORT = 80;
@@ -78,6 +78,6 @@ const char* DEFAULT_ROOT = "html";
 const char* DEFAULT_SERVER_NAME = "";
 const char* DEFAULT_UPLOAD_STORE = "upload";
 const char* DEFAULT_LOCATION_PATH = "/";
-const size_t CONF_BUFFER = 4096;
+const std::size_t CONF_BUFFER = 4096;
 
 }  // namespace config

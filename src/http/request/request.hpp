@@ -87,7 +87,7 @@ class Request {
      * for this request, which is important for handling local redirects.
      * @param count The number of redirects to set.
      */
-    void setRedirectCount(size_t count);
+    void setRedirectCount(std::size_t count);
 
     bool isErrorInternalRedirect() const;
     void setErrorInternalRedirect();
@@ -127,17 +127,18 @@ class Request {
         const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
         const std::string& hostName);
     bool processReturn(const config::Return& returnValue);
-    void processReturnWithContent(size_t statusCode,
-                                const std::string& content);
-    void processReturnWithoutContent(size_t statusCode);
-    bool isRedirectStatus(size_t statusCode) const;
-    bool hasDefaultErrorPage(size_t statusCode) const;
-    bool isMinimalResponse(size_t statusCode) const;
-    void setRedirectResponse(size_t statusCode, const std::string& location);
+    void processReturnWithContent(std::size_t statusCode,
+                                  const std::string& content);
+    void processReturnWithoutContent(std::size_t statusCode);
+    bool isRedirectStatus(std::size_t statusCode) const;
+    bool hasDefaultErrorPage(std::size_t statusCode) const;
+    bool isMinimalResponse(std::size_t statusCode) const;
+    void setRedirectResponse(std::size_t statusCode,
+                             const std::string& location);
     void setTextResponse(const std::string& content);
-    void setHtmlErrorResponse(size_t statusCode);
+    void setHtmlErrorResponse(std::size_t statusCode);
     void setEmptyTextResponse();
-    std::string generateDefaultBody(size_t statusCode);
+    std::string generateDefaultBody(std::size_t statusCode);
     bool selectLocation(
         const toolbox::SharedPtr<config::ServerConfig>& server);
     toolbox::SharedPtr<config::LocationConfig> findDeepestMatchingLocation(

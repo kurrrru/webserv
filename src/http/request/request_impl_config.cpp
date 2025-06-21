@@ -52,9 +52,9 @@ toolbox::SharedPtr<config::ServerConfig> Request::selectServer() {
 bool Request::extractCandidateServers(
     const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
     std::vector<toolbox::SharedPtr<config::ServerConfig> >& candidateServers) {
-    for (size_t i = 0; i < servers.size(); ++i) {
+    for (std::size_t i = 0; i < servers.size(); ++i) {
         const std::vector<config::Listen>& listens = servers[i]->getListens();
-        for (size_t j = 0; j < listens.size(); ++j) {
+        for (std::size_t j = 0; j < listens.size(); ++j) {
             if (listens[j].getPort() == _client->getServerPort()) {
                 if (listens[j].getIp() ==  _client->getServerIp()) {
                     candidateServers.push_back(servers[i]);
@@ -84,10 +84,10 @@ std::string Request::extractHostName() {
 toolbox::SharedPtr<config::ServerConfig> Request::matchServerByName(
     const std::vector<toolbox::SharedPtr<config::ServerConfig> >& candidates,
     const std::string& hostName) {
-    for (size_t i = 0; i < candidates.size(); ++i) {
+    for (std::size_t i = 0; i < candidates.size(); ++i) {
         const std::vector<config::ServerName>& serverNames =
                                     candidates[i]->getServerNames();
-        for (size_t j = 0; j < serverNames.size(); ++j) {
+        for (std::size_t j = 0; j < serverNames.size(); ++j) {
             if (serverNames[j].getType() == config::ServerName::EXACT &&
                 serverNames[j].getName() == hostName) {
                 return candidates[i];
@@ -101,7 +101,7 @@ bool Request::processReturn(const config::Return& returnValue) {
     if (!returnValue.hasReturnValue()) {
         return false;
     }
-    size_t statusCode = returnValue.getStatusCode();
+    std::size_t statusCode = returnValue.getStatusCode();
     _response.setStatus(statusCode);
     if (statusCode == 204) {
         return true;
@@ -114,7 +114,8 @@ bool Request::processReturn(const config::Return& returnValue) {
     return true;
 }
 
-void Request::processReturnWithContent(size_t statusCode, const std::string& content) {
+void Request::processReturnWithContent(std::size_t statusCode,
+                                       const std::string& content) {
     if (isRedirectStatus(statusCode)) {
         setRedirectResponse(statusCode, content);
     } else {
@@ -122,7 +123,7 @@ void Request::processReturnWithContent(size_t statusCode, const std::string& con
     }
 }
 
-void Request::processReturnWithoutContent(size_t statusCode) {
+void Request::processReturnWithoutContent(std::size_t statusCode) {
     if (isRedirectStatus(statusCode)) {
         setRedirectResponse(statusCode, "");
     } else if (hasDefaultErrorPage(statusCode)) {
@@ -134,23 +135,23 @@ void Request::processReturnWithoutContent(size_t statusCode) {
     }
 }
 
-bool Request::isRedirectStatus(size_t statusCode) const {
+bool Request::isRedirectStatus(std::size_t statusCode) const {
     return (statusCode == 301 || statusCode == 302 || statusCode == 303 ||
             statusCode == 307 || statusCode == 308);
 }
 
-bool Request::hasDefaultErrorPage(size_t statusCode) const {
+bool Request::hasDefaultErrorPage(std::size_t statusCode) const {
     return (statusCode >= 400 && statusCode <= 505) &&
            !isMinimalResponse(statusCode);
 }
 
-bool Request::isMinimalResponse(size_t statusCode) const {
+bool Request::isMinimalResponse(std::size_t statusCode) const {
     return (statusCode == 407 || statusCode == 417 || statusCode == 418 ||
             statusCode == 422 || statusCode == 426);
 }
 
-void Request::setRedirectResponse(size_t statusCode,
-                                const std::string& location) {
+void Request::setRedirectResponse(std::size_t statusCode,
+                                  const std::string& location) {
     _response.setHeader(http::fields::LOCATION, location);
     std::string defaultBody = generateDefaultBody(statusCode);
     _response.setBody(defaultBody);
@@ -162,7 +163,7 @@ void Request::setTextResponse(const std::string& content) {
     _response.setHeader(http::fields::CONTENT_TYPE, "text/plain");
 }
 
-void Request::setHtmlErrorResponse(size_t statusCode) {
+void Request::setHtmlErrorResponse(std::size_t statusCode) {
     std::string defaultBody = generateDefaultBody(statusCode);
     _response.setBody(defaultBody);
     _response.setHeader(http::fields::CONTENT_TYPE, "text/html");
@@ -173,7 +174,7 @@ void Request::setEmptyTextResponse() {
     _response.setHeader(http::fields::CONTENT_TYPE, "text/plain");
 }
 
-std::string Request::generateDefaultBody(size_t statusCode) {
+std::string Request::generateDefaultBody(std::size_t statusCode) {
     std::string statusText = _response.getStatusMessage(statusCode);
     return "<html>\n"
            "<head><title>" + toolbox::to_string(statusCode)
@@ -215,7 +216,7 @@ toolbox::SharedPtr<config::LocationConfig> Request::findDeepestMatchingLocation(
     const std::string& path) {
     toolbox::SharedPtr<config::LocationConfig> bestMatch;
     std::size_t longestMatchLength = 0;
-    for (size_t i = 0; i < locations.size(); ++i) {
+    for (std::size_t i = 0; i < locations.size(); ++i) {
         std::string locPath = locations[i]->getPath();
         if (locPath == path) {
             return locations[i];

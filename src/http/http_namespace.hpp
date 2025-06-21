@@ -73,10 +73,10 @@ extern const std::size_t CRLF_SIZE;
 }  // namespace symbols
 
 namespace cgi {
-extern const size_t MAX_REDIRECTS;
-extern const size_t TIMEOUT;
-extern const size_t READ_BUFFER_SIZE;
-extern const size_t READ_TIMEOUT_SEC;
+extern const std::size_t MAX_REDIRECTS;
+extern const std::size_t TIMEOUT;
+extern const std::size_t READ_BUFFER_SIZE;
+extern const std::size_t READ_TIMEOUT_SEC;
 extern const char* GATEWAY_INTERFACE;
 extern const char* SERVER_SOFTWARE;
 extern const char* ENV_PREFIX;
