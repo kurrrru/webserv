@@ -56,7 +56,7 @@ const FieldContent& value, ResponseFlag enabled) {
 void Response::setHeader(const FieldName& name,
 const std::vector<FieldContent>& values, ResponseFlag enabled) {
     std::ostringstream oss;
-    for (size_t i = 0; i < values.size(); ++i) {
+    for (std::size_t i = 0; i < values.size(); ++i) {
         if (i > 0) oss << ", ";
         oss << values[i];
     }

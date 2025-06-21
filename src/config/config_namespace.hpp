@@ -46,15 +46,15 @@ extern const char* SEMICOLON;
 extern const char EQUAL;
 extern const char* ON;
 extern const char* OFF;
-extern const size_t MIN_ERROR_PAGE_CODE;
-extern const size_t MAX_ERROR_PAGE_CODE;
-extern const size_t MIN_NEW_STATUS_CODE;
-extern const size_t MAX_NEW_STATUS_CODE;
+extern const std::size_t MIN_ERROR_PAGE_CODE;
+extern const std::size_t MAX_ERROR_PAGE_CODE;
+extern const std::size_t MIN_NEW_STATUS_CODE;
+extern const std::size_t MAX_NEW_STATUS_CODE;
 extern const char* ASTERISK;
-extern const size_t MIN_PORT;
-extern const size_t MAX_PORT;
+extern const std::size_t MIN_PORT;
+extern const std::size_t MAX_PORT;
 extern const char* LISTEN_DEFAULT_SERVER;
-extern const size_t MAX_RETURN_CODE;
+extern const std::size_t MAX_RETURN_CODE;
 }  // namespace directive
 
 namespace method {
@@ -62,12 +62,12 @@ extern const char* GET;
 extern const char* HEAD;
 extern const char* POST;
 extern const char* DELETE;
-extern const size_t ALLOWED_METHODS_COUNT;
+extern const std::size_t ALLOWED_METHODS_COUNT;
 extern const char* ALLOWED_METHODS[];
 }  // namespace method
 
 extern const bool DEFAULT_AUTOINDEX;
-extern const size_t DEFAULT_CLIENT_MAX_BODY_SIZE;
+extern const std::size_t DEFAULT_CLIENT_MAX_BODY_SIZE;
 extern const char* DEFAULT_CGI_PATH;
 extern const char* DEFAULT_FILE;
 extern const int DEFAULT_PORT;
@@ -78,5 +78,5 @@ extern const char* DEFAULT_ROOT;
 extern const char* DEFAULT_SERVER_NAME;
 extern const char* DEFAULT_UPLOAD_STORE;
 extern const char* DEFAULT_LOCATION_PATH;
-extern const size_t CONF_BUFFER;
+extern const std::size_t CONF_BUFFER;
 }  // namespace config

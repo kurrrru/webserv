@@ -15,15 +15,15 @@ void testCgiBufSize() {
         "Content-Length: 13\n"
         "\n"
         "Hello, World!";
-    const size_t BUFFER_SIZE = 10;
+    const std::size_t BUFFER_SIZE = 10;
 
-    size_t pos = 0;
+    std::size_t pos = 0;
     http::BaseParser::ParseStatus status = http::BaseParser::P_IN_PROGRESS;
 
     std::cout << "===== テスト開始 =====\n";
 
     while (pos < request.size() && status != http::BaseParser::P_ERROR) {
-        size_t chunk_size = std::min(BUFFER_SIZE, request.size() - pos);
+        std::size_t chunk_size = std::min(BUFFER_SIZE, request.size() - pos);
         std::string chunk = request.substr(pos, chunk_size);
         pos += chunk_size;
 

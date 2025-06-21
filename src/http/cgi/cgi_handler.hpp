@@ -31,7 +31,7 @@ class CgiHandler {
                        const Client* client,
                        const config::LocationConfig& config,
                        const http::IOPendingState ioPendingState);
-    void setRedirectCount(size_t count) { _redirectCount = count; }
+    void setRedirectCount(std::size_t count) { _redirectCount = count; }
     void reset();
 
  private:
@@ -60,14 +60,14 @@ class CgiHandler {
     IOPendingState executeInternalRequest(
                      const std::string& location,
                      const std::string& host,
-                     size_t redirectCount);
+                     std::size_t redirectCount);
     void copyCgiResponseToResponse(const CgiResponse& cgiResponse,
                             Response& response);
     std::string buildScriptPath(const std::string& root,
                                const std::string& uriPath,
                                const std::vector<std::string>& cgiExtensions) const;
     CgiExecute _execute;
-    size_t _redirectCount;
+    std::size_t _redirectCount;
     const Client* _client;
 };
 

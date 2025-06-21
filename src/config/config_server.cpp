@@ -24,7 +24,7 @@ _listens(other._listens),
 _serverNames(other._serverNames),
 _returnValue(other._returnValue),
 _parent(other._parent) {
-    for (size_t i = 0; i < other._locations.size(); ++i) {
+    for (std::size_t i = 0; i < other._locations.size(); ++i) {
         toolbox::SharedPtr<LocationConfig> newLocation(new LocationConfig(*other._locations[i]));
         _locations.push_back(newLocation);
         _locations.back()->setServerParent(this);

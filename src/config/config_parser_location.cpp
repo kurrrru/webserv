@@ -11,7 +11,7 @@ namespace config {
 
 void locationPathDuplicateCheck(const std::string& path, const config::ServerConfig& serverConfig) {
     const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = serverConfig.getLocations();
-    for (size_t i = 0; i < locations.size(); ++i) {
+    for (std::size_t i = 0; i < locations.size(); ++i) {
         if (path == locations[i]->getPath()) {
             throwConfigError("duplicate location \""  + path + "\"" );
         }
@@ -20,14 +20,14 @@ void locationPathDuplicateCheck(const std::string& path, const config::ServerCon
 
 void nestLocationPathDuplicateCheck(const std::string& path, const config::LocationConfig& parentConfig) {
     const std::vector<toolbox::SharedPtr<config::LocationConfig> >& locations = parentConfig.getLocations();
-    for (size_t i = 0; i < locations.size(); ++i) {
+    for (std::size_t i = 0; i < locations.size(); ++i) {
         if (path == locations[i]->getPath()) {
             throwConfigError("duplicate location \""  + path + "\"");
         }
     }
 }
 
-void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig ,config::LocationConfig* locationConfig) {
+void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, std::size_t* pos, config::ServerConfig* serverConfig ,config::LocationConfig* locationConfig) {
     if (*pos >= tokens.size() || tokens[*pos] != config::context::LOCATION) {
         if (isContextToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -48,7 +48,7 @@ void validateAndParseLocationBlockStart(const std::vector<std::string>& tokens, 
     (*pos)++;
 }
 
-void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parentConfig, config::LocationConfig* childConfig) {
+void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& tokens, std::size_t* pos, config::LocationConfig* parentConfig, config::LocationConfig* childConfig) {
     if (*pos >= tokens.size() || tokens[*pos] != config::context::LOCATION) {
         if (isContextToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -72,7 +72,7 @@ void validateAndParseNestedLocationBlockStart(const std::vector<std::string>& to
     (*pos)++;
 }
 
-bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig, config::LocationConfig* locationConfig) {
+bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, std::size_t* pos, config::ServerConfig* serverConfig, config::LocationConfig* locationConfig) {
     validateAndParseLocationBlockStart(tokens, pos, serverConfig, locationConfig);
     if (!parseLocationDirectives(tokens, pos, locationConfig)) {
         return false;
@@ -82,7 +82,7 @@ bool ConfigParser::parseLocationBlock(const std::vector<std::string>& tokens, si
     return true;
 }
 
-bool ConfigParser::parseNestedLocationBlock(const std::vector<std::string>& tokens,  size_t* pos,  config::LocationConfig* parentConfig, config::LocationConfig* childConfig) {
+bool ConfigParser::parseNestedLocationBlock(const std::vector<std::string>& tokens,  std::size_t* pos,  config::LocationConfig* parentConfig, config::LocationConfig* childConfig) {
     validateAndParseNestedLocationBlockStart(tokens, pos, parentConfig, childConfig);
     if (!parseLocationDirectives(tokens, pos, childConfig)) {
         return false;
@@ -92,7 +92,7 @@ bool ConfigParser::parseNestedLocationBlock(const std::vector<std::string>& toke
     return true;
 }
 
-bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* locationConfig) {
+bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& tokens, std::size_t* pos, config::LocationConfig* locationConfig) {
     std::map<std::string, bool> processedDirectives;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
         std::string directiveName = tokens[*pos];
@@ -130,7 +130,7 @@ bool ConfigParser::parseLocationDirectives(const std::vector<std::string>& token
     return true;
 }
 
-bool ConfigParser::handleNestedLocationBlock(const std::vector<std::string>& tokens, size_t* pos, config::LocationConfig* parentLocation) {
+bool ConfigParser::handleNestedLocationBlock(const std::vector<std::string>& tokens, std::size_t* pos, config::LocationConfig* parentLocation) {
     toolbox::SharedPtr<config::LocationConfig> nestedLocation(new config::LocationConfig());
     if (!parseNestedLocationBlock(tokens, pos, parentLocation, nestedLocation.get())) {
         return false;

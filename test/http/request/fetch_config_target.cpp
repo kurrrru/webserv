@@ -49,9 +49,9 @@ toolbox::SharedPtr<config::ServerConfig> RequestTest::selectServer() {
 bool RequestTest::extractCandidateServers(
     const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
     std::vector<toolbox::SharedPtr<config::ServerConfig> >& candidateServers) {
-    for (size_t i = 0; i < servers.size(); ++i) {
+    for (std::size_t i = 0; i < servers.size(); ++i) {
         const std::vector<config::Listen>& listens = servers[i]->getListens();
-        for (size_t j = 0; j < listens.size(); ++j) {
+        for (std::size_t j = 0; j < listens.size(); ++j) {
             if (listens[j].getPort() == client->getServerPort()) {
                 if (listens[j].getIp() ==  client->getServerIp()) {
                     candidateServers.push_back(servers[i]);
@@ -81,10 +81,10 @@ std::string RequestTest::extractHostName() {
 toolbox::SharedPtr<config::ServerConfig> RequestTest::matchServerByName(
     const std::vector<toolbox::SharedPtr<config::ServerConfig> >& candidates,
     const std::string& hostName) {
-    for (size_t i = 0; i < candidates.size(); ++i) {
+    for (std::size_t i = 0; i < candidates.size(); ++i) {
         const std::vector<config::ServerName>& serverNames =
                                     candidates[i]->getServerNames();
-        for (size_t j = 0; j < serverNames.size(); ++j) {
+        for (std::size_t j = 0; j < serverNames.size(); ++j) {
             if (serverNames[j].getType() == config::ServerName::EXACT &&
                 serverNames[j].getName() == hostName) {
                 return candidates[i];
@@ -98,7 +98,7 @@ bool RequestTest::processReturn(const config::Return& returnValue) {
     if (!returnValue.hasReturnValue()) {
         return false;
     }
-    size_t statusCode = returnValue.getStatusCode();
+    std::size_t statusCode = returnValue.getStatusCode();
     response.setStatus(statusCode);
     if (statusCode == 204) {
         return true;
@@ -111,7 +111,7 @@ bool RequestTest::processReturn(const config::Return& returnValue) {
     return true;
 }
 
-void RequestTest::processReturnWithContent(size_t statusCode, const std::string& content) {
+void RequestTest::processReturnWithContent(std::size_t statusCode, const std::string& content) {
     if (isRedirectStatus(statusCode)) {
         setRedirectResponse(statusCode, content);
     } else {
@@ -119,7 +119,7 @@ void RequestTest::processReturnWithContent(size_t statusCode, const std::string&
     }
 }
 
-void RequestTest::processReturnWithoutContent(size_t statusCode) {
+void RequestTest::processReturnWithoutContent(std::size_t statusCode) {
     if (isRedirectStatus(statusCode)) {
         setRedirectResponse(statusCode, "");
     } else if (hasDefaultErrorPage(statusCode)) {
@@ -131,22 +131,22 @@ void RequestTest::processReturnWithoutContent(size_t statusCode) {
     }
 }
 
-bool RequestTest::isRedirectStatus(size_t statusCode) const {
+bool RequestTest::isRedirectStatus(std::size_t statusCode) const {
     return (statusCode == 301 || statusCode == 302 || statusCode == 303 ||
             statusCode == 307 || statusCode == 308);
 }
 
-bool RequestTest::hasDefaultErrorPage(size_t statusCode) const {
+bool RequestTest::hasDefaultErrorPage(std::size_t statusCode) const {
     return (statusCode >= 400 && statusCode <= 505) &&
            !isMinimalResponse(statusCode);
 }
 
-bool RequestTest::isMinimalResponse(size_t statusCode) const {
+bool RequestTest::isMinimalResponse(std::size_t statusCode) const {
     return (statusCode == 407 || statusCode == 417 || statusCode == 418 ||
             statusCode == 422 || statusCode == 426);
 }
 
-void RequestTest::setRedirectResponse(size_t statusCode,
+void RequestTest::setRedirectResponse(std::size_t statusCode,
                                 const std::string& location) {
     response.setHeader(http::fields::LOCATION, location);
     std::string defaultBody = generateDefaultBody(statusCode);
@@ -163,7 +163,7 @@ void RequestTest::setTextResponse(const std::string& content) {
                         toolbox::to_string(content.size()));
 }
 
-void RequestTest::setHtmlErrorResponse(size_t statusCode) {
+void RequestTest::setHtmlErrorResponse(std::size_t statusCode) {
     std::string defaultBody = generateDefaultBody(statusCode);
     response.setBody(defaultBody);
     response.setHeader(http::fields::CONTENT_TYPE, "text/html");
@@ -177,7 +177,7 @@ void RequestTest::setEmptyTextResponse() {
     response.setHeader(http::fields::CONTENT_LENGTH, "0");
 }
 
-std::string RequestTest::generateDefaultBody(size_t statusCode) {
+std::string RequestTest::generateDefaultBody(std::size_t statusCode) {
     std::string statusText = response.getStatusMessage(statusCode);
     return "<html>\n"
            "<head><title>" + toolbox::to_string(statusCode)
@@ -221,7 +221,7 @@ toolbox::SharedPtr
     const std::string& path) {
     toolbox::SharedPtr<config::LocationConfig> bestMatch;
     std::size_t longestMatchLength = 0;
-    for (size_t i = 0; i < locations.size(); ++i) {
+    for (std::size_t i = 0; i < locations.size(); ++i) {
         std::string locPath = locations[i]->getPath();
         if (locPath == path) {
             return locations[i];

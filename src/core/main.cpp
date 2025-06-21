@@ -38,10 +38,10 @@ int main(int argc, char* argv[]) {
                                         config::Config::getHttpConfig();
         std::vector<toolbox::SharedPtr<Server> > servers;
         std::set<std::pair<std::string, int> > boundAddresses;
-        for (size_t i = 0; i < httpConfig->getServers().size(); ++i) {
+        for (std::size_t i = 0; i < httpConfig->getServers().size(); ++i) {
             toolbox::SharedPtr<config::ServerConfig> serverConfig =
                                                     httpConfig->getServers()[i];
-            for (size_t j = 0; j < serverConfig->getListens().size(); ++j) {
+            for (std::size_t j = 0; j < serverConfig->getListens().size(); ++j) {
                 int port = serverConfig->getListens()[j].getPort();
                 std::string ip = serverConfig->getListens()[j].getIp();
                 std::pair<std::string, int> address(ip, port);
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
                 toolbox::logger::StepMark::error("Main: whileloop: " + std::string(e.what()));
             }
         }
-        for (size_t i = 0; i < servers.size(); ++i) {
+        for (std::size_t i = 0; i < servers.size(); ++i) {
             Epoll::del(servers[i]->getFd());
         }
     } catch (std::exception& e) {

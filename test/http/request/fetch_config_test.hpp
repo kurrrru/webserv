@@ -15,14 +15,14 @@ namespace test {
 class TestClient {
  private:
     std::string _serverIp;
-    size_t _serverPort;
+    std::size_t _serverPort;
 
  public:
-    TestClient(const std::string& serverIp, size_t serverPort)
+    TestClient(const std::string& serverIp, std::size_t serverPort)
         : _serverIp(serverIp), _serverPort(serverPort) {}
 
     std::string getServerIp() const { return _serverIp; }
-    size_t getServerPort() const { return _serverPort; }
+    std::size_t getServerPort() const { return _serverPort; }
     std::string getIp() const { return "127.0.0.1"; }
     int getFd() const { return -1; }
 };
@@ -98,17 +98,17 @@ class RequestTest {
         const std::vector<toolbox::SharedPtr<config::ServerConfig> >& servers,
         const std::string& hostName);
     bool processReturn(const config::Return& returnValue);
-    void processReturnWithContent(size_t statusCode,
+    void processReturnWithContent(std::size_t statusCode,
                                 const std::string& content);
-    void processReturnWithoutContent(size_t statusCode);
-    bool isRedirectStatus(size_t statusCode) const;
-    bool hasDefaultErrorPage(size_t statusCode) const;
-    bool isMinimalResponse(size_t statusCode) const;
-    void setRedirectResponse(size_t statusCode, const std::string& location);
+    void processReturnWithoutContent(std::size_t statusCode);
+    bool isRedirectStatus(std::size_t statusCode) const;
+    bool hasDefaultErrorPage(std::size_t statusCode) const;
+    bool isMinimalResponse(std::size_t statusCode) const;
+    void setRedirectResponse(std::size_t statusCode, const std::string& location);
     void setTextResponse(const std::string& content);
-    void setHtmlErrorResponse(size_t statusCode);
+    void setHtmlErrorResponse(std::size_t statusCode);
     void setEmptyTextResponse();
-    std::string generateDefaultBody(size_t statusCode);
+    std::string generateDefaultBody(std::size_t statusCode);
     bool selectLocation(
         const toolbox::SharedPtr<config::ServerConfig>& server);
     toolbox::SharedPtr<config::LocationConfig> findDeepestMatchingLocation(
@@ -118,7 +118,7 @@ class RequestTest {
     RequestTest() : client(0) {}
     ~RequestTest() { delete client; }
 
-    void setClient(const std::string& serverIp, size_t serverPort) {
+    void setClient(const std::string& serverIp, std::size_t serverPort) {
         delete client;
         client = new TestClient(serverIp, serverPort);
     }

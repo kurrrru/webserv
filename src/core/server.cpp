@@ -90,9 +90,9 @@ uint32_t Server::parseIpAddress(const std::string& ip) const {
     if (ip == "0.0.0.0") {
         return INADDR_ANY;
     }
-    size_t pos1 = ip.find('.');
-    size_t pos2 = ip.find('.', pos1 + 1);
-    size_t pos3 = ip.find('.', pos2 + 1);
+    std::size_t pos1 = ip.find('.');
+    std::size_t pos2 = ip.find('.', pos1 + 1);
+    std::size_t pos3 = ip.find('.', pos2 + 1);
     if (pos1 == std::string::npos ||
         pos2 == std::string::npos ||
         pos3 == std::string::npos) {

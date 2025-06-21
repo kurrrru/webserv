@@ -26,7 +26,7 @@ http::Response http::Request::getResponse() const {
     return _response;
 }
 
-void http::Request::setRedirectCount(size_t count) {
+void http::Request::setRedirectCount(std::size_t count) {
     _requestDepth = count;
     _cgiHandler.setRedirectCount(count);
 }

@@ -20,7 +20,7 @@ struct FileInfo {
     std::string path;
     std::string time;
     bool isDir;
-    size_t size;
+    std::size_t size;
 };
 
 inline bool isDirectory(const struct stat& st) { return S_ISDIR(st.st_mode); }

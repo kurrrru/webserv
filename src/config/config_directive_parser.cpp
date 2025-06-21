@@ -16,7 +16,7 @@
 
 namespace config {
 
-bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, const std::string directiveName) {
+bool expectSemicolon(const std::vector<std::string>& tokens, std::size_t* pos, const std::string directiveName) {
     if (*pos >= tokens.size() || tokens[*pos] != config::directive::SEMICOLON) {
         throwConfigError("invalid number of arguments in \"" + directiveName + "\" directive");
     }
@@ -24,15 +24,15 @@ bool expectSemicolon(const std::vector<std::string>& tokens, size_t* pos, const 
     return true;
 }
 
-bool parseSize(const std::string& str, size_t* result) {
+bool parseSize(const std::string& str, std::size_t* result) {
     if (!result || str.empty()) {
         toolbox::logger::StepMark::error("Unexpected Error");
         return false;
     }
     char unit = str[str.size() - 1];
-    size_t len = str.size();
-    size_t scale = 1;
-    size_t max;
+    std::size_t len = str.size();
+    std::size_t scale = 1;
+    std::size_t max;
     switch (unit) {
         case 'K':
         case 'k':
@@ -60,7 +60,7 @@ bool parseSize(const std::string& str, size_t* result) {
             max = std::numeric_limits<off_t>::max();
     }
     std::string num_str = str.substr(0, len);
-    size_t value;
+    std::size_t value;
     if (!stringToSizeT(num_str, &value)) {
         return false;
     }
@@ -89,7 +89,7 @@ void validateHost(const std::string& host, const std::string& fullValue) {
     freeaddrinfo(result);
 }
 
-bool DirectiveParser::parseAllowedMethodsDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* methods) {
+bool DirectiveParser::parseAllowedMethodsDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::vector<std::string>* methods) {
     if (!methods || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::ALLOWED_METHODS));
         return false;
@@ -100,7 +100,7 @@ bool DirectiveParser::parseAllowedMethodsDirective(const std::vector<std::string
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string method = tokens[*pos];
         bool isValidMethod = false;
-        for (size_t i = 0; i < config::method::ALLOWED_METHODS_COUNT; ++i) {
+        for (std::size_t i = 0; i < config::method::ALLOWED_METHODS_COUNT; ++i) {
             if (isCaseInsensitiveIdentical(method, config::method::ALLOWED_METHODS[i])) {
                 isValidMethod = true;
                 break;
@@ -115,7 +115,7 @@ bool DirectiveParser::parseAllowedMethodsDirective(const std::vector<std::string
     return expectSemicolon(tokens, pos, std::string(config::directive::ALLOWED_METHODS));
 }
 
-bool DirectiveParser::parseAutoindexDirective(const std::vector<std::string>& tokens, size_t* pos, bool* autoindex) {
+bool DirectiveParser::parseAutoindexDirective(const std::vector<std::string>& tokens, std::size_t* pos, bool* autoindex) {
     if (!autoindex || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::AUTOINDEX));
         return false;
@@ -134,7 +134,7 @@ bool DirectiveParser::parseAutoindexDirective(const std::vector<std::string>& to
     return expectSemicolon(tokens, pos, std::string(config::directive::AUTOINDEX));
 }
 
-bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* cgiExtensions) {
+bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::vector<std::string>* cgiExtensions) {
     if (!cgiExtensions || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CGI_EXTENSION));
         return false;
@@ -149,7 +149,7 @@ bool DirectiveParser::parseCgiExtensionDirective(const std::vector<std::string>&
     return expectSemicolon(tokens, pos, std::string(config::directive::CGI_EXTENSION));
 }
 
-bool DirectiveParser::parseCgiPathDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* cgiPath) {
+bool DirectiveParser::parseCgiPathDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::string* cgiPath) {
     if (!cgiPath || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CGI_PATH));
         return false;
@@ -162,7 +162,7 @@ bool DirectiveParser::parseCgiPathDirective(const std::vector<std::string>& toke
     return expectSemicolon(tokens, pos, std::string(config::directive::CGI_PATH));
 }
 
-bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tokens, size_t* pos, size_t* clientMaxBodySize) {
+bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tokens, std::size_t* pos, std::size_t* clientMaxBodySize) {
     if (*pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::CLIENT_MAX_BODY_SIZE));
         return false;
@@ -177,7 +177,7 @@ bool DirectiveParser::parseClientMaxBodySize(const std::vector<std::string>& tok
     return expectSemicolon(tokens, pos, std::string(config::directive::CLIENT_MAX_BODY_SIZE));
 }
 
-bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ErrorPage>* errorPages) {
+bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::vector<ErrorPage>* errorPages) {
     if (!errorPages || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::ERROR_PAGE));
         return false;
@@ -186,10 +186,10 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::ERROR_PAGE) + "\" directive");
     }
     ErrorPage errorPage;
-    std::vector<size_t> codes;
+    std::vector<std::size_t> codes;
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         std::string token = tokens[(*pos)];
-        size_t codeValue;
+        std::size_t codeValue;
         if (config::stringToSizeT(token, &codeValue)) {
             if (codeValue < config::directive::MIN_ERROR_PAGE_CODE || 
                 codeValue > config::directive::MAX_ERROR_PAGE_CODE) {
@@ -233,7 +233,7 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     if (tokens[*pos] != config::directive::SEMICOLON) {
         throwConfigError("invalid value in \"" + tokens[*pos] + "\"");
     }
-    for (size_t i = 0; i < codes.size(); ++i) {
+    for (std::size_t i = 0; i < codes.size(); ++i) {
         errorPage.addCode(codes[i]);
     }
     errorPage.setPath(path);
@@ -241,7 +241,7 @@ bool DirectiveParser::parseErrorPageDirective(const std::vector<std::string>& to
     return expectSemicolon(tokens, pos, std::string(config::directive::ERROR_PAGE));
 }
 
-bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<std::string>* indexFiles) {
+bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::vector<std::string>* indexFiles) {
     if (!indexFiles || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::INDEX));
         return false;
@@ -260,7 +260,7 @@ bool DirectiveParser::parseIndexDirective(const std::vector<std::string>& tokens
     return expectSemicolon(tokens, pos, std::string(config::directive::INDEX));
 }
 
-bool DirectiveParser::parseListenDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<Listen>* listen) {
+bool DirectiveParser::parseListenDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::vector<Listen>* listen) {
     if (!listen || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::LISTEN));
         return false;
@@ -270,8 +270,8 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
     }
     std::string listenValue = tokens[(*pos)++];
     Listen tmpListen;
-    size_t port;
-    size_t colonPos = listenValue.find(config::token::COLON);
+    std::size_t port;
+    std::size_t colonPos = listenValue.find(config::token::COLON);
     if (colonPos != std::string::npos) {
         std::string portStr = listenValue.substr(colonPos + 1);
         if (!config::stringToSizeT(portStr, &port))
@@ -312,7 +312,7 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
     } else {
         tmpListen.setDefaultServer(false);
     }
-    for (size_t i = 0; i < listen->size(); ++i) {
+    for (std::size_t i = 0; i < listen->size(); ++i) {
         if ((*listen)[i].getPort() == tmpListen.getPort() && (*listen)[i].getIp() == tmpListen.getIp()) {
             throwConfigError("duplicate ip port \"" + std::string(config::directive::LISTEN) + "\" directive");
         }
@@ -322,7 +322,7 @@ bool DirectiveParser::parseListenDirective(const std::vector<std::string>& token
     return expectSemicolon(tokens, pos, std::string(config::directive::LISTEN));
 }
 
-bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, size_t* pos, Return* returnValue) {
+bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& tokens, std::size_t* pos, Return* returnValue) {
     if (!returnValue || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::RETURN));
         return false;
@@ -331,7 +331,7 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
         throwConfigError("invalid number of arguments in \"" + std::string(config::directive::RETURN) + "\" directive");
     }
     std::string firstToken = tokens[(*pos)++];
-    size_t code;
+    std::size_t code;
     if (!stringToSizeT(firstToken, &code)) {
         throwConfigError("Invalid return code: \"" + firstToken + "\"");
     }
@@ -350,7 +350,7 @@ bool DirectiveParser::parseReturnDirective(const std::vector<std::string>& token
     return expectSemicolon(tokens, pos, std::string(config::directive::RETURN));
 }
 
-bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* root) {
+bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::string* root) {
     if (!root || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::ROOT));
         return false;
@@ -363,7 +363,7 @@ bool DirectiveParser::parseRootDirective(const std::vector<std::string>& tokens,
     return expectSemicolon(tokens, pos, std::string(config::directive::ROOT));
 }
 
-bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, std::vector<ServerName>* serverNames) {
+bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::vector<ServerName>* serverNames) {
     if (!serverNames || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::SERVER_NAME));
         return false;
@@ -376,7 +376,7 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
         names.push_back(tokens[*pos]);
         (*pos)++;
     }
-    for (size_t i = 0; i < names.size(); ++i) {
+    for (std::size_t i = 0; i < names.size(); ++i) {
         const std::string& name = names[i];
         ServerName serverName;
         if (name[0] == config::directive::ASTERISK[0]) {
@@ -394,7 +394,7 @@ bool DirectiveParser::parseServerNameDirective(const std::vector<std::string>& t
     return expectSemicolon(tokens, pos, std::string(config::directive::SERVER_NAME));
 }
 
-bool DirectiveParser::parseUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, std::string* uploadStore) {
+bool DirectiveParser::parseUploadStoreDirective(const std::vector<std::string>& tokens, std::size_t* pos, std::string* uploadStore) {
     if (!uploadStore || *pos >= tokens.size()) {
         toolbox::logger::StepMark::error("Unexpected Error :" + std::string(config::directive::UPLOAD_STORE));
         return false;

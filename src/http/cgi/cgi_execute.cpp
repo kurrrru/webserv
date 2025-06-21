@@ -144,7 +144,7 @@ void CgiExecute::setServerVariables(const HTTPRequest& request,
     } else {
         _environment[http::cgi::meta::SERVER_NAME] = hostValues.front();
     }
-    size_t serverPort = client->getServerPort();
+    std::size_t serverPort = client->getServerPort();
     if (serverPort == 0) {
         _environment[http::cgi::meta::SERVER_PORT] = "";
     } else {
@@ -225,7 +225,7 @@ void CgiExecute::convertHeadersToEnv(const HTTPRequest& request) {
             continue;
         }
         std::string envName = http::cgi::ENV_PREFIX;
-        for (size_t i = 0; i < name.size(); i++) {
+        for (std::size_t i = 0; i < name.size(); i++) {
             char c = name[i];
             if (c == '-') {
                 envName += '_';
@@ -352,7 +352,7 @@ std::vector<char*> CgiExecute::prepareEnvironmentVariables() {
         _envStrings.push_back(it->first + "=" + it->second);
     }
     std::vector<char*> envp;
-    for (size_t i = 0; i < _envStrings.size(); ++i) {
+    for (std::size_t i = 0; i < _envStrings.size(); ++i) {
         envp.push_back(const_cast<char*>(_envStrings[i].c_str()));
     }
     envp.push_back(NULL);
@@ -449,14 +449,13 @@ bool CgiExecute::continueWriteRequestBody() {
     if (_lastWriteTime != 0 && (currentTime - _lastWriteTime) < 1) {
         return false;
     }
-    size_t remaining = _totalBytes - _bytesWritten;
-    size_t writeSize = remaining;
+    std::size_t remaining = _totalBytes - _bytesWritten;
+    std::size_t writeSize = remaining;
     if (writeSize > core::IO_BUFFER_SIZE) {
         writeSize = core::IO_BUFFER_SIZE;
     }
-    ssize_t written = write(_inputPipe[1],
-                            _writeBuffer.c_str() + _bytesWritten,
-                            writeSize);
+    ssize_t written =
+        write(_inputPipe[1], _writeBuffer.c_str() + _bytesWritten, writeSize);
     toolbox::logger::StepMark::info(
         "continueWriteRequestBody: write returned "
         + toolbox::to_string(written) + " bytes");
@@ -530,7 +529,7 @@ bool CgiExecute::continueReadOutput() {
     }
 }
 
-bool CgiExecute::processReadBytes(const char* buffer, size_t bytes) {
+bool CgiExecute::processReadBytes(const char* buffer, std::size_t bytes) {
     BaseParser::ParseStatus status = _parser.run(std::string(buffer, bytes));
     if (status == BaseParser::P_COMPLETED) {
         _readState = READ_COMPLETED;
@@ -671,13 +670,13 @@ bool CgiExecute::setNonBlocking(int fd) {
 std::string CgiExecute::extractScriptName(const std::string& requestPath,
                                         const std::string& scriptPath) const {
     std::string filename;
-    size_t scriptLastSlash = scriptPath.find_last_of('/');
+    std::size_t scriptLastSlash = scriptPath.find_last_of('/');
     if (scriptLastSlash != std::string::npos) {
         filename = scriptPath.substr(scriptLastSlash + 1);
     } else {
         filename = scriptPath;
     }
-    size_t pos = requestPath.find(filename);
+    std::size_t pos = requestPath.find(filename);
     if (pos != std::string::npos) {
         return requestPath.substr(0, pos + filename.length());
     }

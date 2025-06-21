@@ -310,7 +310,7 @@ CgiHandler::extractRedirectInfo(const CgiResponse& cgiResponse) {
 IOPendingState CgiHandler::executeInternalRequest(
                             const std::string& location,
                             const std::string& host,
-                            size_t redirectCount) {
+                            std::size_t redirectCount) {
     toolbox::SharedPtr<http::Request> clientRequest = _client->getRequest();
     clientRequest->setRedirectCount(redirectCount);
     clientRequest->setLocalRedirectInfo(http::method::GET, location, host);
@@ -328,14 +328,14 @@ bool CgiHandler::validateParameters(const std::string& scriptPath,
         return false;
     }
     std::string fileName;
-    size_t lastSlash = scriptPath.find_last_of('/');
+    std::size_t lastSlash = scriptPath.find_last_of('/');
     if (lastSlash != std::string::npos) {
         fileName = scriptPath.substr(lastSlash + 1);
     } else {
         fileName = scriptPath;
     }
     std::string fileExtension;
-    size_t lastDot = fileName.find_last_of('.');
+    std::size_t lastDot = fileName.find_last_of('.');
     if (lastDot != std::string::npos) {
         fileExtension = fileName.substr(lastDot);
     } else {
@@ -345,7 +345,7 @@ bool CgiHandler::validateParameters(const std::string& scriptPath,
         return false;
     }
     bool isValidExtension = false;
-    for (size_t i = 0; i < cgi_extension.size(); ++i) {
+    for (std::size_t i = 0; i < cgi_extension.size(); ++i) {
         if (fileExtension == cgi_extension[i]) {
             isValidExtension = true;
             break;
