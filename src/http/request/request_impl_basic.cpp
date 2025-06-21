@@ -44,3 +44,7 @@ void http::Request::setErrorInternalRedirect() {
 const std::string& http::Request::getUploadPath() const {
     return _config.getUploadStore();
 }
+
+void http::Request::terminateActiveCgiProcesses() {
+    _cgiHandler.forceTerminate();
+}

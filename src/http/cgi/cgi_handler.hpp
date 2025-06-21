@@ -35,6 +35,7 @@ class CgiHandler {
                        const http::IOPendingState ioPendingState);
     void setRedirectCount(std::size_t count) { _redirectCount = count; }
     void reset();
+    void forceTerminate();
 
  private:
     CgiHandler(const CgiHandler& other);

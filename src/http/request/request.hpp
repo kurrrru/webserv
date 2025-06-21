@@ -100,6 +100,11 @@ class Request {
      */
     const std::string& getUploadPath() const;
 
+    /**
+     * @brief Terminates any active CGI processes.
+     */
+    void terminateActiveCgiProcesses();
+
  private:
     http::RequestParser _parsedRequest;
     config::LocationConfig _config;
