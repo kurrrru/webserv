@@ -76,15 +76,15 @@ void Epoll::addClient(int fd, toolbox::SharedPtr<Client> client) {
 void Epoll::del(int fd) {
     Epoll& epollInstance = getInstance();
     std::map<int, struct epoll_event*>::iterator it = epollInstance._events.find(fd);
+    if (epoll_ctl(epollInstance._epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+        toolbox::logger::StepMark::error("Epoll::del: epoll_ctl failed for fd: " + toolbox::to_string(fd));
+    }
     if (it != epollInstance._events.end()) {
         struct epoll_event* ev = it->second;
         taggedEventData* tagged = static_cast<taggedEventData*>(ev->data.ptr);
         delete tagged;
         delete ev;
         epollInstance._events.erase(it);
-    }
-    if (epoll_ctl(epollInstance._epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-        toolbox::logger::StepMark::error("Epoll::del: epoll_ctl failed for fd: " + toolbox::to_string(fd));
     }
     close(fd);
 }
