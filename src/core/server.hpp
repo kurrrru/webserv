@@ -1,4 +1,5 @@
 // Copyright 2025 Ideal Broccoli
+
 #pragma once
 
 #include <fcntl.h>

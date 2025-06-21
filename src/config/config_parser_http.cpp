@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include <vector>
 
 #include "config_parser.hpp"

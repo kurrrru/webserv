@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include <string>
 #include <vector>
 #include <fstream>
@@ -8,7 +10,6 @@
 
 #include <sys/stat.h>
 #include <dirent.h>
-#include <errno.h>
 #include <unistd.h>
 #include <limits.h>
 

@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include "request.hpp"
 #include "io_pending_state.hpp"
 

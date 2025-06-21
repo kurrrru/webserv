@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include <string>
 
 #include "server_method_handler.hpp"
