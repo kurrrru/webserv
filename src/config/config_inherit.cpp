@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include "config_inherit.hpp"
 #include "../../toolbox/stepmark.hpp"
 #include "../../toolbox/shared.hpp"
