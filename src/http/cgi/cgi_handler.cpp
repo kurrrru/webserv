@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include <iostream>
 #include <vector>
 #include <string>

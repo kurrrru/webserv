@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include <string>
 
 #include "request_field_parser.hpp"

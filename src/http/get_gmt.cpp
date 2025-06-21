@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include "get_gmt.hpp"
 
 #include <string>

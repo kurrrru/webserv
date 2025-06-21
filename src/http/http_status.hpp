@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #pragma once
 
 namespace http {

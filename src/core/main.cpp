@@ -1,3 +1,5 @@
+// Copyright 2025 Ideal Broccoli
+
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <fcntl.h>
@@ -5,7 +7,6 @@
 #include <unistd.h>
 #include <string>
 #include <iostream>
-#include <cerrno>
 #include <cstdio>
 #include <sstream>
 #include <cstring>
