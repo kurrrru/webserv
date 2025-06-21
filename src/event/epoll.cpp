@@ -5,8 +5,11 @@
 #include <sys/socket.h>
 #include <stdexcept>
 #include <map>
+#include <vector>
 
 #include "epoll.hpp"
+#include "../../toolbox/string.hpp"
+#include "../../toolbox/stepmark.hpp"
 #include "tagged_epoll_event.hpp"
 
 namespace toolbox {
@@ -73,6 +76,9 @@ void Epoll::addClient(int fd, toolbox::SharedPtr<Client> client) {
 void Epoll::del(int fd) {
     Epoll& epollInstance = getInstance();
     std::map<int, struct epoll_event*>::iterator it = epollInstance._events.find(fd);
+    if (epoll_ctl(epollInstance._epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+        toolbox::logger::StepMark::error("Epoll::del: epoll_ctl failed for fd: " + toolbox::to_string(fd));
+    }
     if (it != epollInstance._events.end()) {
         struct epoll_event* ev = it->second;
         taggedEventData* tagged = static_cast<taggedEventData*>(ev->data.ptr);
@@ -80,16 +86,28 @@ void Epoll::del(int fd) {
         delete ev;
         epollInstance._events.erase(it);
     }
-    if (epoll_ctl(epollInstance._epfd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-        close(fd);
-        throw EpollException("epoll_ctl failed");
-    }
     close(fd);
 }
 
 int Epoll::wait(struct epoll_event* events, int maxevents, int timeout) {
     Epoll& epollInstance = getInstance();
     return epoll_wait(epollInstance._epfd, events, maxevents, timeout);
+}
+
+void Epoll::checkClientTimeouts() {
+    std::vector<int> toRemove;
+    Epoll& epollInstance = getInstance();
+    for (std::map<int, struct epoll_event*>::iterator it = epollInstance._events.begin();
+            it != epollInstance._events.end(); ++it) {
+        taggedEventData* tagged = static_cast<taggedEventData*>(it->second->data.ptr);
+        if (tagged->client && tagged->client->isClientTimedOut()) {
+            toRemove.push_back(tagged->client->getFd());
+        }
+    }
+
+    for (std::size_t i = 0; i < toRemove.size(); ++i) {
+        Epoll::del(toRemove[i]);
+    }
 }
 
 Epoll& Epoll::getInstance() {

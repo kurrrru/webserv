@@ -14,12 +14,14 @@
 Client::Client(int fd, const struct sockaddr_in& client_addr,
             socklen_t client_addr_len) :
             _socket_fd(fd), _client_addr(client_addr),
-            _client_addr_len(client_addr_len) {
+            _client_addr_len(client_addr_len),
+            _lastAccessTime(std::time(NULL)) {
 }
 
 Client::Client(const Client& other): _socket_fd(other._socket_fd),
     _client_addr(other._client_addr),
     _client_addr_len(other._client_addr_len),
+    _lastAccessTime(other._lastAccessTime),
     _request(other._request) {
 }
 
@@ -28,6 +30,7 @@ Client& Client::operator=(const Client& other) {
         _socket_fd = other._socket_fd;
         _client_addr = other._client_addr;
         _client_addr_len = other._client_addr_len;
+        _lastAccessTime = other._lastAccessTime;
         _request = other._request;
     }
     return *this;
@@ -95,6 +98,10 @@ void Client::setRequest(const toolbox::SharedPtr<http::Request> request) {
     _request = request;
 }
 
+void Client::setLastAccessTime() {
+    _lastAccessTime = std::time(NULL);
+}
+
 bool Client::isBadRequest() const {
     return _request->getResponse().getStatus() == http::HttpStatus::BAD_REQUEST;
 }
@@ -107,6 +114,10 @@ bool Client::isCgiProcessing() const {
     return _request->getIOPendingState() == http::CGI_BODY_SENDING
         || _request->getIOPendingState() == http::CGI_OUTPUT_READING
         || _request->getIOPendingState() == http::CGI_LOCAL_REDIRECT_IO_PENDING;
+}
+
+bool Client::isClientTimedOut() const {
+    return std::time(NULL) - _lastAccessTime > core::CLIENT_TIMEOUT_SECONDS;
 }
 
 std::string Client::convertIpToString(uint32_t ip) const {
