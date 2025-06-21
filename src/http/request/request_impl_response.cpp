@@ -97,7 +97,7 @@ void http::Request::sendResponse() {
                 if (std::find(errorPages[i].getCodes().begin(),
                         errorPages[i].getCodes().end(), status)
                     != errorPages[i].getCodes().end()) {
-                    
+
                     _response.setErrorPage(
                         errorPages[i].isOverwrite(),
                         errorPages[i].getNewStatusCode());
@@ -172,6 +172,8 @@ void http::Request::sendResponse() {
                 || _errorPageRequest->getIOPendingState() == http::CGI_OUTPUT_READING
                 || _errorPageRequest->getIOPendingState() == http::CGI_LOCAL_REDIRECT_IO_PENDING) {
                 _ioPendingState = http::ERROR_LOCAL_REDIRECT_IO_PENDING;
+                toolbox::logger::StepMark::info(
+                    "Request: sendResponse: local redirect to error page");
                 return;
             }
             int errorStatus = _errorPageRequest->getResponse().getStatus();
@@ -212,10 +214,14 @@ void http::Request::sendResponse() {
             http_user_agent
         );
         _ioPendingState = http::RESPONSE_SENDING;
+        toolbox::logger::StepMark::info(
+            "Request: sendResponse: ready to send response");
         return;
     }
     bool endSending = _response.sendResponse(_client->getFd());
     if (endSending) {
         _ioPendingState = http::END_RESPONSE;
+        toolbox::logger::StepMark::info(
+            "Request: sendResponse: successfully sent response");
     }
 }

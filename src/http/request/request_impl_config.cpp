@@ -16,6 +16,8 @@ void Request::fetchConfig() {
     }
     if (processReturn(selectedServer->getReturnValue())) {
         _ioPendingState = RESPONSE_START;
+        toolbox::logger::StepMark::info(
+            "Request: fetchConfig: proccessReturn selectedServer found return value");
         return;
     }
     if (!selectLocation(selectedServer)) {
@@ -24,6 +26,8 @@ void Request::fetchConfig() {
     }
     if (processReturn(_config.getReturnValue())) {
         _ioPendingState = RESPONSE_START;
+        toolbox::logger::StepMark::info(
+            "Request: fetchConfig: proccessReturn _config found return value");
         return;
     }
 }
