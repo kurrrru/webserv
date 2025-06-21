@@ -28,6 +28,7 @@ class Epoll {
     static void addClient(int fd, toolbox::SharedPtr<Client> client);
     static void del(int fd);
     static int wait(struct epoll_event* events, int maxevents, int timeout);
+    static void checkClientTimeouts();
 
  private:
     Epoll();

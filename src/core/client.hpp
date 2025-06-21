@@ -6,8 +6,10 @@
 
 #include <exception>
 #include <string>
+#include <ctime>
 
 #include "../../toolbox/shared.hpp"
+#include "constant.hpp"
 
 namespace http {
 class Request;
@@ -36,12 +38,14 @@ class Client {
     std::string getIp() const;
     std::string getServerIp() const;
     size_t getServerPort() const;
+    void setLastAccessTime();
 
     toolbox::SharedPtr<http::Request> getRequest() const;
     void setRequest(const toolbox::SharedPtr<http::Request> request);
     bool isBadRequest() const;
     bool isResponseSending() const;
     bool isCgiProcessing() const;
+    bool isClientTimedOut() const;
 
  private:
     Client();
@@ -49,6 +53,7 @@ class Client {
     int _socket_fd;
     struct sockaddr_in _client_addr;
     socklen_t _client_addr_len;
+    time_t _lastAccessTime;
     toolbox::SharedPtr<http::Request> _request;
 
     std::string convertIpToString(uint32_t ip) const;
