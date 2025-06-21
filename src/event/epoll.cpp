@@ -106,6 +106,7 @@ void Epoll::checkClientTimeouts() {
     }
 
     for (std::size_t i = 0; i < toRemove.size(); ++i) {
+        toolbox::logger::StepMark::info("Epoll: timeout for client fd: " + toolbox::to_string(toRemove[i]));
         Epoll::del(toRemove[i]);
     }
 }

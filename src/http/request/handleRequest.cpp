@@ -14,7 +14,7 @@ void Request::handleRequest() {
     }
     if (_response.getStatus() != 200) {
         toolbox::logger::StepMark::error(
-            "Request::handleRequest: Response already set status "
+            "Request: handleRequest: Response already set status "
                 + toolbox::to_string(_response.getStatus()) + " does not handle request");
         return;
     }
@@ -27,7 +27,7 @@ void Request::handleRequest() {
         _response.setStatus(HttpStatus::METHOD_NOT_ALLOWED);
         _ioPendingState = NO_IO_PENDING;
         toolbox::logger::StepMark::error(
-            "Request::handleRequest: Method not allowed: "
+            "Request: handleRequest: Method not allowed: "
                 + httpRequest.method);
         return;
     }
@@ -67,7 +67,7 @@ void Request::handleRequest() {
             _parsedRequest, _config, httpRequest.fields, _response);
     }
 
-    toolbox::logger::StepMark::info("Request::handleRequest: handled request for "
+    toolbox::logger::StepMark::info("Request: handleRequest: handled request for "
         + httpRequest.uri.path + " with method " + httpRequest.method);
 }
 
