@@ -71,7 +71,7 @@ void DirectiveParser::initDirectiveInfo() {
     _directiveInfo[config::directive::RETURN] = info;
 }
 
-bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, size_t* pos, const std::string& directive, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::parseDirective(const std::vector<std::string>& tokens, std::size_t* pos, const std::string& directive, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (directive == config::directive::ROOT) {
         return handleRootDirective(tokens, pos, http, server, location);
     } else if (directive == config::directive::INDEX) {
@@ -111,7 +111,7 @@ bool DirectiveParser::isDirectiveAllowedInContext(const std::string& directive, 
     return true;
 }
 
-bool DirectiveParser::handleAllowedMethodsDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleAllowedMethodsDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::vector<std::string> methods;
     if (http) {
         methods = http->getAllowedMethods();
@@ -133,7 +133,7 @@ bool DirectiveParser::handleAllowedMethodsDirective(const std::vector<std::strin
     return result;
 }
 
-bool DirectiveParser::handleAutoindexDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleAutoindexDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     bool autoindex;
     if (http) {
         autoindex = http->getAutoindex();
@@ -157,7 +157,7 @@ bool DirectiveParser::handleAutoindexDirective(const std::vector<std::string>& t
     return result;
 }
 
-bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::vector<std::string> extensions;
     if (http) {
         extensions = http->getCgiExtensions();
@@ -181,7 +181,7 @@ bool DirectiveParser::handleCgiExtensionDirective(const std::vector<std::string>
     return result;
 }
 
-bool DirectiveParser::handleCgiPathDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleCgiPathDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::string cgiPath;
     if (http) {
         cgiPath = http->getCgiPath();
@@ -205,7 +205,7 @@ bool DirectiveParser::handleCgiPathDirective(const std::vector<std::string>& tok
     return result;
 }
 
-bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::vector<ErrorPage> errorPages;
     if (http) {
         errorPages = http->getErrorPages();
@@ -219,15 +219,15 @@ bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& t
     bool result = parseErrorPageDirective(tokens, pos, &errorPages);
     if (result) {
         if (http) {
-            for (size_t i = 0; i < errorPages.size(); ++i) {
+            for (std::size_t i = 0; i < errorPages.size(); ++i) {
                 http->addErrorPage(errorPages[i]);
             }
         } else if (server) {
-            for (size_t i = 0; i < errorPages.size(); ++i) {
+            for (std::size_t i = 0; i < errorPages.size(); ++i) {
                 server->addErrorPage(errorPages[i]);
             }
         } else if (location) {
-            for (size_t i = 0; i < errorPages.size(); ++i) {
+            for (std::size_t i = 0; i < errorPages.size(); ++i) {
                 location->addErrorPage(errorPages[i]);
             }
         }
@@ -235,8 +235,8 @@ bool DirectiveParser::handleErrorPageDirective(const std::vector<std::string>& t
     return result;
 }
 
-bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
-    size_t size;
+bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+    std::size_t size;
     if (http) {
         size = http->getClientMaxBodySize();
     } else if (server) {
@@ -259,7 +259,7 @@ bool DirectiveParser::handleClientMaxBodySizeDirective(const std::vector<std::st
     return result;
 }
 
-bool DirectiveParser::handleIndexDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleIndexDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::vector<std::string> indices;
     if (http) {
         indices = http->getIndices();
@@ -283,7 +283,7 @@ bool DirectiveParser::handleIndexDirective(const std::vector<std::string>& token
     return result;
 }
 
-bool DirectiveParser::handleListenDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleListenDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
         throwConfigError("\"" + std::string(config::directive::LISTEN) + "\" directive is not allowed here");
     } else if (location) {
@@ -300,7 +300,7 @@ bool DirectiveParser::handleListenDirective(const std::vector<std::string>& toke
     return result;
 }
 
-bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
         throwConfigError("\"" + std::string(config::directive::RETURN) + "\" directive is not allowed here");
     }
@@ -323,7 +323,7 @@ bool DirectiveParser::handleReturnDirective(const std::vector<std::string>& toke
     return result;
 }
 
-bool DirectiveParser::handleRootDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleRootDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::string root;
     if (http) {
         root = http->getRoot();
@@ -347,7 +347,7 @@ bool DirectiveParser::handleRootDirective(const std::vector<std::string>& tokens
     return result;
 }
 
-bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     if (http) {
         throwConfigError("\"" + std::string(config::directive::SERVER_NAME) + "\" directive is not allowed here");
     } else if (location) {
@@ -364,7 +364,7 @@ bool DirectiveParser::handleServerNameDirective(const std::vector<std::string>& 
     return result;
 }
 
-bool DirectiveParser::handleUploadStoreDirective(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
+bool DirectiveParser::handleUploadStoreDirective(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* http, config::ServerConfig* server, config::LocationConfig* location) {
     std::string uploadStore;
     if (http) {
         uploadStore = http->getUploadStore();
@@ -388,7 +388,7 @@ bool DirectiveParser::handleUploadStoreDirective(const std::vector<std::string>&
     return result;
 }
 
-bool DirectiveParser::handleDuplicateDirective(const std::string& directiveName, const std::vector<std::string>& tokens, size_t* pos, bool* shouldSkip) {
+bool DirectiveParser::handleDuplicateDirective(const std::string& directiveName, const std::vector<std::string>& tokens, std::size_t* pos, bool* shouldSkip) {
     *shouldSkip = false;
     if (isAllowedDuplicate(directiveName)) {
         return true;
@@ -411,8 +411,8 @@ bool DirectiveParser::isAllowedDuplicate(const std::string& directiveName) {
         config::directive::SERVER_NAME,
         config::directive::LISTEN,
     };
-    const size_t allowedCount = sizeof(allowedDuplicates) / sizeof(allowedDuplicates[0]);
-    for (size_t i = 0; i < allowedCount; ++i) {
+    const std::size_t allowedCount = sizeof(allowedDuplicates) / sizeof(allowedDuplicates[0]);
+    for (std::size_t i = 0; i < allowedCount; ++i) {
         if (directiveName == allowedDuplicates[i]) {
             return true;
         }
@@ -424,8 +424,8 @@ bool DirectiveParser::isIgnoredDuplicate(const std::string& directiveName) {
     const std::string ignoredDuplicates[] = {
         config::directive::RETURN
     };
-    const size_t ignoredCount = sizeof(ignoredDuplicates) / sizeof(ignoredDuplicates[0]);
-    for (size_t i = 0; i < ignoredCount; ++i) {
+    const std::size_t ignoredCount = sizeof(ignoredDuplicates) / sizeof(ignoredDuplicates[0]);
+    for (std::size_t i = 0; i < ignoredCount; ++i) {
         if (directiveName == ignoredDuplicates[i]) {
             return true;
         }
@@ -433,7 +433,7 @@ bool DirectiveParser::isIgnoredDuplicate(const std::string& directiveName) {
     return false;
 }
 
-void DirectiveParser::skipUntilSemicolon(const std::vector<std::string>& tokens, size_t* pos) {
+void DirectiveParser::skipUntilSemicolon(const std::vector<std::string>& tokens, std::size_t* pos) {
     while (*pos < tokens.size() && tokens[*pos] != config::directive::SEMICOLON) {
         (*pos)++;
     }

@@ -16,9 +16,9 @@ class ConfigLexer {
  private:
     ConfigLexer(const ConfigLexer&);
     ConfigLexer& operator=(const ConfigLexer&);
-    bool readToken(const std::string& input, size_t* pos, std::string* token);
-    bool readPlainToken(const std::string& input, size_t* pos, std::string* token);
-    bool readQuotedString(const std::string& input, size_t* pos, std::string* token);
+    bool readToken(const std::string& input, std::size_t* pos, std::string* token);
+    bool readPlainToken(const std::string& input, std::size_t* pos, std::string* token);
+    bool readQuotedString(const std::string& input, std::size_t* pos, std::string* token);
 };
 
 }  // namespace config

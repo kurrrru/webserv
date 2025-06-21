@@ -55,7 +55,7 @@ class LocationConfig : public ConfigBase {
     const std::vector<toolbox::SharedPtr<LocationConfig> >& getLocations() const { return _locations; }
     void addLocation(const toolbox::SharedPtr<LocationConfig>& location) { _locations.push_back(location); }
     bool hasLocations() const { return !_locations.empty(); }
-    size_t getLocationsCount() const { return _locations.size(); }
+    std::size_t getLocationsCount() const { return _locations.size(); }
 
  private:
     std::string _path;

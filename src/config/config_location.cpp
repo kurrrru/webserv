@@ -24,7 +24,7 @@ _path(other._path),
 _returnValue(other._returnValue),
 _parentServer(other._parentServer),
 _parentLocation(other._parentLocation) {
-    for (size_t i = 0; i < other._locations.size(); ++i) {
+    for (std::size_t i = 0; i < other._locations.size(); ++i) {
         toolbox::SharedPtr<LocationConfig> newLocation(new LocationConfig(*other._locations[i]));
         _locations.push_back(newLocation);
         _locations.back()->setLocationParent(this);
@@ -39,7 +39,7 @@ LocationConfig& LocationConfig::operator=(const LocationConfig& other) {
         _parentServer = other._parentServer;
         _parentLocation = other._parentLocation;
         _locations.clear();
-        for (size_t i = 0; i < other._locations.size(); ++i) {
+        for (std::size_t i = 0; i < other._locations.size(); ++i) {
             toolbox::SharedPtr<LocationConfig> newLocation(
                 new LocationConfig(*other._locations[i]));
             _locations.push_back(newLocation);

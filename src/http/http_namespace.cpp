@@ -77,10 +77,10 @@ const std::size_t CRLF_SIZE = 2;
 }  // namespace symbols
 
 namespace cgi {
-const size_t MAX_REDIRECTS = 10;
-const size_t TIMEOUT = 30;
-const size_t READ_BUFFER_SIZE = 4096;
-const size_t READ_TIMEOUT_SEC = 1;
+const std::size_t MAX_REDIRECTS = 10;
+const std::size_t TIMEOUT = 30;
+const std::size_t READ_BUFFER_SIZE = 4096;
+const std::size_t READ_TIMEOUT_SEC = 1;
 const char* GATEWAY_INTERFACE = "CGI/1.1";
 const char* SERVER_SOFTWARE = "WebServ-Ideal Broccoli/1.0";
 const char* ENV_PREFIX = "HTTP_";

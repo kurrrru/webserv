@@ -24,7 +24,7 @@ namespace config {
  * errorPage.setPath("/404.html");
  * 
  * // Accessing the configured settings
- * const std::vector<size_t>& codes = errorPage.getCodes(); // Returns [404, 403]
+ * const std::vector<std::size_t>& codes = errorPage.getCodes(); // Returns [404, 403]
  * const std::string& path = errorPage.getPath();           // Returns "/404.html"
  * @endcode
  */
@@ -35,8 +35,8 @@ class ErrorPage {
     ErrorPage& operator=(const ErrorPage&);
     ~ErrorPage();
 
-    void addCode(size_t code) { _codes.push_back(code); }
-    const std::vector<size_t>& getCodes() const { return _codes; }
+    void addCode(std::size_t code) { _codes.push_back(code); }
+    const std::vector<std::size_t>& getCodes() const { return _codes; }
     const std::string& getPath() const { return _path; }
     void setPath(const std::string& path) { _path = path; }
 
@@ -46,7 +46,7 @@ class ErrorPage {
     void setNewStatusCode(int newStatusCode) { _newStatusCode = newStatusCode; }
 
  private:
-    std::vector<size_t> _codes;
+    std::vector<std::size_t> _codes;
     std::string _path;
     bool _overwrite;  // Indicates if the HTTP status code should be overwritten
     int _newStatusCode;
@@ -67,7 +67,7 @@ class ErrorPage {
  * listen.setDefaultServer(true);
  * 
  * // Accessing the configured settings
- * size_t port = listen.getPort();                // Returns 80
+ * std::size_t port = listen.getPort();                // Returns 80
  * const std::string& ip = listen.getIp();        // Returns "0.0.0.0"
  * bool isDefault = listen.isDefaultServer();     // Returns true
  * @endcode
@@ -79,15 +79,15 @@ class Listen {
     Listen& operator=(const Listen&);
     ~Listen();
 
-    size_t getPort() const { return _port; }
+    std::size_t getPort() const { return _port; }
     const std::string& getIp() const { return _ip; }
     bool isDefaultServer() const { return _defaultServer; }
-    void setPort(size_t port) { _port = port; }
+    void setPort(std::size_t port) { _port = port; }
     void setIp(const std::string& ip) { _ip = ip; }
     void setDefaultServer(bool defaultServer) { _defaultServer = defaultServer; }
 
  private:
-    size_t _port;
+    std::size_t _port;
     std::string _ip;
     bool _defaultServer;
 };
@@ -154,7 +154,7 @@ class ServerName {
  * redirect.setHasReturnValue(true);
  * 
  * // Accessing the configured settings
- * size_t code = redirect.getStatusCode();                // Returns 301
+ * std::size_t code = redirect.getStatusCode();                // Returns 301
  * const std::string& url = redirect.getTextOrUrl();      // Returns "https://example.com"
  * bool hasUrl = redirect.isTextOrUrlSetting();           // Returns true
  * bool hasValue = redirect.hasReturnValue();             // Returns true
@@ -167,17 +167,17 @@ class Return {
     Return(const Return&);
     Return& operator=(const Return&);
 
-    size_t getStatusCode() const { return _statusCode; }
+    std::size_t getStatusCode() const { return _statusCode; }
     const std::string& getTextOrUrl() const { return _textOrUrl; }
     bool isTextOrUrlSetting() const { return _isTextOrUrlSetting; }
     bool hasReturnValue() const { return _hasReturnValue; }
-    void setStatusCode(size_t code) { _statusCode = code; }
+    void setStatusCode(std::size_t code) { _statusCode = code; }
     void setTextOrUrl(const std::string& textOrUrl) { _textOrUrl = textOrUrl; }
     void setIsTextOrUrlSetting(bool isTextOrUrlSetting) { _isTextOrUrlSetting = isTextOrUrlSetting; }
     void setHasReturnValue(bool hasValue) { _hasReturnValue = hasValue; }
 
  private:
-    size_t _statusCode;
+    std::size_t _statusCode;
     std::string _textOrUrl;
     bool _isTextOrUrlSetting;
     bool _hasReturnValue;
@@ -215,7 +215,7 @@ class Return {
  * const std::string& root = config->getRoot();           // Returns "/var/www"
  * bool autoindex = config->getAutoindex();               // Returns true
  * const std::vector<std::string>& methods = config->getAllowedMethods(); // Returns ["GET", "POST"]
- * size_t maxBodySize = config->getClientMaxBodySize();   // Returns default or configured value
+ * std::size_t maxBodySize = config->getClientMaxBodySize();   // Returns default or configured value
  * @endcode
  */
 class ConfigBase {
@@ -229,7 +229,7 @@ class ConfigBase {
     bool getAutoindex() const { return _autoindex; }
     const std::vector<std::string>& getCgiExtensions() const { return _cgiExtensions; }
     const std::string& getCgiPath() const { return _cgiPath; }
-    size_t getClientMaxBodySize() const { return _clientMaxBodySize; }
+    std::size_t getClientMaxBodySize() const { return _clientMaxBodySize; }
     const std::vector<ErrorPage>& getErrorPages() const { return _errorPages; }
     const std::vector<std::string>& getIndices() const { return _indices; }
     const std::string& getRoot() const { return _root; }
@@ -241,7 +241,7 @@ class ConfigBase {
     void setCgiExtensions(const std::vector<std::string>& extensions) { _cgiExtensions = extensions; }
     void addCgiExtension(const std::string& extension) { _cgiExtensions.push_back(extension); }
     void setCgiPath(const std::string& path) { _cgiPath = path; }
-    void setClientMaxBodySize(size_t size) { _clientMaxBodySize = size; }
+    void setClientMaxBodySize(std::size_t size) { _clientMaxBodySize = size; }
     void setErrorPages(const std::vector<ErrorPage>& pages) { _errorPages = pages; }
     void addErrorPage(const ErrorPage& page) { _errorPages.push_back(page); }
     void setIndices(const std::vector<std::string>& indices) { _indices = indices; }
@@ -254,7 +254,7 @@ class ConfigBase {
     bool _autoindex;
     std::vector<std::string> _cgiExtensions;
     std::string _cgiPath;
-    size_t _clientMaxBodySize;
+    std::size_t _clientMaxBodySize;
     std::vector<ErrorPage> _errorPages;
     std::vector<std::string> _indices;
     std::string _root;

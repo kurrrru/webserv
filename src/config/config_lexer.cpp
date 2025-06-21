@@ -24,20 +24,20 @@ bool isWhitespace(const char c) {
     return std::strchr(config::token::WHITESPACE_CHARS, c) != NULL;
 }
 
-void skipWhitespace(const std::string& input, size_t* pos) {
+void skipWhitespace(const std::string& input, std::size_t* pos) {
     while (*pos < input.length() && isWhitespace(input[*pos])) {
         (*pos)++;
     }
 }
 
-bool isNewline(const std::string& input, size_t pos) {
+bool isNewline(const std::string& input, std::size_t pos) {
     if (input[pos] == config::token::LF[0] || input[pos] == config::token::CR[0]) {
         return true;
     }
     return false;
 }
 
-void skipComment(const std::string& input, size_t* pos) {
+void skipComment(const std::string& input, std::size_t* pos) {
     while (*pos < input.length() && !isNewline(input, *pos)) {
         (*pos)++;
     }
@@ -46,7 +46,7 @@ void skipComment(const std::string& input, size_t* pos) {
     }
 }
 
-void processEscapeSequence(const std::string& input, size_t* pos, std::string* token) {
+void processEscapeSequence(const std::string& input, std::size_t* pos, std::string* token) {
     (*pos)++;
     switch (input[*pos]) {
         case 'n':
@@ -65,7 +65,7 @@ void processEscapeSequence(const std::string& input, size_t* pos, std::string* t
     (*pos)++;
 }
 
-void validateAfterQuotedString(const std::string& input, size_t pos) {
+void validateAfterQuotedString(const std::string& input, std::size_t pos) {
     if (pos < input.length()) {
         char ch = input[pos];
         if (!isWhitespace(ch) &&
@@ -79,7 +79,7 @@ void validateAfterQuotedString(const std::string& input, size_t pos) {
 }
 
 std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
-    size_t pos = 0;
+    std::size_t pos = 0;
     std::vector<std::string> tokens;
     std::string token;
     std::string preToken;
@@ -112,7 +112,7 @@ std::vector<std::string> ConfigLexer::tokenize(const std::string& input) {
     return tokens;
 }
 
-bool ConfigLexer::readToken(const std::string& input, size_t* pos, std::string* token) {
+bool ConfigLexer::readToken(const std::string& input, std::size_t* pos, std::string* token) {
     token->clear();
     if (input[*pos] == config::token::DOUBLE_QUOTE[0] ||
         input[*pos] == config::token::SINGLE_QUOTE[0]) {
@@ -131,7 +131,7 @@ bool ConfigLexer::readToken(const std::string& input, size_t* pos, std::string* 
     return true;
 }
 
-bool ConfigLexer::readQuotedString(const std::string& input, size_t* pos, std::string* token) {
+bool ConfigLexer::readQuotedString(const std::string& input, std::size_t* pos, std::string* token) {
     token->clear();
     char quote = input[*pos];
     (*pos)++;
@@ -153,9 +153,9 @@ bool ConfigLexer::readQuotedString(const std::string& input, size_t* pos, std::s
     return true;
 }
 
-bool ConfigLexer::readPlainToken(const std::string& input, size_t* pos, std::string* token) {
+bool ConfigLexer::readPlainToken(const std::string& input, std::size_t* pos, std::string* token) {
     token->clear();
-    size_t start = *pos;
+    std::size_t start = *pos;
     while (*pos < input.length() &&
             !isWhitespace(input[*pos]) &&
             input[*pos] != config::token::OPEN_BRACE[0] &&

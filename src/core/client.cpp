@@ -78,7 +78,7 @@ std::string Client::getServerIp() const {
     return "";
 }
 
-size_t Client::getServerPort() const {
+std::size_t Client::getServerPort() const {
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
     if (getsockname(_socket_fd,

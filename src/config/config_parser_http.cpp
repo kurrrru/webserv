@@ -10,7 +10,7 @@
 
 namespace config {
 
-void validateHttpBlockStart(const std::vector<std::string>& tokens, size_t* pos, const std::string& expectedDirective) {
+void validateHttpBlockStart(const std::vector<std::string>& tokens, std::size_t* pos, const std::string& expectedDirective) {
     if (*pos >= tokens.size() || tokens[*pos] != expectedDirective) {
         if (isContextToken(tokens[*pos]) || isDirectiveToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -25,7 +25,7 @@ void validateHttpBlockStart(const std::vector<std::string>& tokens, size_t* pos,
     (*pos)++;
 }
 
-bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, size_t* pos) {
+bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, std::size_t* pos) {
     validateHttpBlockStart(tokens, pos, config::context::HTTP);
     if (!parseHttpDirectives(tokens, pos, _config.get())) {
         return false;
@@ -34,7 +34,7 @@ bool ConfigParser::parseHttpBlock(const std::vector<std::string>& tokens, size_t
     return true;
 }
 
-bool ConfigParser::parseHttpDirectives(const std::vector<std::string>& tokens, size_t* pos, config::HttpConfig* config) {
+bool ConfigParser::parseHttpDirectives(const std::vector<std::string>& tokens, std::size_t* pos, config::HttpConfig* config) {
     std::map<std::string, bool> processedDirectives;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
         std::string directiveName = tokens[*pos];

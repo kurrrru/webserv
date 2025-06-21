@@ -37,11 +37,11 @@ void serverEmptyCheck(ServerConfig* server) {
 
 void ConfigInherit::applyInheritance() {
     indexEmptyCheck(_httpConfig);
-    for (size_t i = 0; i < _httpConfig->getServers().size(); ++i) {
+    for (std::size_t i = 0; i < _httpConfig->getServers().size(); ++i) {
         ServerConfig* server = _httpConfig->getServers()[i].get();
         config::ConfigInherit::inheritHttpToServer(_httpConfig, server);
         serverEmptyCheck(server);
-        for (size_t j = 0; j < server->getLocations().size(); j++) {
+        for (std::size_t j = 0; j < server->getLocations().size(); j++) {
             LocationConfig* location = server->getLocations()[j].get();
             config::ConfigInherit::inheritServerToLocation(server, location);
             applyLocationInheritance(*location);
@@ -50,7 +50,7 @@ void ConfigInherit::applyInheritance() {
 }
 
 void ConfigInherit::applyLocationInheritance(LocationConfig& location) {
-    for (size_t i = 0; i < location.getLocations().size(); ++i) {
+    for (std::size_t i = 0; i < location.getLocations().size(); ++i) {
         LocationConfig* child = location.getLocations()[i].get();
         config::ConfigInherit::inheritLocationToLocation(&location, child);
         if (!child->getLocations().empty()) {
@@ -82,7 +82,7 @@ void ConfigInherit::inheritHttpToServer(const HttpConfig* http, ServerConfig* se
         server->setClientMaxBodySize(http->getClientMaxBodySize());
     }
     if (server->getErrorPages().empty() && !http->getErrorPages().empty()) {
-        for (size_t i = 0; i < http->getErrorPages().size(); ++i) {
+        for (std::size_t i = 0; i < http->getErrorPages().size(); ++i) {
             server->addErrorPage(http->getErrorPages()[i]);
         }
     }
@@ -122,7 +122,7 @@ void ConfigInherit::inheritServerToLocation(const ServerConfig* server, Location
         location->setClientMaxBodySize(server->getClientMaxBodySize());
     }
     if (location->getErrorPages().empty() && !server->getErrorPages().empty()) {
-        for (size_t i = 0; i < server->getErrorPages().size(); ++i) {
+        for (std::size_t i = 0; i < server->getErrorPages().size(); ++i) {
             location->addErrorPage(server->getErrorPages()[i]);
         }
     }
@@ -162,7 +162,7 @@ void ConfigInherit::inheritLocationToLocation(const LocationConfig* parent, Loca
         child->setClientMaxBodySize(parent->getClientMaxBodySize());
     }
     if (child->getErrorPages().empty() && !parent->getErrorPages().empty()) {
-        for (size_t i = 0; i < parent->getErrorPages().size(); ++i) {
+        for (std::size_t i = 0; i < parent->getErrorPages().size(); ++i) {
             child->addErrorPage(parent->getErrorPages()[i]);
         }
     }

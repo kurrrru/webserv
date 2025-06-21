@@ -38,7 +38,7 @@ namespace config {
  * 
  * // Accessing the configured settings
  * const std::vector<toolbox::SharedPtr<ServerConfig> >& servers = httpConfig.getServers();
- * size_t serverCount = servers.size();  // Returns 2
+ * std::size_t serverCount = servers.size();  // Returns 2
  * @endcode
  */
 class HttpConfig : public ConfigBase {

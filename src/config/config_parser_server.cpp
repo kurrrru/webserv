@@ -8,7 +8,7 @@
 
 namespace config {
 
-void validateServerBlockStart(const std::vector<std::string>& tokens, size_t* pos, const std::string& expectedDirective) {
+void validateServerBlockStart(const std::vector<std::string>& tokens, std::size_t* pos, const std::string& expectedDirective) {
     if (*pos >= tokens.size() || tokens[*pos] != expectedDirective) {
         if (isContextToken(tokens[*pos])) {
             throwConfigError("\"" + std::string(tokens[*pos]) + "\" directive is not allowed here");
@@ -23,7 +23,7 @@ void validateServerBlockStart(const std::vector<std::string>& tokens, size_t* po
     (*pos)++;
 }
 
-bool ConfigParser::parseServerBlock(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig) {
+bool ConfigParser::parseServerBlock(const std::vector<std::string>& tokens, std::size_t* pos, config::ServerConfig* serverConfig) {
     validateServerBlockStart(tokens, pos, config::context::SERVER);
     if (!parseServerDirectives(tokens, pos, serverConfig)) {
         return false;
@@ -33,9 +33,9 @@ bool ConfigParser::parseServerBlock(const std::vector<std::string>& tokens, size
     return true;
 }
 
-bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens, size_t* pos, config::ServerConfig* serverConfig) {
+bool ConfigParser::parseServerDirectives(const std::vector<std::string>& tokens, std::size_t* pos, config::ServerConfig* serverConfig) {
     std::map<std::string, bool> processedDirectives;
-    size_t locationCounter = 0;
+    std::size_t locationCounter = 0;
     while (*pos < tokens.size() && tokens[*pos] != config::token::CLOSE_BRACE) {
         std::string directiveName = tokens[*pos];
         (*pos)++;

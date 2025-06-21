@@ -37,7 +37,7 @@ class Client {
     int getFd() const;
     std::string getIp() const;
     std::string getServerIp() const;
-    size_t getServerPort() const;
+    std::size_t getServerPort() const;
     void setLastAccessTime();
 
     toolbox::SharedPtr<http::Request> getRequest() const;

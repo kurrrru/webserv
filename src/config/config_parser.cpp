@@ -53,7 +53,7 @@ bool ConfigParser::readFile(const std::string& filepath) {
 
 bool ConfigParser::parse() {
     toolbox::logger::StepMark::info("Parsing configuration");
-    size_t pos = 0;
+    std::size_t pos = 0;
     if (_tokens.empty()) {
         return false;
     } else {
@@ -70,7 +70,7 @@ bool ConfigParser::parse() {
     return true;
 }
 
-void ConfigParser::validateBlockEnd(const std::vector<std::string>& tokens, size_t* pos) {
+void ConfigParser::validateBlockEnd(const std::vector<std::string>& tokens, std::size_t* pos) {
     if (*pos >= tokens.size() || tokens[*pos] != config::token::CLOSE_BRACE) {
         throwConfigError("unexpected end of file, expecting \"" + std::string(config::token::CLOSE_BRACE) + "\"");
     }

@@ -68,7 +68,7 @@ class CgiExecute {
     CgiExecute(const CgiExecute& other);
     CgiExecute& operator=(const CgiExecute& other);
 
-    bool processReadBytes(const char* buffer, size_t bytes);
+    bool processReadBytes(const char* buffer, std::size_t bytes);
     bool processEndOfFile();
     bool handleReadError();
 
@@ -121,8 +121,8 @@ class CgiExecute {
     bool _isExecveError;
     std::vector<std::string> _envStrings;
     WriteState _writeState;
-    size_t _totalBytes;
-    size_t _bytesWritten;
+    std::size_t _totalBytes;
+    std::size_t _bytesWritten;
     std::string _writeBuffer;
     ReadState _readState;
     CgiResponseParser _parser;

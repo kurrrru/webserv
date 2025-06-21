@@ -52,12 +52,12 @@ class Config {
     static Config& getConfig() { return getInstance(); }
     static const toolbox::SharedPtr<config::HttpConfig>&
                     getHttpConfig() { return getInstance()._httpConfig; }
-    static size_t getTokenCount() { return getInstance()._tokenCount; }
+    static std::size_t getTokenCount() { return getInstance()._tokenCount; }
     static void setHttpConfig
     (const toolbox::SharedPtr<config::HttpConfig>& httpConfig) {
         getInstance()._httpConfig = httpConfig;
     }
-    static void setTokenCount(const size_t tokenCount) {
+    static void setTokenCount(const std::size_t tokenCount) {
         getInstance()._tokenCount = tokenCount;
     }
 
@@ -68,7 +68,7 @@ class Config {
     Config& operator=(const Config& other);
 
     toolbox::SharedPtr<config::HttpConfig> _httpConfig;
-    size_t _tokenCount;
+    std::size_t _tokenCount;
 
     static Config& getInstance();
 };
