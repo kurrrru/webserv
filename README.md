@@ -20,7 +20,7 @@
 * **Flexible Configuration**: Customize server behavior using an Nginx-like configuration file, including settings for multiple virtual servers.
 * **Virtual Servers**: Host multiple domains or IP/port combinations from a single server instance.
 * **Location-Based Routing**: Apply different rules and configurations for specific URL paths (locations).
-* **HTTP/1.1 Methods**: Full support for `GET`, `POST`, and `DELETE` requests.
+* **HTTP/1.1 Methods**: Full support for `GET`, `HEAD`, `POST`, and `DELETE` requests.
 * **Static File Serving**: Efficiently serves static files like HTML, CSS, images, and more.
 * **CGI Execution**: Executes CGI scripts (e.g., Python, Bash) to generate dynamic web pages. The server correctly sets META variables and handles both `GET` and `POST` data streams.
 * **File Uploads**: Manages file uploads via `POST` requests, with configurable body size limits and storage locations.
@@ -62,7 +62,7 @@ The repository is organized as follows:
 
 ### Prerequisites
 
-* A C++98 compliant compiler (e.g., `g++`)
+* A C++98 compliant compiler (e.g., `c++`)
 * `make`
 
 ### Build
@@ -134,7 +134,7 @@ curl -X POST -d "name=Gemini" http://localhost:8080/cgi-bin/script.py
 # First, create a dummy file
 echo "This is a test file." > test.txt
 # Then, upload it
-curl -X POST --data-binary "@test.txt" http://localhost:8080/upload/test.txt
+curl -X POST --data-binary "@test.txt" http://localhost:8080/uploads/
 ```
 
 **Delete an uploaded file:**
