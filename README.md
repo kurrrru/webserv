@@ -11,7 +11,7 @@
 * **Language**: C++98
 * **Build System**: `make`
 * **I/O Model**: Non-blocking I/O with `epoll` (Linux)
-* **Protocols**: HTTP/1.1, CGI/1.1
+* **Protocols**: HTTP/1.1
 
 ---
 
