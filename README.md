@@ -1,3 +1,5 @@
+[Japanese version](README.ja.md)
+
 # webserv
 
 ## Overview
